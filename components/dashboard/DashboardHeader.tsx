@@ -33,7 +33,7 @@ export default function DashboardHeader() {
       <PageHeader
         title="Dashboard"
         actions={
-          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+          <div className="flex items-center gap-3 sm:justify-end">
             <Form
               className="min-w-0 flex-1 basis-60"
               onFinish={() => setSearchOpen(true)}
