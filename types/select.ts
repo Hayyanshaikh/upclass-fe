@@ -10,7 +10,7 @@ export type SelectRule = {
 };
 
 export type SelectProps = {
-  name: string;
+  name: string | (string | number)[];
   label?: string;
   rules?: SelectRule[];
   isRequird?: boolean;

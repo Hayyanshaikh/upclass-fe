@@ -10,7 +10,7 @@ export type InputRule = {
 };
 
 export type InputProps = {
-  name: string;
+  name: string | (string | number)[];
   label?: string;
   rules?: InputRule[];
   isRequird?: boolean;
