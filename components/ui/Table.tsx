@@ -23,6 +23,8 @@ export default function Table<T extends object>({
   filterFields = [],
   actions = [],
   header: cardHeader,
+  beforeTable,
+  interactive = true,
 }: TableProps<T>) {
   const [page, setPage] = useState(1);
   const tableArea = useRef<HTMLDivElement>(null);
@@ -53,6 +55,7 @@ export default function Table<T extends object>({
   }, []);
 
   function changePage(nextPage: number) {
+    if (!interactive) return;
     setPage(nextPage);
     onPageChange?.(nextPage);
   }
@@ -64,11 +67,12 @@ export default function Table<T extends object>({
           showSearch={showSearch}
           search={search && { ...search, onChange: (value) => { changePage(1); search.onChange(value); } }}
           filterFields={filterFields.map<FilterField>((field) => field.type === "date"
-            ? { ...field, onChange: (value: Dayjs | null) => { changePage(1); field.onChange(value); } }
-            : { ...field, onChange: (value: string | undefined) => { changePage(1); field.onChange(value); } })}
+            ? { ...field, onChange: (value: Dayjs | null) => { changePage(1); if (interactive) field.onChange?.(value); } }
+            : { ...field, onChange: (value: string | undefined) => { changePage(1); if (interactive) field.onChange?.(value); } })}
           actions={actions}
         />
       )}
+      {beforeTable}
     <div
       className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-background"
     >

@@ -20,7 +20,7 @@ export default function SegmentedControl<T extends string>({ label, value, optio
       role="radiogroup"
       aria-label={label}
       value={value}
-      onChange={(event) => onChange(event.target.value)}
+      onChange={onChange ? (event) => onChange(event.target.value) : undefined}
       className="inline-flex! whitespace-nowrap"
     >
       {options.map((option) => (

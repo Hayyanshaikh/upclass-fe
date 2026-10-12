@@ -8,11 +8,12 @@ export default function SectionCard({
   children,
   divider = false,
   className = "",
+  size = "md",
 }: SectionCardProps) {
   return (
     <Card
       className={`h-full min-w-0 rounded-lg! border-border! bg-background! ${className}`}
-      classNames={{ body: "p-5! sm:p-6!" }}
+      classNames={{ body: size === "sm" ? "p-3!" : "p-5! sm:p-6!" }}
     >
       {title && (
         <h2 className={`text-base font-extrabold text-dark ${divider ? "border-b border-border pb-2" : "mb-5"}`}>

@@ -5,4 +5,5 @@ export type SectionCardProps = {
   children: ReactNode;
   divider?: boolean;
   className?: string;
+  size?: "sm" | "md";
 };

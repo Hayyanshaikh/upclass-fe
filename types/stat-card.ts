@@ -4,4 +4,5 @@ export type StatCardProps = {
   description?: string;
   variant?: "success" | "warning" | "danger";
   className?: string;
+  size?: "sm" | "md";
 };

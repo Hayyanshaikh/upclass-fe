@@ -18,4 +18,6 @@ export type TableProps<T extends object> = {
   filterFields?: FilterField[];
   actions?: TableAction[];
   header?: ReactNode;
+  beforeTable?: ReactNode;
+  interactive?: boolean;
 };

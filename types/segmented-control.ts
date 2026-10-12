@@ -8,5 +8,5 @@ export type SegmentedControlProps<T extends string> = {
   label: string;
   value?: T;
   options: SegmentedOption<T>[];
-  onChange: (value: T) => void;
+  onChange?: (value: T) => void;
 };

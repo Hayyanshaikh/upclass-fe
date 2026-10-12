@@ -14,7 +14,7 @@ export type SelectFilterField = {
   options: SelectOption[];
   value?: string;
   allowClear?: boolean;
-  onChange: (value: string | undefined) => void;
+  onChange?: (value: string | undefined) => void;
 };
 
 export type DateFilterField = {
@@ -23,7 +23,7 @@ export type DateFilterField = {
   label: string;
   value?: Dayjs | null;
   pastOnly?: boolean;
-  onChange: (value: Dayjs | null) => void;
+  onChange?: (value: Dayjs | null) => void;
 };
 
 export type FilterField = SelectFilterField | DateFilterField;
