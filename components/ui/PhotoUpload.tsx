@@ -6,7 +6,7 @@ import { Upload } from "antd";
 import { LuUpload } from "react-icons/lu";
 import type { PhotoUploadProps } from "@/types/photo-upload";
 
-export default function PhotoUpload({ value, onChange }: PhotoUploadProps) {
+export default function PhotoUpload({ value, onChange, alt = "Photo preview" }: PhotoUploadProps) {
   const [error, setError] = useState("");
 
   return (
@@ -27,7 +27,7 @@ export default function PhotoUpload({ value, onChange }: PhotoUploadProps) {
         }}
       >
         <button type="button" className="flex size-32 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border border-dashed border-gray/50 bg-background text-gray focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
-          {value ? <Image src={value} alt="Student photo preview" width={128} height={128} unoptimized className="size-full object-cover" /> : <><LuUpload size={24} aria-hidden="true" /><span className="text-xs">Upload photo</span></>}
+          {value ? <Image src={value} alt={alt} width={128} height={128} unoptimized className="size-full object-cover" /> : <><LuUpload size={24} aria-hidden="true" /><span className="text-xs">Upload photo</span></>}
         </button>
       </Upload>
       {error && <p role="alert" className="mt-2 max-w-32 text-xs text-danger">{error}</p>}

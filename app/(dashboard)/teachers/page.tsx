@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { flushSync } from "react-dom";
+import { useRouter } from "next/navigation";
 import type { TableColumnsType } from "antd";
 import PageHeader from "@/components/shared/PageHeader";
 import Table from "@/components/ui/Table";
@@ -8,30 +10,26 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import ActionButtons from "@/components/shared/ActionButtons";
 import DeleteDialog from "@/components/shared/DeleteDialog";
 import TeacherDetailsDialog from "@/components/dialogs/TeacherDetailsDialog";
-import TeacherFormDialog from "@/components/dialogs/TeacherFormDialog";
 import {
-  teachers,
   teacherEmploymentOptions,
   teacherStatusOptions,
   teacherStatusVariants,
 } from "@/constants/teachers";
 import { exportCsv } from "@/utils/export-csv";
-import type { Teacher, TeacherFormValues } from "@/types/teacher";
+import type { Teacher } from "@/types/teacher";
+import { useTeacherStore } from "@/stores/teachers";
 
 export default function TeachersPage() {
-  const [records, setRecords] = useState(teachers);
+  const router = useRouter();
+  const records = useTeacherStore((state) => state.records);
+  const deleteTeacher = useTeacherStore((state) => state.deleteTeacher);
   const [search, setSearch] = useState("");
   const [subject, setSubject] = useState<string>();
   const [employment, setEmployment] = useState<string>();
   const [status, setStatus] = useState<string>();
   const [page, setPage] = useState(1);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [teacherToDelete, setTeacherToDelete] = useState<Teacher | null>(null);
-  const [formOpen, setFormOpen] = useState(false);
-  const nextId = useRef(
-    Math.max(...teachers.map((teacher) => Number(teacher.id.slice(2)))) + 1,
-  );
 
   const filteredTeachers = records.filter(
     (teacher) =>
@@ -44,31 +42,8 @@ export default function TeachersPage() {
   );
 
   function editTeacher(teacher: Teacher) {
-    setSelectedTeacher(null);
-    setEditingTeacher(teacher);
-    setFormOpen(true);
-  }
-
-  function saveTeacher(values: TeacherFormValues) {
-    const teacher: Teacher = {
-      ...values,
-      id:
-        editingTeacher?.id ?? `T-${String(nextId.current++).padStart(3, "0")}`,
-      name: values.name.trim(),
-      phone: values.phone.trim(),
-      classes: [
-        ...new Set(values.classes.split(",").map((value) => value.trim())),
-      ],
-    };
-    setRecords((current) =>
-      editingTeacher
-        ? current.map((record) =>
-            record.id === editingTeacher.id ? teacher : record,
-          )
-        : [teacher, ...current],
-    );
-    setPage(1);
-    setFormOpen(false);
+    flushSync(() => setSelectedTeacher(null));
+    router.push(`/teachers/edit/${encodeURIComponent(teacher.id)}`);
   }
 
   function downloadCsv() {
@@ -180,10 +155,7 @@ export default function TeachersPage() {
           { label: "Export CSV", variant: "secondary", onClick: downloadCsv },
           {
             label: "Add teacher",
-            onClick: () => {
-              setEditingTeacher(null);
-              setFormOpen(true);
-            },
+            onClick: () => router.push("/teachers/add"),
           },
         ]}
       />
@@ -192,21 +164,13 @@ export default function TeachersPage() {
         onClose={() => setSelectedTeacher(null)}
         onEdit={editTeacher}
       />
-      <TeacherFormDialog
-        open={formOpen}
-        teacher={editingTeacher}
-        onClose={() => setFormOpen(false)}
-        onSave={saveTeacher}
-      />
       <DeleteDialog
         open={teacherToDelete !== null}
         title="Delete teacher?"
         message={`Remove ${teacherToDelete?.name ?? "this teacher"} from the teachers list?`}
         onClose={() => setTeacherToDelete(null)}
         onConfirm={() => {
-          setRecords((current) =>
-            current.filter((teacher) => teacher.id !== teacherToDelete?.id),
-          );
+          if (teacherToDelete) deleteTeacher(teacherToDelete.id);
           setTeacherToDelete(null);
         }}
       />

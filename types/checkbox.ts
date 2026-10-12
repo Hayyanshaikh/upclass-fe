@@ -1,5 +1,5 @@
 export type CheckboxProps = {
-  name: string;
+  name: string | (string | number)[];
   label: string;
   disabled?: boolean;
   className?: string;

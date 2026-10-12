@@ -11,6 +11,7 @@ import DatePicker from "@/components/ui/DatePicker";
 import TextArea from "@/components/ui/TextArea";
 import PhotoUpload from "@/components/ui/PhotoUpload";
 import Button from "@/components/ui/Button";
+import SectionCard from "@/components/ui/SectionCard";
 import {
   bloodGroupOptions,
   classOptions,
@@ -43,29 +44,31 @@ export default function StudentForm({
     const [firstName, ...lastName] = student.name.split(" ");
     const [className, section] = student.className.split("-");
     return {
-    firstName: student.firstName ?? firstName,
-    lastName: student.lastName ?? lastName.join(" "),
-    dateOfBirth: parseDate(student.dateOfBirth),
-    gender: student.gender,
-    identityNumber: student.identityNumber,
-    bloodGroup: student.bloodGroup,
-    className,
-    section,
-    roll: student.roll,
-    admissionDate: parseDate(student.admissionDate),
-    status: student.status || "Active",
-    guardian: student.guardian,
-    relation: student.relation,
-    phone: student.phone,
-    email: student.email,
-    address: student.address,
-    photo: student.photo,
+      firstName: student.firstName ?? firstName,
+      lastName: student.lastName ?? lastName.join(" "),
+      dateOfBirth: parseDate(student.dateOfBirth),
+      gender: student.gender,
+      identityNumber: student.identityNumber,
+      bloodGroup: student.bloodGroup,
+      className,
+      section,
+      roll: student.roll,
+      admissionDate: parseDate(student.admissionDate),
+      status: student.status || "Active",
+      guardian: student.guardian,
+      relation: student.relation,
+      phone: student.phone,
+      email: student.email,
+      address: student.address,
+      photo: student.photo,
     };
   }, [student]);
 
   // Apply prefills after hydration so server and first client render agree.
   useEffect(() => {
-    form.setFieldsValue(initialValues || editValues || { status: "Active", relation: "Father" });
+    form.setFieldsValue(
+      initialValues || editValues || { status: "Active", relation: "Father" },
+    );
   }, [form, initialValues, editValues]);
 
   async function handleSubmit(values: StudentFormValues) {
@@ -95,15 +98,9 @@ export default function StudentForm({
       key={student?.id || "add"}
       onFinish={handleSubmit}
       scrollToFirstError
-      className="space-y-4"
+      className="flex flex-col gap-4"
     >
-      <section
-        className="rounded-lg border border-border bg-background p-5"
-        aria-labelledby="personal-heading"
-      >
-        <h2 id="personal-heading" className="mb-4 text-sm font-bold text-dark">
-          Personal details
-        </h2>
+      <SectionCard title="Personal details" className="h-auto!">
         <div className="flex flex-col gap-5 sm:flex-row">
           <Form.Item name="photo">
             <PhotoUpload />
@@ -163,15 +160,9 @@ export default function StudentForm({
             />
           </div>
         </div>
-      </section>
+      </SectionCard>
 
-      <section
-        className="rounded-lg border border-border bg-background p-5"
-        aria-labelledby="academic-heading"
-      >
-        <h2 id="academic-heading" className="mb-4 text-sm font-bold text-dark">
-          Academic details
-        </h2>
+      <SectionCard title="Academic details" className="h-auto!">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Select
             name="className"
@@ -209,15 +200,9 @@ export default function StudentForm({
             isRequird
           />
         </div>
-      </section>
+      </SectionCard>
 
-      <section
-        className="rounded-lg border border-border bg-background p-5"
-        aria-labelledby="guardian-heading"
-      >
-        <h2 id="guardian-heading" className="mb-4 text-sm font-bold text-dark">
-          Guardian details
-        </h2>
+      <SectionCard title="Guardian details" className="h-auto!">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Input
             name="guardian"
@@ -273,7 +258,7 @@ export default function StudentForm({
             />
           </div>
         </div>
-      </section>
+      </SectionCard>
 
       {message && (
         <p
