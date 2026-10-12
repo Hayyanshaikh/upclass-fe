@@ -1,4 +1,5 @@
 import type { TableColumnsType } from "antd";
+import type { ReactNode } from "react";
 import type { FilterField, TableAction, TableSearch } from "@/types/table-toolbar";
 
 export type TableProps<T extends object> = {
@@ -13,6 +14,8 @@ export type TableProps<T extends object> = {
   scrollX?: number | "max-content";
   onPageChange?: (page: number) => void;
   search?: TableSearch;
+  showSearch?: boolean;
   filterFields?: FilterField[];
   actions?: TableAction[];
+  header?: ReactNode;
 };

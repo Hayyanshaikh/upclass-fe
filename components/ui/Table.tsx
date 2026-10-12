@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Pagination, Table as AntTable } from "antd";
 import type { TableProps } from "@/types/table";
+import type { FilterField } from "@/types/table-toolbar";
+import type { Dayjs } from "dayjs";
 import TableToolbar from "@/components/shared/TableToolbar";
 
 export default function Table<T extends object>({
@@ -17,8 +19,10 @@ export default function Table<T extends object>({
   scrollX = "max-content",
   onPageChange,
   search,
+  showSearch = true,
   filterFields = [],
   actions = [],
+  header: cardHeader,
 }: TableProps<T>) {
   const [page, setPage] = useState(1);
   const tableArea = useRef<HTMLDivElement>(null);
@@ -55,16 +59,22 @@ export default function Table<T extends object>({
 
   return (
     <div className={`flex min-h-0 flex-1 flex-col gap-5 ${className}`}>
-      {(search || filterFields.length > 0 || actions.length > 0) && (
+      {((showSearch && search) || filterFields.length > 0 || actions.length > 0) && (
         <TableToolbar
+          showSearch={showSearch}
           search={search && { ...search, onChange: (value) => { changePage(1); search.onChange(value); } }}
-          filterFields={filterFields.map((field) => ({ ...field, onChange: (value) => { changePage(1); field.onChange(value); } }))}
+          filterFields={filterFields.map<FilterField>((field) => field.type === "date"
+            ? { ...field, onChange: (value: Dayjs | null) => { changePage(1); field.onChange(value); } }
+            : { ...field, onChange: (value: string | undefined) => { changePage(1); field.onChange(value); } })}
           actions={actions}
         />
       )}
     <div
       className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-background"
     >
+      {cardHeader && (
+        <div className="shrink-0 border-b border-border p-4">{cardHeader}</div>
+      )}
       <div ref={tableArea} className="min-h-0 flex-1 overflow-hidden">
       <AntTable<T>
         columns={columns}

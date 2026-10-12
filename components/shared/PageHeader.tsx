@@ -46,9 +46,7 @@ export default function PageHeader({
           </h1>
           {subtitle && <p className="mt-1 text-sm text-gray">{subtitle}</p>}
         </div>
-        {actions && (
-          <div className="min-w-0 sm:max-w-xl sm:flex-1">{actions}</div>
-        )}
+        {actions && <div className="min-w-0">{actions}</div>}
       </div>
     </header>
   );
