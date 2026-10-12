@@ -4,6 +4,8 @@ import Link from "next/link";
 export default function PageHeader({
   title,
   breadcrumbs = [],
+  subtitle,
+  actions,
 }: PageHeaderProps) {
   return (
     <header className="mb-5">
@@ -37,9 +39,17 @@ export default function PageHeader({
           </ol>
         </nav>
       )}
-      <h1 className="text-2xl leading-tight font-extrabold text-dark">
-        {title}
-      </h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="shrink-0">
+          <h1 className="text-2xl leading-tight font-extrabold text-dark">
+            {title}
+          </h1>
+          {subtitle && <p className="mt-1 text-sm text-gray">{subtitle}</p>}
+        </div>
+        {actions && (
+          <div className="min-w-0 sm:max-w-xl sm:flex-1">{actions}</div>
+        )}
+      </div>
     </header>
   );
 }

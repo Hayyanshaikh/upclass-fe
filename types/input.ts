@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 
 export type InputRule = {
   required?: boolean;
@@ -22,5 +22,7 @@ export type InputProps = {
   autoCapitalize?: string;
   spellCheck?: boolean;
   className?: string;
+  prefix?: ReactNode;
+  ariaLabel?: string;
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
 };

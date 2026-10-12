@@ -17,6 +17,8 @@ export default function Input({
   autoCapitalize,
   spellCheck,
   className = "",
+  prefix,
+  ariaLabel,
   onChange,
 }: InputProps) {
   const inputProps = {
@@ -26,6 +28,8 @@ export default function Input({
     autoComplete,
     autoCapitalize,
     spellCheck,
+    prefix,
+    "aria-label": ariaLabel,
     className: `w-full ${className}`,
     onChange,
   };
@@ -47,7 +51,13 @@ export default function Input({
       {type === "password" ? (
         <AntInput.Password
           {...inputProps}
-          iconRender={(visible) => visible ? <LuEye aria-hidden="true" /> : <LuEyeOff aria-hidden="true" />}
+          iconRender={(visible) =>
+            visible ? (
+              <LuEye aria-hidden="true" />
+            ) : (
+              <LuEyeOff aria-hidden="true" />
+            )
+          }
         />
       ) : (
         <AntInput {...inputProps} type={type} />

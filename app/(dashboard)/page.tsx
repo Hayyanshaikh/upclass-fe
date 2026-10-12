@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import StatCard from "@/components/ui/StatCard";
-import PageHeader from "@/components/shared/PageHeader";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import FeeCollection from "@/components/dashboard/FeeCollection";
+import TodayTimetable from "@/components/dashboard/TodayTimetable";
+import RecentNotices from "@/components/dashboard/RecentNotices";
+import BarChart from "@/components/ui/BarChart";
+import { weeklyAttendance } from "@/constants/dashboard";
 
 export const metadata: Metadata = {
   title: "Dashboard | UPCLASS",
@@ -10,7 +15,7 @@ export const metadata: Metadata = {
 export default function DashboardPage() {
   return (
     <div>
-      <PageHeader title="Dashboard" />
+      <DashboardHeader />
 
       <section
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
@@ -38,6 +43,22 @@ export default function DashboardPage() {
           description="86 students"
           variant="warning"
         />
+      </section>
+
+      <section
+        className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2"
+        aria-label="Attendance overview"
+      >
+        <BarChart title="Attendance this week" data={weeklyAttendance} />
+        <FeeCollection />
+      </section>
+
+      <section
+        className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2"
+        aria-label="School updates"
+      >
+        <TodayTimetable />
+        <RecentNotices />
       </section>
     </div>
   );

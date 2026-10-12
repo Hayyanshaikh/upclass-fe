@@ -14,4 +14,5 @@ export type DialogProps = {
   closable?: boolean;
   confirmDanger?: boolean;
   className?: string;
+  footer?: ReactNode;
 };

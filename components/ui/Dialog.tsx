@@ -19,6 +19,7 @@ export default function Dialog({
   closable = true,
   confirmDanger = false,
   className = "",
+  footer,
 }: DialogProps) {
   return (
     <Modal
@@ -32,19 +33,21 @@ export default function Dialog({
       className={className}
       closeIcon={<LuX size={20} aria-hidden="true" />}
       footer={
-        <div className="flex flex-wrap justify-end gap-3">
-          <Button variant="secondary" onClick={onClose}>
-            {cancelText}
-          </Button>
-          <Button
-            onClick={onConfirm}
-            loading={confirmLoading}
-            disabled={confirmDisabled}
-            danger={confirmDanger}
-          >
-            {okText}
-          </Button>
-        </div>
+        footer !== undefined ? footer : (
+          <div className="flex flex-wrap justify-end gap-3">
+            <Button variant="secondary" onClick={onClose}>
+              {cancelText}
+            </Button>
+            <Button
+              onClick={onConfirm}
+              loading={confirmLoading}
+              disabled={confirmDisabled}
+              danger={confirmDanger}
+            >
+              {okText}
+            </Button>
+          </div>
+        )
       }
     >
       {children}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Card } from "antd";
+import SectionCard from "@/components/ui/SectionCard";
 import type { StatCardProps } from "@/types/stat-card";
 
 const colors = {
@@ -17,19 +17,16 @@ export default function StatCard({
   className = "",
 }: StatCardProps) {
   return (
-    <Card
-      className={`h-full rounded-lg! border-border! bg-white ${className}`}
-      classNames={{ body: "p-[22px]" }}
-    >
-      <p className="text-base text-gray">{title}</p>
-      <p className="mt-3 text-[32px] leading-tight font-extrabold tracking-tight text-dark">
+    <SectionCard className={className}>
+      <p className="text-sm text-gray">{title}</p>
+      <p className="mt-3 text-3xl leading-tight font-extrabold tracking-tight text-dark">
         {value}
       </p>
       {description && (
-        <p className={`mt-2 text-base font-semibold ${colors[variant]}`}>
+        <p className={`mt-2 text-sm font-semibold ${colors[variant]}`}>
           {description}
         </p>
       )}
-    </Card>
+    </SectionCard>
   );
 }
