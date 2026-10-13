@@ -98,6 +98,8 @@ export default function Exams() {
         actions={examToolbarActions.map((action) =>
           action.label === "Create exam"
             ? { ...action, onClick: () => router.push("/exams/create") }
+            : action.label === "Results"
+              ? { ...action, onClick: () => router.push("/exams/results") }
             : action,
         )}
       />
