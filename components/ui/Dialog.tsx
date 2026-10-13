@@ -11,6 +11,7 @@ export default function Dialog({
   children,
   onConfirm,
   onClose,
+  afterClose,
   okText = "Ok",
   cancelText = "Cancel",
   confirmLoading = false,
@@ -26,6 +27,7 @@ export default function Dialog({
       open={open}
       title={title}
       onCancel={onClose}
+      afterClose={afterClose}
       centered
       destroyOnHidden
       width={width}

@@ -34,25 +34,59 @@ export type LessonCardProps = {
   room?: string;
   colorClass?: string;
   free?: boolean;
+  onClick?: () => void;
+  ariaLabel?: string;
 };
-export type TeacherTimetableLesson = {
-  className: string;
+export type TimetableGridProps = {
+  rows: TimetableRow[];
+  filterFields: FilterField[];
+  beforeTable?: ReactNode;
+  renderLesson: (row: TimetableRow, day: TimetableDay) => ReactNode;
+  interactive?: boolean;
+};
+
+export type TimetableFilters = {
+  grade: string;
+  section: string;
+  term: string;
+  teacherId?: string;
+  subject?: string;
+};
+
+export type TimetableAssignment = {
+  classId: string;
+  term: string;
+  periodId: string;
+  day: TimetableDay;
+  subject: string;
+  teacherId: string;
   room: string;
 };
 
-export type TeacherTimetablePeriod = {
-  id: string;
-  type: "period";
+export type TimetableSlot = {
+  classId: string;
+  term: string;
+  periodId: string;
+  day: TimetableDay;
   label: string;
   time: string;
-  lessons: Record<TimetableDay, TeacherTimetableLesson | null>;
 };
 
-export type TeacherTimetableRow = TeacherTimetablePeriod | TimetableBreak;
+export type PeriodFormValues = {
+  subject: string;
+  teacherId: string;
+  room: string;
+};
 
-export type TimetableGridProps<T extends TimetableRow | TeacherTimetableRow> = {
-  rows: T[];
-  filterFields: FilterField[];
-  beforeTable?: ReactNode;
-  renderLesson: (row: T, day: TimetableDay) => ReactNode;
+export type AssignPeriodDialogProps = {
+  slot: TimetableSlot;
+  open: boolean;
+  onClose: () => void;
+  afterClose: () => void;
+};
+
+export type TimetableStore = {
+  assignments: TimetableAssignment[];
+  savePeriod: (slot: TimetableSlot, values: PeriodFormValues) => boolean;
+  clearPeriod: (slot: TimetableSlot) => void;
 };

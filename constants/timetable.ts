@@ -92,14 +92,18 @@ export const timetableFilterFields: FilterField[] = [
     allowClear: false,
   },
   {
-    name: "view",
-    label: "View",
-    options: [
-      { label: "Class timetable", value: "class" },
-      { label: "Teacher timetable", value: "teacher" },
-    ],
-    value: "class",
-    allowClear: false,
+    name: "teacherId",
+    label: "Teacher",
+    placeholder: "All teachers",
+    options: [],
+    allowClear: true,
+  },
+  {
+    name: "subject",
+    label: "Subject",
+    placeholder: "All subjects",
+    options: [],
+    allowClear: true,
   },
 ];
 

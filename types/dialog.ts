@@ -6,6 +6,7 @@ export type DialogProps = {
   children: ReactNode;
   onConfirm: () => void;
   onClose: () => void;
+  afterClose?: () => void;
   okText?: string;
   cancelText?: string;
   confirmLoading?: boolean;

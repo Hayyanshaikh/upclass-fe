@@ -40,6 +40,7 @@ export default function Select({
         disabled={disabled}
         loading={loading}
         showSearch={showSearch}
+        optionFilterProp="label"
         allowClear={allowClear}
         onChange={onChange}
         className={`w-full ${className}`}

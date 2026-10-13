@@ -3,10 +3,10 @@
 import type { TableColumnsType } from "antd";
 import Table from "@/components/ui/Table";
 import { timetableDays } from "@/constants/timetable";
-import type { TeacherTimetableRow, TimetableGridProps, TimetableRow } from "@/types/timetable";
+import type { TimetableGridProps, TimetableRow } from "@/types/timetable";
 
-export default function TimetableGrid<T extends TimetableRow | TeacherTimetableRow>({ rows, filterFields, beforeTable, renderLesson }: TimetableGridProps<T>) {
-  const columns: TableColumnsType<T> = [
+export default function TimetableGrid({ rows, filterFields, beforeTable, renderLesson, interactive = false }: TimetableGridProps) {
+  const columns: TableColumnsType<TimetableRow> = [
     {
       title: "Time", key: "time", width: 150,
       onCell: (row) => row.type === "break"
@@ -21,7 +21,7 @@ export default function TimetableGrid<T extends TimetableRow | TeacherTimetableR
         </div>
       ),
     },
-    ...timetableDays.map((day): TableColumnsType<T>[number] => ({
+    ...timetableDays.map((day): TableColumnsType<TimetableRow>[number] => ({
       title: <span className="block text-center">{day.label}</span>,
       key: day.key,
       width: 160,
@@ -31,5 +31,5 @@ export default function TimetableGrid<T extends TimetableRow | TeacherTimetableR
   ];
 
   return <Table columns={columns} data={rows} scrollX={1110} pagination={false}
-    interactive={false} showSearch={false} filterFields={filterFields} beforeTable={beforeTable} />;
+    interactive={interactive} showSearch={false} filterFields={filterFields} beforeTable={beforeTable} />;
 }

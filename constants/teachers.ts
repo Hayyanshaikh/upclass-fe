@@ -14,6 +14,7 @@ export const teachers: Teacher[] = [
   { id: "T-057", name: "Bilal Shah", subject: "Urdu", classes: ["6-A", "6-B"], phone: "0300-0000000", employment: "Full-time", status: "Inactive" },
   { id: "T-061", name: "Hina Raza", subject: "Computer", classes: ["9-C", "10-A"], phone: "0300-0000000", employment: "Part-time", status: "Active" },
   { id: "T-064", name: "Usman Akhtar", subject: "Islamiyat", classes: ["7-A", "8-A"], phone: "0300-0000000", employment: "Full-time", status: "Active" },
+  { id: "T-067", name: "Adnan Javed", subject: "Physical Ed.", classes: ["8-A"], phone: "0300-0000000", employment: "Full-time", status: "Active" },
 ];
 
 export const teacherSubjects = [...new Set(teachers.map((teacher) => teacher.subject))].sort();
