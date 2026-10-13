@@ -40,7 +40,8 @@ function ActionButton({ action }: ActionButtonProps) {
         <Button
           variant="text"
           danger={action.danger}
-          className={`size-8! shrink-0 rounded-sm! p-0! text-gray! hover:bg-action-hover! focus-visible:bg-action-hover! ${action.danger ? "text-danger! hover:bg-danger/10!" : ""}`}
+          disabled={action.disabled}
+          className={`size-8! shrink-0 rounded-sm! p-0! text-gray! hover:bg-action-hover! focus-visible:bg-action-hover! ${action.danger ? "text-danger! hover:bg-danger/10!" : ""} ${action.success ? "text-success! hover:bg-success/10!" : ""}`}
           onClick={() => {
             setHovered(false);
             setFocused(false);
@@ -48,7 +49,7 @@ function ActionButton({ action }: ActionButtonProps) {
           }}
         >
           <Icon
-            className={`size-4.5 ${action.danger ? "text-danger" : ""}`}
+            className={`size-4.5 ${action.danger ? "text-danger" : ""} ${action.success ? "text-success" : ""}`}
             aria-hidden="true"
           />
           <span className="sr-only">{action.label}</span>

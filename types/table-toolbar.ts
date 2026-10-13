@@ -2,6 +2,7 @@ import type { SelectOption } from "@/types/select";
 import type { Dayjs } from "dayjs";
 
 export type TableSearch = {
+  label?: string;
   placeholder?: string;
   onChange?: (value: string) => void;
 };

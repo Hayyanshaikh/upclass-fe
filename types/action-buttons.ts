@@ -12,6 +12,8 @@ export type RecordAction = {
   icon: IconType;
   onClick?: () => void;
   danger?: boolean;
+  success?: boolean;
+  disabled?: boolean;
 };
 
 export type ActionButtonProps = {

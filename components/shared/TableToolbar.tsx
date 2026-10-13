@@ -48,6 +48,7 @@ export default function TableToolbar({
           <div className="min-w-0 grow basis-full sm:basis-0">
             <Input
               name="search"
+              label={search.label}
               placeholder={search.placeholder || "Search records"}
               allowClear
               onChange={(event) => search.onChange?.(event.target.value)}
