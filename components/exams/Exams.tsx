@@ -68,7 +68,7 @@ export default function Exams() {
               icon: LuEye,
               onClick: () => viewExam(exam),
             },
-            { label: "Results for ", icon: LuFileText },
+            { label: "Enter marks", icon: LuFileText, onClick: () => router.push(`/exams/marks?exam=${exam.id}`) },
             {
               label: "Edit ",
               icon: LuPencil,

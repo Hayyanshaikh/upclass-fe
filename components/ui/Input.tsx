@@ -12,6 +12,7 @@ export default function Input({
   type = "text",
   placeholder,
   disabled = false,
+  readOnly = false,
   allowClear = false,
   autoComplete,
   autoCapitalize,
@@ -24,6 +25,7 @@ export default function Input({
   const inputProps = {
     placeholder,
     disabled,
+    readOnly,
     allowClear,
     autoComplete,
     autoCapitalize,

@@ -17,6 +17,7 @@ export type InputProps = {
   type?: "text" | "password" | "email" | "tel" | "url" | "number";
   placeholder?: string;
   disabled?: boolean;
+  readOnly?: boolean;
   allowClear?: boolean;
   autoComplete?: string;
   autoCapitalize?: string;
