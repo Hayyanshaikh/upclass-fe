@@ -19,6 +19,15 @@ const theme: ThemeConfig = {
   },
   components: {
     Button: { fontWeight: 600, borderRadius: 10, primaryShadow: "none" },
+    Tooltip: {
+      colorBgSpotlight: "var(--color-dark)",
+      colorTextLightSolid: "var(--color-light)",
+      fontSize: 12,
+      controlHeight: 0,
+      paddingSM: 8,
+      paddingXS: 10,
+      borderRadius: 4,
+    },
     Select: {
       optionSelectedBg: "#0f5c4d",
       optionSelectedColor: "#ffffff",
@@ -48,6 +57,13 @@ export default function AntdProvider({ children }: LayoutProps) {
   return (
     <ConfigProvider
       theme={theme}
+      tooltip={{
+        arrow: false,
+        classNames: {
+          root: "filter-none!",
+          container: "border border-border font-medium shadow-sm",
+        },
+      }}
       modal={{
         classNames: ({ props }) => ({
           container: "rounded-lg! p-6!",

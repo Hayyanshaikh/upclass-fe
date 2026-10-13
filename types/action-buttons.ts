@@ -13,3 +13,7 @@ export type RecordAction = {
   onClick?: () => void;
   danger?: boolean;
 };
+
+export type ActionButtonProps = {
+  action: RecordAction;
+};
