@@ -85,7 +85,7 @@ export default function TableToolbar({
           className={showSearch || actions.length > 0 ? "mt-4" : ""}
         >
           <div
-            className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${showSearch ? "lg:grid-cols-6" : "lg:grid-cols-4"}`}
+            className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${showSearch ? "lg:grid-cols-6" : filterFields.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}
           >
             {filterFields.map((field) => field.type === "date" ? (
               <DatePicker
