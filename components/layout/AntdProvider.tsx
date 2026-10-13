@@ -41,6 +41,12 @@ const theme: ThemeConfig = {
       headerSplitColor: "transparent",
       cellPaddingBlock: 14,
     },
+    DatePicker: {
+      cellWidth: 40,
+      cellHeight: 30,
+      textHeight: 36,
+      withoutTimeCellHeight: 52,
+    },
     Pagination: {
       itemSize: 44,
       itemActiveBg: "#0f5c4d",

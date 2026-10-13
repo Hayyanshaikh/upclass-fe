@@ -55,6 +55,10 @@ export const menuItems: NavItem[] = [
     icon: LuCalendarDays,
     badge: 5,
   },
+  {
+    label: "Teacher Leaves",
+    href: "/teacher-leaves",
+    icon: LuCalendarDays,
+  },
   { label: "Settings", href: "/settings", icon: LuSettings },
 ];
-

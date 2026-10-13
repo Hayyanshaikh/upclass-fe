@@ -5,5 +5,6 @@ export type DatePickerProps = {
   label: string;
   isRequird?: boolean;
   pastOnly?: boolean;
+  minDate?: Dayjs;
   onChange?: (value: Dayjs | null) => void;
 };
