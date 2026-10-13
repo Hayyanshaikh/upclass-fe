@@ -25,6 +25,7 @@ export default function Table<T extends object>({
   header: cardHeader,
   beforeTable,
   interactive = true,
+  pagination = true,
 }: TableProps<T>) {
   const [page, setPage] = useState(1);
   const tableArea = useRef<HTMLDivElement>(null);
@@ -33,7 +34,7 @@ export default function Table<T extends object>({
   const lastPage = Math.max(1, Math.ceil(count / pageSize));
   const activePage = Math.min(current ?? page, lastPage);
   const start = (activePage - 1) * pageSize;
-  const rows = total === undefined ? data.slice(start, start + pageSize) : data;
+  const rows = pagination && total === undefined ? data.slice(start, start + pageSize) : data;
 
   useEffect(() => {
     const area = tableArea.current;
@@ -89,7 +90,7 @@ export default function Table<T extends object>({
         scroll={{ x: scrollX, y: bodyHeight }}
       />
       </div>
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-t border-border px-5 py-4">
+      {pagination && <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-t border-border px-5 py-4">
         <p className="text-sm text-gray" aria-live="polite">
           Showing {count === 0 ? 0 : start + 1}–
           {Math.min(start + rows.length, count)} of {count.toLocaleString()}
@@ -111,7 +112,7 @@ export default function Table<T extends object>({
             return original;
           }}
         />
-      </div>
+      </div>}
     </div>
     </div>
   );

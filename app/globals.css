@@ -10,6 +10,13 @@
   --color-gray: #51655d;
   --color-light: #c9ddd5;
   --color-action-hover: #edf1ee;
+  --color-subject-mathematics: #dcefe8;
+  --color-subject-english: #e4e8f8;
+  --color-subject-science: #fcedc9;
+  --color-subject-urdu: #f1e4f5;
+  --color-subject-computer: #d9eef4;
+  --color-subject-islamiyat: #eaedcc;
+  --color-subject-physical: #f8e1d3;
 
   --color-background: #ffffff;
   --color-foreground: #f3f6f3;

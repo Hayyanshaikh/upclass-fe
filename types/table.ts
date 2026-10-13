@@ -20,4 +20,5 @@ export type TableProps<T extends object> = {
   header?: ReactNode;
   beforeTable?: ReactNode;
   interactive?: boolean;
+  pagination?: boolean;
 };
