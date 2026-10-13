@@ -7,6 +7,8 @@ import type { FilterField } from "@/types/table-toolbar";
 import type { Dayjs } from "dayjs";
 import TableToolbar from "@/components/shared/TableToolbar";
 
+export const TableSummary = AntTable.Summary;
+
 export default function Table<T extends object>({
   columns,
   data,
@@ -26,6 +28,8 @@ export default function Table<T extends object>({
   beforeTable,
   interactive = true,
   pagination = true,
+  autoHeight = false,
+  summary,
 }: TableProps<T>) {
   const [page, setPage] = useState(1);
   const tableArea = useRef<HTMLDivElement>(null);
@@ -37,6 +41,7 @@ export default function Table<T extends object>({
   const rows = pagination && total === undefined ? data.slice(start, start + pageSize) : data;
 
   useEffect(() => {
+    if (autoHeight) return;
     const area = tableArea.current;
     if (!area) return;
 
@@ -53,7 +58,7 @@ export default function Table<T extends object>({
     if (header) observer.observe(header);
     updateHeight();
     return () => observer.disconnect();
-  }, []);
+  }, [autoHeight]);
 
   function changePage(nextPage: number) {
     if (!interactive) return;
@@ -87,7 +92,8 @@ export default function Table<T extends object>({
         rowKey={rowKey}
         loading={loading}
         pagination={false}
-        scroll={{ x: scrollX, y: bodyHeight }}
+        scroll={{ x: scrollX, y: autoHeight ? undefined : bodyHeight }}
+        summary={summary}
       />
       </div>
       {pagination && <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-t border-border px-5 py-4">

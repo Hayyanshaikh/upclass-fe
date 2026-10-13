@@ -1,26 +1,31 @@
 "use client";
 
 import type { TableColumnsType } from "antd";
-import { notFound, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { LuEye, LuPrinter } from "react-icons/lu";
 import PageHeader from "@/components/shared/PageHeader";
 import ActionButtons from "@/components/shared/ActionButtons";
 import Table from "@/components/ui/Table";
 import Button from "@/components/ui/Button";
 import StatusBadge from "@/components/ui/StatusBadge";
+import PublishResultsDialog from "@/components/dialogs/PublishResultsDialog";
 import { exams } from "@/constants/exams";
 import {
   examResults,
-  resultsDefaultClassId,
   resultsDefaultExamId,
   resultsFilterFields,
   resultsHeaderActions,
   resultsTotalStudents,
 } from "@/constants/exam-results";
 import type { ExamResult } from "@/types/exam-results";
+import type { Exam } from "@/types/exam";
 
 export default function Results() {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const [examToPublish, setExamToPublish] = useState<Exam | null>(null);
+  const [publishOpen, setPublishOpen] = useState(false);
   const examId = searchParams.get("exam") ?? resultsDefaultExamId;
   const exam = exams.find((exam) => exam.id === examId);
   if (!exam) notFound();
@@ -89,10 +94,10 @@ export default function Results() {
       title: "Actions",
       key: "actions",
       width: 110,
-      render: () => (
+      render: (_, student) => (
         <ActionButtons
           actions={[
-            { label: "View result", icon: LuEye },
+            { label: "View result", icon: LuEye, onClick: () => router.push(`/exams/results/card?student=${student.id}&exam=${exam.id}`) },
             { label: "Print card", icon: LuPrinter },
           ]}
         />
@@ -112,7 +117,11 @@ export default function Results() {
           actions={
             <div className="flex flex-wrap gap-3">
               {resultsHeaderActions.map((action) => (
-                <Button key={action.label} variant={action.variant}>
+                <Button key={action.label} variant={action.variant}
+                  onClick={action.label === "Publish results" ? () => {
+                    setExamToPublish(exam);
+                    setPublishOpen(true);
+                  } : action.onClick}>
                   {action.label}
                 </Button>
               ))}
@@ -133,6 +142,8 @@ export default function Results() {
           field.name === "exam" ? { ...field, value: exam.id } : field,
         )}
       />
+      {examToPublish && <PublishResultsDialog exam={examToPublish} open={publishOpen}
+        onClose={() => setPublishOpen(false)} afterClose={() => setExamToPublish(null)} />}
     </div>
   );
 }

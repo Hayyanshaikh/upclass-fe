@@ -14,6 +14,7 @@ export default function DeleteDialog({
   onClose,
   onConfirm,
   confirmLoading = false,
+  afterClose,
 }: DeleteDialogProps) {
   return (
     <Dialog
@@ -31,6 +32,7 @@ export default function DeleteDialog({
       okText={okText}
       cancelText={cancelText}
       confirmLoading={confirmLoading}
+      afterClose={afterClose}
       confirmDanger
       closable={false}
       width={400}

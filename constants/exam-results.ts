@@ -7,6 +7,12 @@ export const resultsDefaultExamId = "EX-001";
 export const resultsDefaultClassId = "8-A";
 export const resultsTotalStudents = 38;
 
+export const resultsPublishSummary = {
+  className: resultsDefaultClassId,
+  passed: 36,
+  failed: 2,
+};
+
 // Sample result records for the UI preview until result endpoints are available.
 export const examResults: ExamResult[] = [
   { id: "1012", rank: 1, name: "Ayesha Khan", roll: "1012", total: 534, maximum: 600, grade: "A", result: "Pass" },

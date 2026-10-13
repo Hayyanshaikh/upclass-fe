@@ -10,4 +10,5 @@ export type DeleteDialogProps = {
   onClose: () => void;
   onConfirm: () => void;
   confirmLoading?: boolean;
+  afterClose?: () => void;
 };

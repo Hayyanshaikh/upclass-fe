@@ -9,6 +9,7 @@ import ActionButtons from "@/components/shared/ActionButtons";
 import Table from "@/components/ui/Table";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ExamDetailsDialog from "@/components/dialogs/ExamDetailsDialog";
+import DeleteDialog from "@/components/shared/DeleteDialog";
 import {
   examFilterFields,
   exams,
@@ -22,6 +23,8 @@ export default function Exams() {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editAfterClose, setEditAfterClose] = useState(false);
+  const [examToDelete, setExamToDelete] = useState<Exam | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   function viewExam(exam: Exam) {
     setSelectedExam(exam);
@@ -74,7 +77,10 @@ export default function Exams() {
               icon: LuPencil,
               onClick: () => router.push(`/exams/edit/${exam.id}`),
             },
-            { label: "Delete ", icon: LuTrash2, danger: true },
+            { label: "Delete ", icon: LuTrash2, danger: true, onClick: () => {
+              setExamToDelete(exam);
+              setDeleteOpen(true);
+            } },
           ]}
         />
       ),
@@ -113,6 +119,17 @@ export default function Exams() {
             setEditAfterClose(true);
             setDetailsOpen(false);
           }}
+        />
+      )}
+      {examToDelete && (
+        <DeleteDialog
+          open={deleteOpen}
+          title="Delete exam?"
+          message={`${examToDelete.name}, its date sheet and all entered marks will be removed. This cannot be undone.`}
+          okText="Delete"
+          onClose={() => setDeleteOpen(false)}
+          onConfirm={() => setDeleteOpen(false)}
+          afterClose={() => setExamToDelete(null)}
         />
       )}
     </div>

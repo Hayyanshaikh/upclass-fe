@@ -1,3 +1,5 @@
+import type { Exam } from "@/types/exam";
+
 export type ExamResult = {
   id: string;
   rank: number;
@@ -7,4 +9,10 @@ export type ExamResult = {
   maximum: number;
   grade: "A+" | "A" | "B" | "C" | "D" | "E" | "F";
   result: "Pass" | "Fail";
+};
+export type PublishResultsDialogProps = {
+  exam: Exam;
+  open: boolean;
+  onClose: () => void;
+  afterClose: () => void;
 };

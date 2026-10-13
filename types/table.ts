@@ -21,4 +21,6 @@ export type TableProps<T extends object> = {
   beforeTable?: ReactNode;
   interactive?: boolean;
   pagination?: boolean;
+  autoHeight?: boolean;
+  summary?: (data: readonly T[]) => ReactNode;
 };
