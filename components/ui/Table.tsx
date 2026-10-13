@@ -66,7 +66,7 @@ export default function Table<T extends object>({
       {((showSearch && search) || filterFields.length > 0 || actions.length > 0) && (
         <TableToolbar
           showSearch={showSearch}
-          search={search && { ...search, onChange: (value) => { changePage(1); search.onChange(value); } }}
+          search={search && { ...search, onChange: (value) => { changePage(1); if (interactive) search.onChange?.(value); } }}
           filterFields={filterFields.map<FilterField>((field) => field.type === "date"
             ? { ...field, onChange: (value: Dayjs | null) => { changePage(1); if (interactive) field.onChange?.(value); } }
             : { ...field, onChange: (value: string | undefined) => { changePage(1); if (interactive) field.onChange?.(value); } })}

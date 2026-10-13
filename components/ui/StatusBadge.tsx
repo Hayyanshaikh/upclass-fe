@@ -5,6 +5,7 @@ const variants = {
   warning: "bg-secondary/20 text-warning",
   neutral: "bg-gray/10 text-gray",
   danger: "bg-danger/10 text-danger",
+  info: "bg-info/10 text-info",
 };
 
 export default function StatusBadge({ children, variant = "neutral" }: StatusBadgeProps) {

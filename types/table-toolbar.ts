@@ -3,7 +3,7 @@ import type { Dayjs } from "dayjs";
 
 export type TableSearch = {
   placeholder?: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
 };
 
 export type SelectFilterField = {
@@ -31,7 +31,7 @@ export type FilterField = SelectFilterField | DateFilterField;
 export type TableAction = {
   label: string;
   variant?: "primary" | "secondary" | "link";
-  onClick: () => void;
+  onClick?: () => void;
   disabled?: boolean;
   loading?: boolean;
 };

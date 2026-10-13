@@ -50,7 +50,7 @@ export default function TableToolbar({
               name="search"
               placeholder={search.placeholder || "Search records"}
               allowClear
-              onChange={(event) => search.onChange(event.target.value)}
+              onChange={(event) => search.onChange?.(event.target.value)}
             />
           </div>
         )}
