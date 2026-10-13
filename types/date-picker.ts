@@ -2,7 +2,7 @@ import type { Dayjs } from "dayjs";
 
 export type DatePickerProps = {
   name: string | (string | number)[];
-  label: string;
+  label?: string;
   isRequird?: boolean;
   pastOnly?: boolean;
   minDate?: Dayjs;

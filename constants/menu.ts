@@ -22,6 +22,7 @@ export const menuItems: NavItem[] = [
     icon: LuUsers,
   },
   { label: "Teachers", href: "/teachers", icon: LuUserRound },
+  { label: "Subjects", href: "/subjects", icon: LuBookOpen },
   { label: "Classes", href: "/classes", icon: LuBookOpen },
   {
     group: "Attendance",

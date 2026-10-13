@@ -44,39 +44,39 @@ export default function TableToolbar({
       {((showSearch && (search || filterFields.length > 0)) ||
         actions.length > 0) && (
         <div className="flex flex-wrap items-end gap-3">
-        {showSearch && search && (
-          <div className="min-w-0 grow basis-full sm:basis-0">
-            <Input
-              name="search"
-              label={search.label}
-              placeholder={search.placeholder || "Search records"}
-              allowClear
-              onChange={(event) => search.onChange?.(event.target.value)}
-            />
-          </div>
-        )}
-        {showSearch && filterFields.length > 0 && (
-          <Button
-            variant={showFilters ? "primary" : "secondary"}
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <LuListFilter size={18} aria-hidden="true" />
-            <span className="sr-only">
-              {showFilters ? "Hide filters" : "Show filters"}
-            </span>
-          </Button>
-        )}
-        {actions.map((action) => (
-          <Button
-            key={action.label}
-            variant={action.variant}
-            disabled={action.disabled}
-            loading={action.loading}
-            onClick={action.onClick}
-          >
-            {action.label}
-          </Button>
-        ))}
+          {showSearch && search && (
+            <div className="min-w-0 grow basis-full sm:basis-0">
+              <Input
+                name="search"
+                label={search.label}
+                placeholder={search.placeholder || "Search records"}
+                allowClear
+                onChange={(event) => search.onChange?.(event.target.value)}
+              />
+            </div>
+          )}
+          {showSearch && filterFields.length > 0 && (
+            <Button
+              variant={showFilters ? "primary" : "secondary"}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <LuListFilter size={18} aria-hidden="true" />
+              <span className="sr-only">
+                {showFilters ? "Hide filters" : "Show filters"}
+              </span>
+            </Button>
+          )}
+          {actions.map((action) => (
+            <Button
+              key={action.label}
+              variant={action.variant}
+              disabled={action.disabled}
+              loading={action.loading}
+              onClick={action.onClick}
+            >
+              {action.label}
+            </Button>
+          ))}
         </div>
       )}
       {filterFields.length > 0 && (
@@ -85,28 +85,26 @@ export default function TableToolbar({
           hidden={showSearch && !showFilters}
           className={showSearch || actions.length > 0 ? "mt-4" : ""}
         >
-          <div
-            className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${showSearch ? "lg:grid-cols-6" : filterFields.length === 3 ? "lg:grid-cols-3" : filterFields.length === 5 ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}
-          >
-            {filterFields.map((field) => field.type === "date" ? (
-              <DatePicker
-                key={field.name}
-                name={field.name}
-                label={field.label}
-                pastOnly={field.pastOnly}
-                onChange={field.onChange}
-              />
-            ) : (
-              <Select
-                key={field.name}
-                name={field.name}
-                label={!showSearch ? field.label : undefined}
-                options={field.options}
-                placeholder={field.placeholder || "Any"}
-                allowClear={field.allowClear ?? true}
-                onChange={field.onChange}
-              />
-            ))}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
+            {filterFields.map((field) =>
+              field.type === "date" ? (
+                <DatePicker
+                  key={field.name}
+                  name={field.name}
+                  pastOnly={field.pastOnly}
+                  onChange={field.onChange}
+                />
+              ) : (
+                <Select
+                  key={field.name}
+                  name={field.name}
+                  options={field.options}
+                  placeholder={field.placeholder || "Any"}
+                  allowClear={field.allowClear ?? true}
+                  onChange={field.onChange}
+                />
+              ),
+            )}
           </div>
         </div>
       )}
