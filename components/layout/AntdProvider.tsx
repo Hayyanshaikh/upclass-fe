@@ -82,6 +82,10 @@ export default function AntdProvider({ children }: LayoutProps) {
         className:
           "[&_.ant-pagination-item]:border-primary! [&_.ant-pagination-prev]:w-auto! [&_.ant-pagination-next]:w-auto! [&_.ant-pagination-disabled]:opacity-40",
       }}
+      tabs={{
+        className:
+          "[&_.ant-tabs-nav]:mb-4! [&_.ant-tabs-nav-list]:gap-1! [&_.ant-tabs-tab]:m-0! [&_.ant-tabs-tab]:px-3! [&_.ant-tabs-tab]:py-2! [&_.ant-tabs-tab]:font-semibold! [&_.ant-tabs-tab-active]:rounded-t-sm! [&_.ant-tabs-tab-active]:bg-primary! [&_.ant-tabs-tab-active_.ant-tabs-tab-btn]:text-background! [&_.ant-tabs-ink-bar]:hidden!",
+      }}
     >
       {children}
     </ConfigProvider>

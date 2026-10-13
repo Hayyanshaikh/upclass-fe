@@ -4,7 +4,11 @@ import { Tooltip } from "antd";
 import { useState } from "react";
 import { LuEye, LuPencil, LuTrash2 } from "react-icons/lu";
 import Button from "@/components/ui/Button";
-import type { ActionButtonProps, ActionButtonsProps, RecordAction } from "@/types/action-buttons";
+import type {
+  ActionButtonProps,
+  ActionButtonsProps,
+  RecordAction,
+} from "@/types/action-buttons";
 
 function getTooltipContainer(trigger: HTMLElement) {
   // Use the existing body to avoid a temporarily detached default portal.
@@ -27,7 +31,7 @@ function ActionButton({ action }: ActionButtonProps) {
       trigger={["hover"]}
       open={hovered || focused}
       onOpenChange={setHovered}
-      getPopupContainer={getTooltipContainer}
+      getPopupContainer={(trigger) => trigger.parentElement!}
       destroyOnHidden
     >
       <span
@@ -87,7 +91,9 @@ export default function ActionButtons({
 
   return (
     <div className="flex items-center gap-1">
-      {buttons.map((action) => <ActionButton key={action.label} action={action} />)}
+      {buttons.map((action) => (
+        <ActionButton key={action.label} action={action} />
+      ))}
     </div>
   );
 }
