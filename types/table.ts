@@ -24,3 +24,12 @@ export type TableProps<T extends object> = {
   autoHeight?: boolean;
   summary?: (data: readonly T[]) => ReactNode;
 };
+
+export type TablePaginationFooterProps = {
+  count: number;
+  start: number;
+  rowCount: number;
+  activePage: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+};

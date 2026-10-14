@@ -15,7 +15,7 @@ export default function TableToolbar({
   filterFields = [],
   actions = [],
 }: TableToolbarProps) {
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [form] = Form.useForm();
   const filterId = useId();
   const fieldValues = Object.fromEntries(
