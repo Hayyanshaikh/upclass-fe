@@ -180,7 +180,7 @@ export default function Fees() {
               label: `Print fee page for ${fee.student}`,
               icon: LuPrinter,
               disabled: fee.paid === 0,
-              onClick: () => window.print(),
+              onClick: () => router.push(`/fees/receipt?student=${encodeURIComponent(fee.roll)}&amount=${fee.paid}`),
             },
           ]}
         />
@@ -222,6 +222,12 @@ export default function Fees() {
             router.push(
               `/fees/collect?student=${encodeURIComponent(selectedFee.roll)}`,
             );
+          }
+        }}
+        onPrintReceipt={() => {
+          if (selectedFee) {
+            setDetailsOpen(false);
+            router.push(`/fees/receipt?student=${encodeURIComponent(selectedFee.roll)}&amount=${selectedFee.paid}`);
           }
         }}
         afterClose={() => setSelectedFee(null)}

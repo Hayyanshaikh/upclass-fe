@@ -106,6 +106,18 @@ export default function CollectFee() {
     form.setFieldValue("received", String(balance + fine));
   }
 
+  function openReceipt() {
+    const paymentDate = form.getFieldValue("paymentDate");
+    const params = new URLSearchParams({
+      student: selectedStudent.roll,
+      amount: String(amount(received ?? initialReceived)),
+      method: form.getFieldValue("method") || "Cash",
+      period: selectedFees.map((fee) => fee.month).join(", "),
+    });
+    if (paymentDate) params.set("date", paymentDate.format("DD/MM/YYYY"));
+    router.push(`/fees/receipt?${params.toString()}`);
+  }
+
   const feeColumns: TableColumnsType<OutstandingFee> = [
     {
       title: <span className="sr-only">Select</span>,
@@ -310,7 +322,7 @@ export default function CollectFee() {
           Cancel
         </Button>
         <Button variant="secondary">Save payment</Button>
-        <Button>Save and print receipt</Button>
+        <Button onClick={openReceipt}>Save and print receipt</Button>
       </div>
     </Form>
   );

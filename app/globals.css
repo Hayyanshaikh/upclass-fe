@@ -96,3 +96,53 @@
 .table-with-header .ant-table-thead>tr:first-child>td:last-child {
   border-start-end-radius: 0 !important;
 }
+
+.fee-receipt-table > div {
+  border: 0;
+  border-radius: 0;
+}
+
+.fee-receipt-table .ant-table-thead > tr:first-child > th:first-child,
+.fee-receipt-table .ant-table-thead > tr:first-child > th:last-child {
+  border-radius: 0;
+}
+
+.fee-receipt-table .ant-table-summary > tr > td {
+  border-top: 2px solid var(--color-dark);
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body:has(.fee-receipt-page) .h-dvh,
+  body:has(.fee-receipt-page) .h-dvh > div {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  body:has(.fee-receipt-page) aside,
+  body:has(.fee-receipt-page) .h-dvh > div:first-child,
+  body:has(.fee-receipt-page) details,
+  .fee-receipt-page > header {
+    display: none !important;
+  }
+
+  body:has(.fee-receipt-page) main,
+  .fee-receipt-table > div {
+    overflow: visible !important;
+  }
+
+  body:has(.fee-receipt-page) main {
+    padding: 0 !important;
+  }
+
+  .fee-receipt-card {
+    max-width: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+}

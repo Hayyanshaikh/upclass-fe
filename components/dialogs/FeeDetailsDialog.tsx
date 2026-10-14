@@ -12,6 +12,7 @@ type FeeDetailsDialogProps = {
   open: boolean;
   onClose: () => void;
   onCollect: () => void;
+  onPrintReceipt: () => void;
   afterClose?: () => void;
 };
 
@@ -32,6 +33,7 @@ export default function FeeDetailsDialog({
   open,
   onClose,
   onCollect,
+  onPrintReceipt,
   afterClose,
 }: FeeDetailsDialogProps) {
   const grade = Number(fee?.className.split("-")[0]);
@@ -108,9 +110,9 @@ export default function FeeDetailsDialog({
                   <p className="text-gray">Receipt FR-[0001]</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="p-2 text-gray" role="img" aria-label="Print receipt">
+                  <button type="button" className="p-2 text-gray hover:text-primary" aria-label="Print receipt" onClick={onPrintReceipt}>
                     <LuPrinter size={18} aria-hidden="true" />
-                  </span>
+                  </button>
                   <span className="p-2 text-danger" role="img" aria-label="Delete payment">
                     <LuTrash2 size={18} aria-hidden="true" />
                   </span>
