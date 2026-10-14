@@ -17,7 +17,7 @@ export default function DatePicker({
     <Form.Item
       name={name}
       layout="vertical"
-      label={<span className="font-semibold">{label}</span>}
+      label={label && <span className="font-semibold">{label}</span>}
       rules={
         isRequird ? [{ required: true, message: `${label} is required` }] : []
       }
