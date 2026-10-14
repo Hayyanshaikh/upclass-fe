@@ -1,6 +1,6 @@
 "use client";
 
-import { Tooltip } from "antd";
+import { ConfigProvider, Tooltip } from "antd";
 import { useState } from "react";
 import { LuEye, LuPencil, LuTrash2 } from "react-icons/lu";
 import Button from "@/components/ui/Button";
@@ -26,40 +26,46 @@ function ActionButton({ action }: ActionButtonProps) {
   const Icon = action.icon;
 
   return (
-    <Tooltip
-      title={action.label}
-      trigger={["hover"]}
-      open={hovered || focused}
-      onOpenChange={setHovered}
-      getPopupContainer={(trigger) => trigger.parentElement!}
-      destroyOnHidden
+    <ConfigProvider
+      getPopupContainer={(triggerNode) =>
+        triggerNode?.parentNode as HTMLElement
+      }
     >
-      <span
-        className="inline-flex shrink-0"
-        // Dialogs restore focus during commit. Defer focus updates to avoid
-        // invoking AntD's synchronous focus trigger inside React's lifecycle.
-        onFocus={() => queueMicrotask(() => setFocused(true))}
-        onBlur={() => queueMicrotask(() => setFocused(false))}
+      <Tooltip
+        title={action.label}
+        trigger={["hover"]}
+        open={hovered || focused}
+        onOpenChange={setHovered}
+        getPopupContainer={(trigger) => trigger.parentElement!}
+        destroyOnHidden
       >
-        <Button
-          variant="text"
-          danger={action.danger}
-          disabled={action.disabled}
-          className={`size-8! shrink-0 rounded-sm! p-0! text-gray! hover:bg-action-hover! focus-visible:bg-action-hover! ${action.danger ? "text-danger! hover:bg-danger/10!" : ""} ${action.success ? "text-success! hover:bg-success/10!" : ""}`}
-          onClick={() => {
-            setHovered(false);
-            setFocused(false);
-            action.onClick?.();
-          }}
+        <span
+          className="inline-flex shrink-0"
+          // Dialogs restore focus during commit. Defer focus updates to avoid
+          // invoking AntD's synchronous focus trigger inside React's lifecycle.
+          onFocus={() => queueMicrotask(() => setFocused(true))}
+          onBlur={() => queueMicrotask(() => setFocused(false))}
         >
-          <Icon
-            className={`size-4.5 ${action.danger ? "text-danger" : ""} ${action.success ? "text-success" : ""}`}
-            aria-hidden="true"
-          />
-          <span className="sr-only">{action.label}</span>
-        </Button>
-      </span>
-    </Tooltip>
+          <Button
+            variant="text"
+            danger={action.danger}
+            disabled={action.disabled}
+            className={`size-8! shrink-0 rounded-sm! p-0! text-gray! hover:bg-action-hover! focus-visible:bg-action-hover! ${action.danger ? "text-danger! hover:bg-danger/10!" : ""} ${action.success ? "text-success! hover:bg-success/10!" : ""}`}
+            onClick={() => {
+              setHovered(false);
+              setFocused(false);
+              action.onClick?.();
+            }}
+          >
+            <Icon
+              className={`size-4.5 ${action.danger ? "text-danger" : ""} ${action.success ? "text-success" : ""}`}
+              aria-hidden="true"
+            />
+            <span className="sr-only">{action.label}</span>
+          </Button>
+        </span>
+      </Tooltip>
+    </ConfigProvider>
   );
 }
 

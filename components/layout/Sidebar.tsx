@@ -50,6 +50,11 @@ function MenuItem({ item, active }: MenuItemProps) {
 
 function SidebarMenu() {
   const pathname = usePathname();
+  const activeHref = menuItems.reduce((current, item) => {
+    const matches = pathname === item.href ||
+      (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+    return matches && item.href.length > current.length ? item.href : current;
+  }, "");
 
   return (
     <nav
@@ -60,10 +65,7 @@ function SidebarMenu() {
         <MenuItem
           key={item.href}
           item={item}
-          active={
-            pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(`${item.href}/`))
-          }
+          active={item.href === activeHref}
         />
       ))}
     </nav>

@@ -13,6 +13,7 @@ export type DialogProps = {
   confirmDisabled?: boolean;
   width?: number;
   closable?: boolean;
+  forceRender?: boolean;
   confirmDanger?: boolean;
   className?: string;
   footer?: ReactNode;

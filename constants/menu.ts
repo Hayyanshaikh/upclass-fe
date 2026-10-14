@@ -9,6 +9,7 @@ import {
   LuCalendarDays,
   LuFileText,
   LuCreditCard,
+  LuReceiptText,
   LuBell,
   LuSettings,
 } from "react-icons/lu";
@@ -43,6 +44,7 @@ export const menuItems: NavItem[] = [
   },
   { label: "Exams & Results", href: "/exams", icon: LuFileText },
   { group: "Finance", label: "Fees", href: "/fees", icon: LuCreditCard },
+  { label: "Fee Structure", href: "/fee-structure", icon: LuReceiptText },
   {
     group: "Communication",
     label: "Notices",

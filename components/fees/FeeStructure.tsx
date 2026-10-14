@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { TableColumnsType } from "antd";
 import { LuEye, LuPencil, LuTrash2 } from "react-icons/lu";
 import FeeStructureDetailsDialog from "@/components/dialogs/FeeStructureDetailsDialog";
@@ -9,7 +10,8 @@ import DeleteDialog from "@/components/shared/DeleteDialog";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
-import { feeStructureFilters, feeStructures } from "@/constants/fee-structure";
+import { feeStructureFilters, feeStructureTotal } from "@/constants/fee-structure";
+import { useFeeStructureStore } from "@/stores/fee-structures";
 import type { FeeStructure as FeeStructureRecord } from "@/types/fee-structure";
 import type { FilterField } from "@/types/table-toolbar";
 
@@ -21,7 +23,7 @@ function exportCsv(records: FeeStructureRecord[]) {
     ...records.map((item) => [
       `Class ${item.grade}`, item.academicYear, item.tuition, item.examFee,
       item.labFee, item.sportsFee,
-      item.tuition + item.examFee + item.labFee + item.sportsFee, item.status,
+      feeStructureTotal(item), item.status,
     ]),
   ];
   const csv = rows.map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\r\n");
@@ -34,7 +36,9 @@ function exportCsv(records: FeeStructureRecord[]) {
 }
 
 export default function FeeStructure() {
-  const [records, setRecords] = useState(feeStructures);
+  const router = useRouter();
+  const records = useFeeStructureStore((state) => state.records);
+  const deleteStructure = useFeeStructureStore((state) => state.deleteStructure);
   const [search, setSearch] = useState("");
   const [academicYear, setAcademicYear] = useState("2026-27");
   const [status, setStatus] = useState<string>();
@@ -63,13 +67,13 @@ export default function FeeStructure() {
     { title: "Lab fee", dataIndex: "labFee", key: "labFee", width: 110, render: number },
     { title: "Sports fee", dataIndex: "sportsFee", key: "sportsFee", width: 120, render: number },
     { title: "Monthly total", key: "monthlyTotal", width: 155,
-      render: (_, item) => <span className="font-bold text-dark">Rs. {number(item.tuition + item.examFee + item.labFee + item.sportsFee)}</span> },
+      render: (_, item) => <span className="font-bold text-dark">Rs. {number(feeStructureTotal(item))}</span> },
     { title: "Status", key: "status", width: 125,
       render: (_, item) => <StatusBadge variant={item.status === "Active" ? "success" : "neutral"}>{item.status}</StatusBadge> },
     { title: "Actions", key: "actions", width: 135,
       render: (_, item) => <ActionButtons actions={[
         { label: `View Class ${item.grade} fee structure`, icon: LuEye, onClick: () => { setSelected(item); setDetailsOpen(true); } },
-        { label: `Edit Class ${item.grade} fee structure`, icon: LuPencil },
+        { label: `Edit Class ${item.grade} fee structure`, icon: LuPencil, onClick: () => router.push(`/fee-structure/edit/${item.id}`) },
         { label: `Delete Class ${item.grade} fee structure`, icon: LuTrash2, danger: true,
           onClick: () => { setSelected(item); setDeleteOpen(true); } },
       ]} /> },
@@ -85,7 +89,7 @@ export default function FeeStructure() {
       filterFields={filters}
       actions={[
         { label: "Export CSV", variant: "secondary", onClick: () => exportCsv(filtered) },
-        { label: "Add fee structure" },
+        { label: "Add fee structure", onClick: () => router.push("/fee-structure/add") },
       ]}
     />
     <FeeStructureDetailsDialog
@@ -101,7 +105,7 @@ export default function FeeStructure() {
       description="This demo change lasts until the page is refreshed."
       onClose={() => setDeleteOpen(false)}
       onConfirm={() => {
-        if (selected) setRecords((current) => current.filter((item) => item.id !== selected.id));
+        if (selected) deleteStructure(selected.id);
         setDeleteOpen(false);
       }}
       afterClose={() => setSelected(null)}

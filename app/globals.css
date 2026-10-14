@@ -77,3 +77,22 @@
 .ant-form-item {
   margin-bottom: 0 !important;
 }
+
+/* The card header supplies the top corners; the table heading starts square below it. */
+.table-with-header .ant-table-container,
+.table-with-header .ant-table-content,
+.table-with-header .ant-table-container>table {
+  border-start-start-radius: 0 !important;
+  border-start-end-radius: 0 !important;
+}
+
+.table-with-header .ant-table-thead>tr:first-child>th:first-child,
+.table-with-header .ant-table-thead>tr:first-child>td:first-child {
+  border-start-start-radius: 0 !important;
+}
+
+
+.table-with-header .ant-table-thead>tr:first-child>th:last-child,
+.table-with-header .ant-table-thead>tr:first-child>td:last-child {
+  border-start-end-radius: 0 !important;
+}

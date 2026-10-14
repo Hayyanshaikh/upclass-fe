@@ -87,6 +87,7 @@ export default function Table<T extends object>({
       )}
       <div ref={tableArea} className="min-h-0 flex-1 overflow-hidden">
       <AntTable<T>
+        className={cardHeader ? "table-with-header" : undefined}
         columns={columns}
         dataSource={rows}
         rowKey={rowKey}

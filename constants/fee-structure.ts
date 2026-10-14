@@ -14,6 +14,19 @@ export const feeStructures: FeeStructure[] = [
   { id: "FS-04", grade: 4, academicYear: "2026-27", tuition: 7800, examFee: 1000, labFee: 500, sportsFee: 500, status: "Active" },
 ];
 
+export const defaultFeeHeads = [
+  { name: "Tuition fee", amount: undefined },
+  { name: "Exam fee", amount: undefined },
+  { name: "Lab fee", amount: undefined },
+  { name: "Sports fee", amount: undefined },
+];
+
+export function feeStructureTotal(structure: FeeStructure): number {
+  return structure.feeHeads?.length
+    ? structure.feeHeads.reduce((sum, head) => sum + Number(head.amount || 0), 0)
+    : structure.tuition + structure.examFee + structure.labFee + structure.sportsFee;
+}
+
 export const feeStructureFilters: FilterField[] = [
   { name: "academicYear", label: "Academic year", value: "2026-27", allowClear: false, options: [
     { label: "[2026–27]", value: "2026-27" },

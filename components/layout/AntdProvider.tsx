@@ -56,6 +56,10 @@ const theme: ThemeConfig = {
       colorBorder: "#0f5c4d",
       borderRadius: 12,
     },
+    Popover: {
+      colorBgElevated: "#12261f",
+      colorText: "#fff",
+    },
   },
 };
 
@@ -68,6 +72,13 @@ export default function AntdProvider({ children }: LayoutProps) {
         classNames: {
           root: "filter-none!",
           container: "border border-border font-medium shadow-sm",
+        },
+      }}
+      popover={{
+        classNames: {
+          root: "filter-none! text-light!",
+          container:
+            "shadow-xl bg-dark! text-light! font-medium py-2! rounded-sm!",
         },
       }}
       modal={{

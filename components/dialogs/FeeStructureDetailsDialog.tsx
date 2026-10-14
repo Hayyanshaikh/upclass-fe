@@ -4,6 +4,7 @@ import { LuCreditCard } from "react-icons/lu";
 import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { feeStructureTotal } from "@/constants/fee-structure";
 import type { FeeStructure } from "@/types/fee-structure";
 
 type FeeStructureDetailsDialogProps = {
@@ -16,7 +17,13 @@ type FeeStructureDetailsDialogProps = {
 const rupees = (value: number) => `Rs. ${value.toLocaleString("en-PK")}`;
 
 export default function FeeStructureDetailsDialog({ structure, open, onClose, afterClose }: FeeStructureDetailsDialogProps) {
-  const total = structure ? structure.tuition + structure.examFee + structure.labFee + structure.sportsFee : 0;
+  const total = structure ? feeStructureTotal(structure) : 0;
+  const heads = structure?.feeHeads?.length ? structure.feeHeads : structure ? [
+    { name: "Tuition fee", amount: structure.tuition },
+    { name: "Exam fee", amount: structure.examFee },
+    { name: "Lab fee", amount: structure.labFee },
+    { name: "Sports fee", amount: structure.sportsFee },
+  ] : [];
 
   return <Dialog
     open={open}
@@ -33,10 +40,9 @@ export default function FeeStructureDetailsDialog({ structure, open, onClose, af
     </div>}
   >
     {structure && <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-      <div><dt className="text-xs text-gray">Tuition</dt><dd className="mt-1 text-sm font-semibold text-dark">{rupees(structure.tuition)}</dd></div>
-      <div><dt className="text-xs text-gray">Exam fee</dt><dd className="mt-1 text-sm font-semibold text-dark">{rupees(structure.examFee)}</dd></div>
-      <div><dt className="text-xs text-gray">Lab fee</dt><dd className="mt-1 text-sm font-semibold text-dark">{rupees(structure.labFee)}</dd></div>
-      <div><dt className="text-xs text-gray">Sports fee</dt><dd className="mt-1 text-sm font-semibold text-dark">{rupees(structure.sportsFee)}</dd></div>
+      {heads.map((head, index) =>
+        <div key={`${head.name}-${index}`}><dt className="text-xs text-gray">{head.name}</dt><dd className="mt-1 text-sm font-semibold text-dark">{rupees(head.amount)}</dd></div>
+      )}
       <div><dt className="text-xs text-gray">Monthly total</dt><dd className="mt-1 text-sm font-bold text-dark">{rupees(total)}</dd></div>
       <div><dt className="text-xs text-gray">Status</dt><dd className="mt-1"><StatusBadge variant={structure.status === "Active" ? "success" : "neutral"}>{structure.status}</StatusBadge></dd></div>
     </dl>}

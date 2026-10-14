@@ -80,7 +80,11 @@ export default function TeacherLeaves() {
       <PageHeader
         title="Teacher leaves"
         subtitle="Your leave balance and requests"
-        actions={<Button onClick={() => router.push("/teacher-leaves/apply")}>Apply leave</Button>}
+        actions={
+          <Button onClick={() => router.push("/teacher-leaves/apply")}>
+            Apply leave
+          </Button>
+        }
       />
 
       <div className="grid shrink-0 grid-cols-1 gap-3 sm:grid-cols-3 mb-4">

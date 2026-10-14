@@ -18,7 +18,7 @@ const columns: TableColumnsType<FeeHead> = [
 export default function FeeHeadsTab({ fees, onAdd }: FeeHeadsTabProps) {
   return <SectionCard className="h-auto! min-h-full">
     <SectionTitle icon={LuCreditCard}>Fee heads</SectionTitle>
-    <p className="mb-5 text-sm text-gray">Default fee heads available when creating a fee structure. Managed in detail from Fees → Fee structure.</p>
+    <p className="mb-5 text-sm text-gray">Default fee heads available when creating a fee structure. Managed in detail from the Fee Structure menu.</p>
     <Table columns={columns} data={fees} pagination={false} autoHeight />
     <div className="mt-4"><Button variant="secondary" onClick={onAdd}>Add fee head</Button></div>
   </SectionCard>;
