@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LuLogOut } from "react-icons/lu";
 import Logo from "@/components/shared/Logo";
 import { menuItems } from "@/constants/menu";
 import type { MenuItemProps } from "@/types/sidebar";
@@ -51,7 +52,8 @@ function MenuItem({ item, active }: MenuItemProps) {
 function SidebarMenu() {
   const pathname = usePathname();
   const activeHref = menuItems.reduce((current, item) => {
-    const matches = pathname === item.href ||
+    const matches =
+      pathname === item.href ||
       (item.href !== "/" && pathname.startsWith(`${item.href}/`));
     return matches && item.href.length > current.length ? item.href : current;
   }, "");
@@ -85,6 +87,22 @@ function SidebarProfile() {
         <p className="truncate font-bold">[Admin Name]</p>
         <p className="text-[10px] text-light">Super admin</p>
       </div>
+      <span className="group relative ml-auto inline-flex shrink-0">
+        <Link
+          href="/login"
+          replace
+          aria-label="Log out"
+          className="flex size-8 items-center justify-center rounded-sm text-light transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
+        >
+          <LuLogOut size={18} aria-hidden="true" />
+        </Link>
+        <span
+          aria-hidden="true"
+          className="pointer-events-none invisible absolute right-0 bottom-full z-10 mb-2 whitespace-nowrap rounded-sm border border-border bg-dark px-2 py-1 text-xs font-medium text-light opacity-0 shadow-sm transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+        >
+          Log out
+        </span>
+      </span>
     </div>
   );
 }
