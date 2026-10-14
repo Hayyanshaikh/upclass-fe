@@ -167,7 +167,6 @@ export default function TeacherAttendance() {
         rowKey="id"
         pageSize={8}
         search={{
-          label: "Search",
           placeholder: "Teacher name or ID",
           onChange: setSearch,
         }}

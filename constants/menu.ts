@@ -12,6 +12,7 @@ import {
   LuReceiptText,
   LuBell,
   LuSettings,
+  LuClock,
 } from "react-icons/lu";
 
 export const menuItems: NavItem[] = [
@@ -35,6 +36,11 @@ export const menuItems: NavItem[] = [
     label: "Teacher Attendance",
     href: "/attendance/teachers",
     icon: LuUsersRound,
+  },
+  {
+    label: "Mark Attendance",
+    href: "/mark-attendance",
+    icon: LuClock,
   },
   {
     group: "Academics",
