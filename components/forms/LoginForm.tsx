@@ -7,23 +7,36 @@ import Checkbox from "@/components/ui/Checkbox";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
-
-const roleOptions = [
-  { label: "Admin", value: "admin" },
-  { label: "Teacher", value: "teacher" },
-  { label: "Student", value: "student" },
-  { label: "Parent", value: "parent" },
-];
+import { ROLE_OPTIONS } from "@/constants/roles";
+import { Login } from "@/types/login";
+import { useAuthControllerLogin } from "@/app/api/endpoints";
 
 export default function LoginForm() {
   const router = useRouter();
   const [message, setMessage] = useState("");
 
-  function handleSubmit() {
-    setMessage(
-      "Sign-in is not available yet. Please contact your school office for access.",
-    );
-  }
+  const { mutateAsync: login, isPending } = useAuthControllerLogin();
+
+  const handleSubmit = async (data: Login) => {
+    try {
+      setMessage("");
+
+      const response = await login({
+        data: {
+          email: data.email,
+          password: data.password,
+        },
+      });
+
+      console.log("Login successful:", response);
+      setMessage("Login successful!");
+
+      router.push("/");
+    } catch (error) {
+      console.error("Login failed:", error);
+      setMessage("Invalid email or password.");
+    }
+  };
 
   return (
     <div className="w-full max-w-[486px] rounded-lg border border-border bg-white p-6 text-dark sm:p-8">
@@ -35,23 +48,18 @@ export default function LoginForm() {
       </h2>
       <p className="mt-1.5 text-sm text-gray">Sign in to your school portal</p>
 
-      <Form
-        className=" mt-5!"
-        requiredMark={false}
-        onFinish={handleSubmit}
-        initialValues={{ role: "admin", remember: false }}
-      >
+      <Form className=" mt-5!" requiredMark={false} onFinish={handleSubmit}>
         <div className="flex flex-col gap-3">
           <Select
             showSearch={false}
             name="role"
             label="Sign in as"
-            options={roleOptions}
+            options={ROLE_OPTIONS}
             placeholder="Select Role"
             isRequird
           />
           <Input
-            name="identifier"
+            name="email"
             label="Email or ID"
             autoComplete="username"
             autoCapitalize="none"
