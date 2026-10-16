@@ -10,26 +10,30 @@ import Select from "@/components/ui/Select";
 import { ROLE_OPTIONS } from "@/constants/roles";
 import { Login } from "@/types/login";
 import { useAuthControllerLogin } from "@/app/api/endpoints";
+import { useStorageStore } from "@/stores/storage";
+import { LoginResponseDto } from "@/app/api/schemas";
+import Cookies from "js-cookie";
 
 export default function LoginForm() {
   const router = useRouter();
   const [message, setMessage] = useState("");
-
+  const { setValue } = useStorageStore();
   const { mutateAsync: login, isPending } = useAuthControllerLogin();
 
   const handleSubmit = async (data: Login) => {
     try {
-      setMessage("");
-
-      const response = await login({
+      const response: LoginResponseDto = await login({
         data: {
           email: data.email,
           password: data.password,
         },
       });
 
-      console.log("Login successful:", response);
-      setMessage("Login successful!");
+      Cookies.set("accessToken", response.accessToken, {
+        expires: 1,
+      });
+
+      setValue("user", response.user);
 
       router.push("/");
     } catch (error) {
@@ -50,14 +54,14 @@ export default function LoginForm() {
 
       <Form className=" mt-5!" requiredMark={false} onFinish={handleSubmit}>
         <div className="flex flex-col gap-3">
-          <Select
+          {/* <Select
             showSearch={false}
             name="role"
             label="Sign in as"
             options={ROLE_OPTIONS}
             placeholder="Select Role"
             isRequird
-          />
+          /> */}
           <Input
             name="email"
             label="Email or ID"

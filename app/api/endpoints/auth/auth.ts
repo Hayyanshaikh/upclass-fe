@@ -16,37 +16,16 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  LoginDto
+  LoginDto,
+  LoginResponseDto
 } from '../../schemas';
 
 import { customInstance } from '../../axios-instance';
 
 
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
-export type authControllerLoginResponse200 = {
-  data: void
-  status: 200
-}
-
-export type authControllerLoginResponse400 = {
-  data: void
-  status: 400
-}
-
-export type authControllerLoginResponse401 = {
-  data: void
-  status: 401
-}
-
-export type authControllerLoginResponseSuccess = (authControllerLoginResponse200) & {
-  headers: Headers;
-};
-export type authControllerLoginResponseError = (authControllerLoginResponse400 | authControllerLoginResponse401) & {
-  headers: Headers;
-};
-
-export type authControllerLoginResponse = (authControllerLoginResponseSuccess | authControllerLoginResponseError)
 
 export const getAuthControllerLoginUrl = () => {
 
@@ -59,7 +38,7 @@ export const getAuthControllerLoginUrl = () => {
 /**
  * @summary User login
  */
-export const authControllerLogin = async (loginDto: LoginDto, options?: RequestInit): Promise<authControllerLoginResponse> => {
+export const authControllerLogin = async (loginDto: LoginDto, options?: Parameters<typeof customInstance>[1]): Promise<LoginResponseDto> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -75,7 +54,7 @@ export const authControllerLogin = async (loginDto: LoginDto, options?: RequestI
     }
     return headers;
   };
-return customInstance<authControllerLoginResponse>(getAuthControllerLoginUrl(),
+return customInstance<LoginResponseDto>(getAuthControllerLoginUrl(),
   {
     ...options,
     method: 'POST',
@@ -91,15 +70,15 @@ return customInstance<authControllerLoginResponse>(getAuthControllerLoginUrl(),
 export const getAuthControllerLoginMutationKey = () => ['authControllerLogin'] as const;
 
 export const getAuthControllerLoginMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError,AuthControllerLoginMutationVariables, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError,AuthControllerLoginMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError,AuthControllerLoginMutationVariables, TContext> => {
 
 const mutationKey = getAuthControllerLoginMutationKey();
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -107,7 +86,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerLogin>>, AuthControllerLoginMutationVariables> = (props) => {
           const {data} = props ?? {};
 
-          return  authControllerLogin(data,)
+          return  authControllerLogin(data,requestOptions)
         }
 
 
@@ -126,7 +105,7 @@ const {mutation: mutationOptions} = options ?
  * @summary User login
  */
 export const useAuthControllerLogin = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError,AuthControllerLoginMutationVariables, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError,AuthControllerLoginMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerLogin>>,
         TError,

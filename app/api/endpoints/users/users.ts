@@ -32,6 +32,8 @@ import type {
 import { customInstance } from '../../axios-instance';
 
 
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
 
 
 const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
@@ -49,30 +51,6 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export type userControllerCreateResponse201 = {
-  data: void
-  status: 201
-}
-
-export type userControllerCreateResponse400 = {
-  data: void
-  status: 400
-}
-
-export type userControllerCreateResponse409 = {
-  data: void
-  status: 409
-}
-
-export type userControllerCreateResponseSuccess = (userControllerCreateResponse201) & {
-  headers: Headers;
-};
-export type userControllerCreateResponseError = (userControllerCreateResponse400 | userControllerCreateResponse409) & {
-  headers: Headers;
-};
-
-export type userControllerCreateResponse = (userControllerCreateResponseSuccess | userControllerCreateResponseError)
-
 export const getUserControllerCreateUrl = () => {
 
 
@@ -84,7 +62,7 @@ export const getUserControllerCreateUrl = () => {
 /**
  * @summary Create a user
  */
-export const userControllerCreate = async (createUserDto: CreateUserDto, options?: RequestInit): Promise<userControllerCreateResponse> => {
+export const userControllerCreate = async (createUserDto: CreateUserDto, options?: Parameters<typeof customInstance>[1]): Promise<void> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -100,7 +78,7 @@ export const userControllerCreate = async (createUserDto: CreateUserDto, options
     }
     return headers;
   };
-return customInstance<userControllerCreateResponse>(getUserControllerCreateUrl(),
+return customInstance<void>(getUserControllerCreateUrl(),
   {
     ...options,
     method: 'POST',
@@ -116,15 +94,15 @@ return customInstance<userControllerCreateResponse>(getUserControllerCreateUrl()
 export const getUserControllerCreateMutationKey = () => ['userControllerCreate'] as const;
 
 export const getUserControllerCreateMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerCreate>>, TError,UserControllerCreateMutationVariables, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerCreate>>, TError,UserControllerCreateMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof userControllerCreate>>, TError,UserControllerCreateMutationVariables, TContext> => {
 
 const mutationKey = getUserControllerCreateMutationKey();
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -132,7 +110,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof userControllerCreate>>, UserControllerCreateMutationVariables> = (props) => {
           const {data} = props ?? {};
 
-          return  userControllerCreate(data,)
+          return  userControllerCreate(data,requestOptions)
         }
 
 
@@ -151,7 +129,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Create a user
  */
 export const useUserControllerCreate = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerCreate>>, TError,UserControllerCreateMutationVariables, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerCreate>>, TError,UserControllerCreateMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof userControllerCreate>>,
         TError,
@@ -160,19 +138,7 @@ export const useUserControllerCreate = <TError = void,
       > => {
       return useMutation(getUserControllerCreateMutationOptions(options), queryClient);
     }
-    export type userControllerFindAllResponse200 = {
-  data: void
-  status: 200
-}
-
-export type userControllerFindAllResponseSuccess = (userControllerFindAllResponse200) & {
-  headers: Headers;
-};
-;
-
-export type userControllerFindAllResponse = (userControllerFindAllResponseSuccess)
-
-export const getUserControllerFindAllUrl = () => {
+    export const getUserControllerFindAllUrl = () => {
 
 
 
@@ -183,9 +149,9 @@ export const getUserControllerFindAllUrl = () => {
 /**
  * @summary Get all users
  */
-export const userControllerFindAll = async ( options?: RequestInit): Promise<userControllerFindAllResponse> => {
+export const userControllerFindAll = async ( options?: Parameters<typeof customInstance>[1]): Promise<void> => {
 
-  return customInstance<userControllerFindAllResponse>(getUserControllerFindAllUrl(),
+  return customInstance<void>(getUserControllerFindAllUrl(),
   {
     ...options,
     method: 'GET'
@@ -205,16 +171,16 @@ export const getUserControllerFindAllQueryKey = () => {
     }
 
 
-export const getUserControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof userControllerFindAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>>, }
+export const getUserControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof userControllerFindAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getUserControllerFindAllQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof userControllerFindAll>>> = ({ signal }) => userControllerFindAll({ signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof userControllerFindAll>>> = ({ signal }) => userControllerFindAll({ signal, ...requestOptions });
 
 
 
@@ -234,7 +200,7 @@ export function useUserControllerFindAll<TData = Awaited<ReturnType<typeof userC
           TError,
           Awaited<ReturnType<typeof userControllerFindAll>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useUserControllerFindAll<TData = Awaited<ReturnType<typeof userControllerFindAll>>, TError = unknown>(
@@ -244,11 +210,11 @@ export function useUserControllerFindAll<TData = Awaited<ReturnType<typeof userC
           TError,
           Awaited<ReturnType<typeof userControllerFindAll>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useUserControllerFindAll<TData = Awaited<ReturnType<typeof userControllerFindAll>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -256,7 +222,7 @@ export function useUserControllerFindAll<TData = Awaited<ReturnType<typeof userC
  */
 
 export function useUserControllerFindAll<TData = Awaited<ReturnType<typeof userControllerFindAll>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -272,25 +238,6 @@ export function useUserControllerFindAll<TData = Awaited<ReturnType<typeof userC
 
 
 
-export type userControllerFindOneResponse200 = {
-  data: void
-  status: 200
-}
-
-export type userControllerFindOneResponse404 = {
-  data: void
-  status: 404
-}
-
-export type userControllerFindOneResponseSuccess = (userControllerFindOneResponse200) & {
-  headers: Headers;
-};
-export type userControllerFindOneResponseError = (userControllerFindOneResponse404) & {
-  headers: Headers;
-};
-
-export type userControllerFindOneResponse = (userControllerFindOneResponseSuccess | userControllerFindOneResponseError)
-
 export const getUserControllerFindOneUrl = (id: string,) => {
 
 
@@ -302,9 +249,9 @@ export const getUserControllerFindOneUrl = (id: string,) => {
 /**
  * @summary Get a user by ID
  */
-export const userControllerFindOne = async (id: string, options?: RequestInit): Promise<userControllerFindOneResponse> => {
+export const userControllerFindOne = async (id: string, options?: Parameters<typeof customInstance>[1]): Promise<void> => {
 
-  return customInstance<userControllerFindOneResponse>(getUserControllerFindOneUrl(id),
+  return customInstance<void>(getUserControllerFindOneUrl(id),
   {
     ...options,
     method: 'GET'
@@ -324,16 +271,16 @@ export const getUserControllerFindOneQueryKey = (id: string,) => {
     }
 
 
-export const getUserControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof userControllerFindOne>>, TError = void>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>>, }
+export const getUserControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof userControllerFindOne>>, TError = void>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getUserControllerFindOneQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof userControllerFindOne>>> = ({ signal }) => userControllerFindOne(id, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof userControllerFindOne>>> = ({ signal }) => userControllerFindOne(id, { signal, ...requestOptions });
 
 
 
@@ -353,7 +300,7 @@ export function useUserControllerFindOne<TData = Awaited<ReturnType<typeof userC
           TError,
           Awaited<ReturnType<typeof userControllerFindOne>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useUserControllerFindOne<TData = Awaited<ReturnType<typeof userControllerFindOne>>, TError = void>(
@@ -363,11 +310,11 @@ export function useUserControllerFindOne<TData = Awaited<ReturnType<typeof userC
           TError,
           Awaited<ReturnType<typeof userControllerFindOne>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useUserControllerFindOne<TData = Awaited<ReturnType<typeof userControllerFindOne>>, TError = void>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>>, }
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -375,7 +322,7 @@ export function useUserControllerFindOne<TData = Awaited<ReturnType<typeof userC
  */
 
 export function useUserControllerFindOne<TData = Awaited<ReturnType<typeof userControllerFindOne>>, TError = void>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>>, }
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -391,30 +338,6 @@ export function useUserControllerFindOne<TData = Awaited<ReturnType<typeof userC
 
 
 
-export type userControllerUpdateResponse200 = {
-  data: void
-  status: 200
-}
-
-export type userControllerUpdateResponse400 = {
-  data: void
-  status: 400
-}
-
-export type userControllerUpdateResponse404 = {
-  data: void
-  status: 404
-}
-
-export type userControllerUpdateResponseSuccess = (userControllerUpdateResponse200) & {
-  headers: Headers;
-};
-export type userControllerUpdateResponseError = (userControllerUpdateResponse400 | userControllerUpdateResponse404) & {
-  headers: Headers;
-};
-
-export type userControllerUpdateResponse = (userControllerUpdateResponseSuccess | userControllerUpdateResponseError)
-
 export const getUserControllerUpdateUrl = (id: string,) => {
 
 
@@ -427,7 +350,7 @@ export const getUserControllerUpdateUrl = (id: string,) => {
  * @summary Update a user
  */
 export const userControllerUpdate = async (id: string,
-    updateUserDto: UpdateUserDto, options?: RequestInit): Promise<userControllerUpdateResponse> => {
+    updateUserDto: UpdateUserDto, options?: Parameters<typeof customInstance>[1]): Promise<void> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -443,7 +366,7 @@ export const userControllerUpdate = async (id: string,
     }
     return headers;
   };
-return customInstance<userControllerUpdateResponse>(getUserControllerUpdateUrl(id),
+return customInstance<void>(getUserControllerUpdateUrl(id),
   {
     ...options,
     method: 'PATCH',
@@ -459,15 +382,15 @@ return customInstance<userControllerUpdateResponse>(getUserControllerUpdateUrl(i
 export const getUserControllerUpdateMutationKey = () => ['userControllerUpdate'] as const;
 
 export const getUserControllerUpdateMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerUpdate>>, TError,UserControllerUpdateMutationVariables, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerUpdate>>, TError,UserControllerUpdateMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof userControllerUpdate>>, TError,UserControllerUpdateMutationVariables, TContext> => {
 
 const mutationKey = getUserControllerUpdateMutationKey();
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -475,7 +398,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof userControllerUpdate>>, UserControllerUpdateMutationVariables> = (props) => {
           const {id,data} = props ?? {};
 
-          return  userControllerUpdate(id,data,)
+          return  userControllerUpdate(id,data,requestOptions)
         }
 
 
@@ -494,7 +417,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Update a user
  */
 export const useUserControllerUpdate = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerUpdate>>, TError,UserControllerUpdateMutationVariables, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerUpdate>>, TError,UserControllerUpdateMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof userControllerUpdate>>,
         TError,
@@ -503,26 +426,7 @@ export const useUserControllerUpdate = <TError = void,
       > => {
       return useMutation(getUserControllerUpdateMutationOptions(options), queryClient);
     }
-    export type userControllerRemoveResponse200 = {
-  data: void
-  status: 200
-}
-
-export type userControllerRemoveResponse404 = {
-  data: void
-  status: 404
-}
-
-export type userControllerRemoveResponseSuccess = (userControllerRemoveResponse200) & {
-  headers: Headers;
-};
-export type userControllerRemoveResponseError = (userControllerRemoveResponse404) & {
-  headers: Headers;
-};
-
-export type userControllerRemoveResponse = (userControllerRemoveResponseSuccess | userControllerRemoveResponseError)
-
-export const getUserControllerRemoveUrl = (id: string,) => {
+    export const getUserControllerRemoveUrl = (id: string,) => {
 
 
 
@@ -533,9 +437,9 @@ export const getUserControllerRemoveUrl = (id: string,) => {
 /**
  * @summary Delete a user
  */
-export const userControllerRemove = async (id: string, options?: RequestInit): Promise<userControllerRemoveResponse> => {
+export const userControllerRemove = async (id: string, options?: Parameters<typeof customInstance>[1]): Promise<void> => {
 
-  return customInstance<userControllerRemoveResponse>(getUserControllerRemoveUrl(id),
+  return customInstance<void>(getUserControllerRemoveUrl(id),
   {
     ...options,
     method: 'DELETE'
@@ -551,15 +455,15 @@ export const userControllerRemove = async (id: string, options?: RequestInit): P
 export const getUserControllerRemoveMutationKey = () => ['userControllerRemove'] as const;
 
 export const getUserControllerRemoveMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerRemove>>, TError,UserControllerRemoveMutationVariables, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerRemove>>, TError,UserControllerRemoveMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof userControllerRemove>>, TError,UserControllerRemoveMutationVariables, TContext> => {
 
 const mutationKey = getUserControllerRemoveMutationKey();
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -567,7 +471,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof userControllerRemove>>, UserControllerRemoveMutationVariables> = (props) => {
           const {id} = props ?? {};
 
-          return  userControllerRemove(id,)
+          return  userControllerRemove(id,requestOptions)
         }
 
 
@@ -586,7 +490,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Delete a user
  */
 export const useUserControllerRemove = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerRemove>>, TError,UserControllerRemoveMutationVariables, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userControllerRemove>>, TError,UserControllerRemoveMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof userControllerRemove>>,
         TError,
