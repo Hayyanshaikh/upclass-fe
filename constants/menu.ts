@@ -14,6 +14,7 @@ import {
   LuSettings,
   LuClock,
   LuUserCog,
+  LuStar,
 } from "react-icons/lu";
 
 export const menuItems: NavItem[] = [
@@ -71,5 +72,6 @@ export const menuItems: NavItem[] = [
     icon: LuCalendarDays,
   },
   { label: "Users", href: "/users", icon: LuUserCog },
+  { label: "Roles", href: "/roles", icon: LuStar },
   { label: "Settings", href: "/settings", icon: LuSettings },
 ];
