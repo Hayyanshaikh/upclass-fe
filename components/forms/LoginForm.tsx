@@ -4,17 +4,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Form } from "antd";
 import Checkbox from "@/components/ui/Checkbox";
+import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import Select from "@/components/ui/Select";
-import { ROLE_OPTIONS } from "@/constants/roles";
 import { Login } from "@/types/login";
 import { useAuthControllerLogin } from "@/app/api/endpoints";
 import { useStorageStore } from "@/stores/storage";
 import { LoginResponseDto } from "@/app/api/schemas";
 import Cookies from "js-cookie";
+import { useForm } from "antd/es/form/Form";
 
 export default function LoginForm() {
+  const [form] = useForm();
   const router = useRouter();
   const [message, setMessage] = useState("");
   const { setValue } = useStorageStore();
@@ -31,11 +32,15 @@ export default function LoginForm() {
 
       Cookies.set("accessToken", response.accessToken, {
         expires: 1,
+        path: "/",
       });
 
       setValue("user", response.user);
 
       router.push("/");
+
+      form.resetFields();
+      setMessage("");
     } catch (error) {
       console.error("Login failed:", error);
       setMessage("Invalid email or password.");
@@ -52,7 +57,12 @@ export default function LoginForm() {
       </h2>
       <p className="mt-1.5 text-sm text-gray">Sign in to your school portal</p>
 
-      <Form className=" mt-5!" requiredMark={false} onFinish={handleSubmit}>
+      <Form
+        form={form}
+        className="mt-5!"
+        requiredMark={false}
+        onFinish={handleSubmit}
+      >
         <div className="flex flex-col gap-3">
           {/* <Select
             showSearch={false}
@@ -64,17 +74,18 @@ export default function LoginForm() {
           /> */}
           <Input
             name="email"
-            label="Email or ID"
+            label="Email"
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}
-            placeholder="[email or user ID]"
+            placeholder="Email"
             isRequird
           />
           <Input
             name="password"
             label="Password"
             type="password"
+            placeholder="Password"
             autoComplete="current-password"
             isRequird
           />
@@ -90,16 +101,9 @@ export default function LoginForm() {
           </Button>
         </div>
 
-        {message && (
-          <p
-            role="status"
-            className="mt-5 rounded-sm border border-border bg-foreground p-3 text-sm text-gray"
-          >
-            {message}
-          </p>
-        )}
+        {message && <Alert type="error" message={message} className="mt-5" />}
 
-        <Button type="submit" fullWidth className="mt-5">
+        <Button type="submit" fullWidth className="mt-5" loading={isPending}>
           Sign in
         </Button>
         <p className="mt-5 text-center text-[13px] leading-6 text-gray">

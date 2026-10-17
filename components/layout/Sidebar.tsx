@@ -1,11 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { Tooltip } from "antd";
+import Cookies from "js-cookie";
 import { LuLogOut } from "react-icons/lu";
+import Button from "@/components/ui/Button";
+import Dialog from "@/components/ui/Dialog";
 import Logo from "@/components/shared/Logo";
 import { menuItems } from "@/constants/menu";
 import type { MenuItemProps } from "@/types/sidebar";
+import { useStorageStore } from "@/stores/storage";
 
 function SidebarHeader() {
   return (
@@ -75,6 +81,18 @@ function SidebarMenu() {
 }
 
 function SidebarProfile() {
+  const router = useRouter();
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const deleteValue = useStorageStore((state) => state.deleteValue);
+
+  const handleLogout = () => {
+    Cookies.remove("accessToken", { path: "/" });
+    deleteValue("user");
+    setLogoutDialogOpen(false);
+    router.replace("/login");
+    router.refresh();
+  };
+
   return (
     <div className="mt-2 flex shrink-0 items-center gap-2.5 border-t border-border-light px-2 pt-3">
       <span
@@ -87,22 +105,33 @@ function SidebarProfile() {
         <p className="truncate font-bold">[Admin Name]</p>
         <p className="text-[10px] text-light">Super admin</p>
       </div>
-      <span className="group relative ml-auto inline-flex shrink-0">
-        <Link
-          href="/login"
-          replace
-          aria-label="Log out"
-          className="flex size-8 items-center justify-center rounded-sm text-light transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
-        >
-          <LuLogOut size={18} aria-hidden="true" />
-        </Link>
-        <span
-          aria-hidden="true"
-          className="pointer-events-none invisible absolute right-0 bottom-full z-10 mb-2 whitespace-nowrap rounded-sm border border-border bg-dark px-2 py-1 text-xs font-medium text-light opacity-0 shadow-sm transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
-        >
-          Log out
+      <Tooltip title="Log out" placement="top">
+        <span className="ml-auto inline-flex shrink-0">
+          <Button
+            variant="text"
+            className="size-8! shrink-0 rounded-sm! p-0! text-light! transition hover:bg-white/10! hover:text-white! focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
+            onClick={() => setLogoutDialogOpen(true)}
+          >
+            <LuLogOut size={18} aria-hidden="true" />
+            <span className="sr-only">Log out</span>
+          </Button>
         </span>
-      </span>
+      </Tooltip>
+      <Dialog
+        open={logoutDialogOpen}
+        title="Log out?"
+        onClose={() => setLogoutDialogOpen(false)}
+        onConfirm={handleLogout}
+        okText="Log out"
+        cancelText="Cancel"
+        confirmDanger
+        closable={false}
+        width={400}
+      >
+        <p className="text-sm text-dark">
+          Are you sure you want to log out of your account?
+        </p>
+      </Dialog>
     </div>
   );
 }

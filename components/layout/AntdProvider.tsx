@@ -18,6 +18,25 @@ const theme: ThemeConfig = {
     controlHeight: 44,
   },
   components: {
+    Alert: {
+      colorSuccess: "var(--color-success)",
+      colorSuccessBg:
+        "color-mix(in srgb, var(--color-success) 10%, transparent)",
+      colorSuccessBorder:
+        "color-mix(in srgb, var(--color-success) 20%, transparent)",
+      colorInfo: "var(--color-info)",
+      colorInfoBg: "color-mix(in srgb, var(--color-info) 10%, transparent)",
+      colorInfoBorder: "color-mix(in srgb, var(--color-info) 20%, transparent)",
+      colorWarning: "var(--color-warning)",
+      colorWarningBg:
+        "color-mix(in srgb, var(--color-warning) 10%, transparent)",
+      colorWarningBorder:
+        "color-mix(in srgb, var(--color-warning) 20%, transparent)",
+      colorError: "var(--color-danger)",
+      colorErrorBg: "color-mix(in srgb, var(--color-danger) 10%, transparent)",
+      colorErrorBorder:
+        "color-mix(in srgb, var(--color-danger) 20%, transparent)",
+    },
     Button: { fontWeight: 600, borderRadius: 10, primaryShadow: "none" },
     Tooltip: {
       colorBgSpotlight: "var(--color-dark)",
