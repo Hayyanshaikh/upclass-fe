@@ -8,11 +8,12 @@ export default function SectionCard({
   children,
   divider = false,
   className = "",
+  autoHeight = false,
   size = "md",
 }: SectionCardProps) {
   return (
     <Card
-      className={`h-full min-w-0 rounded-lg! border-border! bg-background! ${className}`}
+      className={`${autoHeight ? "h-auto" : "h-full"} min-w-0 rounded-lg! border-border! bg-background! ${className}`}
       classNames={{ body: size === "sm" ? "p-3!" : "p-5! sm:p-6!" }}
     >
       {title && (

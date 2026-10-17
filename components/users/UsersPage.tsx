@@ -1,0 +1,153 @@
+"use client";
+
+import type { TableColumnsType } from "antd";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { flushSync } from "react-dom";
+import ActionButtons from "@/components/shared/ActionButtons";
+import DeleteDialog from "@/components/shared/DeleteDialog";
+import PageHeader from "@/components/shared/PageHeader";
+import UserDetailsDialog from "@/components/dialogs/UserDetailsDialog";
+import StatCard from "@/components/ui/StatCard";
+import StatusBadge from "@/components/ui/StatusBadge";
+import Table from "@/components/ui/Table";
+import {
+  userRoleOptions,
+  userStatusOptions,
+  userStatusVariants,
+} from "@/constants/users";
+import { exportCsv } from "@/utils/export-csv";
+import { useUserStore } from "@/stores/users";
+import type { UserAccount, UserStatus } from "@/types/user-management";
+
+export default function UsersPage() {
+  const router = useRouter();
+  const records = useUserStore((state) => state.records);
+  const deleteUser = useUserStore((state) => state.deleteUser);
+  const [search, setSearch] = useState("");
+  const [role, setRole] = useState<string>();
+  const [status, setStatus] = useState<string>();
+  const [page, setPage] = useState(1);
+  const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserAccount | null>(null);
+
+  const filteredUsers = records.filter(
+    (user) =>
+      `${user.name} ${user.email}`
+        .toLowerCase()
+        .includes(search.trim().toLowerCase()) &&
+      (!role || user.role === role) &&
+      (!status || user.status === status),
+  );
+
+  function downloadCsv() {
+    exportCsv("users.csv", [
+      ["Name", "Email", "Role", "Status"],
+      ...filteredUsers.map((user) => [
+        user.name,
+        user.email,
+        user.role,
+        user.status,
+      ]),
+    ]);
+  }
+
+  function editUser(user: UserAccount) {
+    flushSync(() => setSelectedUser(null));
+    router.push(`/users/edit/${encodeURIComponent(user.id)}`);
+  }
+
+  const columns: TableColumnsType<UserAccount> = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      render: (name: string) => (
+        <span className="font-bold text-dark">{name}</span>
+      ),
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      render: (email: string) =>
+        email === "—" ? <span className="text-gray">—</span> : email,
+    },
+    {
+      title: "Role",
+      dataIndex: "role",
+      render: (value: string) => <StatusBadge>{value}</StatusBadge>,
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      render: (value: UserStatus) => (
+        <StatusBadge variant={userStatusVariants[value]}>{value}</StatusBadge>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      width: 160,
+      render: (_, user) => (
+        <ActionButtons
+          name={user.name}
+          onView={() => setSelectedUser(user)}
+          onEdit={() => editUser(user)}
+          onDelete={() => setUserToDelete(user)}
+        />
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="shrink-0">
+        <PageHeader title="Users" />
+      </div>
+      <Table
+        columns={columns}
+        data={filteredUsers}
+        pageSize={7}
+        current={page}
+        onPageChange={setPage}
+        search={{ placeholder: "Name or email", onChange: setSearch }}
+        filterFields={[
+          {
+            name: "role",
+            label: "Role",
+            placeholder: "Any role",
+            options: userRoleOptions,
+            onChange: setRole,
+          },
+          {
+            name: "status",
+            label: "Status",
+            placeholder: "Any status",
+            options: userStatusOptions,
+            onChange: setStatus,
+          },
+        ]}
+        actions={[
+          { label: "Export CSV", variant: "secondary", onClick: downloadCsv },
+          { label: "Invite user", onClick: () => router.push("/users/invite") },
+        ]}
+      />
+      <UserDetailsDialog
+        user={selectedUser}
+        onClose={() => setSelectedUser(null)}
+        onEdit={editUser}
+      />
+      <DeleteDialog
+        open={userToDelete !== null}
+        title="Remove user?"
+        message={`Remove ${userToDelete?.name ?? "this user"} from the user list?`}
+        description="This only removes the account from this frontend preview."
+        okText="Remove user"
+        onClose={() => setUserToDelete(null)}
+        onConfirm={() => {
+          if (userToDelete) deleteUser(userToDelete.id);
+          setUserToDelete(null);
+        }}
+      />
+    </div>
+  );
+}

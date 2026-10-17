@@ -13,6 +13,7 @@ import {
   LuBell,
   LuSettings,
   LuClock,
+  LuUserCog,
 } from "react-icons/lu";
 
 export const menuItems: NavItem[] = [
@@ -69,5 +70,6 @@ export const menuItems: NavItem[] = [
     href: "/teacher-leaves",
     icon: LuCalendarDays,
   },
+  { label: "Users", href: "/users", icon: LuUserCog },
   { label: "Settings", href: "/settings", icon: LuSettings },
 ];
