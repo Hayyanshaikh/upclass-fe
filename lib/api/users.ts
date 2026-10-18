@@ -1,8 +1,7 @@
-import type { LoginResponseUserDto } from "@/app/api/schemas";
-import type { UserAccount } from "@/types/user-management";
+import type { UserAccount, UserApiItem } from "@/types/user-management";
 
 export const userManipulator = (
-  users: LoginResponseUserDto[] = [],
+  users: UserApiItem[] = [],
 ): UserAccount[] =>
   users.map((user) => ({
     id: user.id,
@@ -10,4 +9,5 @@ export const userManipulator = (
     email: user.email,
     role: user.role?.name ?? "Unknown role",
     isActive: user.isActive ? "Active" : "Inactive",
+    isSystem: user.isSystem ?? false,
   }));

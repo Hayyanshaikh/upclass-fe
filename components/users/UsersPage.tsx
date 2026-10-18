@@ -1,7 +1,9 @@
 "use client";
 
 import type { TableColumnsType } from "antd";
+import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import ActionButtons from "@/components/shared/ActionButtons";
@@ -9,7 +11,6 @@ import Button from "@/components/ui/Button";
 import DeleteDialog from "@/components/shared/DeleteDialog";
 import PageHeader from "@/components/shared/PageHeader";
 import UserDetailsDialog from "@/components/dialogs/UserDetailsDialog";
-import StatCard from "@/components/ui/StatCard";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
 import {
@@ -19,9 +20,11 @@ import {
 } from "@/constants/users";
 import { exportCsv } from "@/utils/export-csv";
 import { useStorageStore } from "@/stores/storage";
-import { useUserStore } from "@/stores/users";
 import type { UserAccount, UserStatus } from "@/types/user-management";
-import { useUserControllerFindAll } from "@/app/api/endpoints";
+import {
+  useUserControllerFindAll,
+  useUserControllerRemove,
+} from "@/app/api/endpoints";
 import { userManipulator } from "@/lib/api/users";
 
 export default function UsersPage() {
@@ -35,13 +38,15 @@ export default function UsersPage() {
       ? user.id
       : undefined;
   });
-  const deleteUser = useUserStore((state) => state.deleteUser);
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<string>();
   const [status, setStatus] = useState<string>();
   const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserAccount | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const { mutateAsync: removeUser, isPending: isDeleting } =
+    useUserControllerRemove();
 
   const {
     data: users,
@@ -53,10 +58,9 @@ export default function UsersPage() {
   const records = Array.isArray(users) ? users : users?.data;
   const isSuperAdmin = Boolean(
     currentUserId &&
-      records?.some(
-        (user) =>
-          user.id === currentUserId && user.role?.slug === "super_admin",
-      ),
+    records?.some(
+      (user) => user.id === currentUserId && user.role?.slug === "super_admin",
+    ),
   );
   const userData = userManipulator(records);
 
@@ -75,6 +79,24 @@ export default function UsersPage() {
   function editUser(user: UserAccount) {
     flushSync(() => setSelectedUser(null));
     router.push(`/users/edit/${encodeURIComponent(user.id)}`);
+  }
+
+  async function confirmDelete() {
+    if (!userToDelete || userToDelete.isSystem || isDeleting) return;
+
+    const id = userToDelete.id;
+    setDeleteError(null);
+
+    try {
+      await removeUser({ id });
+      setUserToDelete(null);
+      refetch();
+    } catch (error) {
+      const message = isAxiosError(error)
+        ? (error.response?.data as { message?: string } | undefined)?.message
+        : undefined;
+      setDeleteError(message ?? "Unable to delete user. Please try again.");
+    }
   }
 
   const columns: TableColumnsType<UserAccount> = [
@@ -112,7 +134,15 @@ export default function UsersPage() {
           name={user.name}
           onView={() => setSelectedUser(user)}
           onEdit={() => editUser(user)}
-          onDelete={() => setUserToDelete(user)}
+          onDelete={() => {
+            if (user.isSystem) return;
+            setDeleteError(null);
+            setUserToDelete(user);
+          }}
+          deleteDisabled={user.isSystem || isDeleting}
+          deleteDisabledReason={
+            user.isSystem ? "System users cannot be deleted" : undefined
+          }
         />
       ),
     },
@@ -176,13 +206,21 @@ export default function UsersPage() {
         open={userToDelete !== null}
         title="Remove user?"
         message={`Remove ${userToDelete?.name ?? "this user"} from the user list?`}
-        description="This only removes the account from this frontend preview."
+        description={
+          deleteError ? (
+            <span role="alert" className="text-danger">
+              {deleteError}
+            </span>
+          ) : (
+            "This permanently deletes the user account."
+          )
+        }
         okText="Remove user"
-        onClose={() => setUserToDelete(null)}
-        onConfirm={() => {
-          if (userToDelete) deleteUser(userToDelete.id);
-          setUserToDelete(null);
+        confirmLoading={isDeleting}
+        onClose={() => {
+          if (!isDeleting) setUserToDelete(null);
         }}
+        onConfirm={() => void confirmDelete()}
       />
     </div>
   );

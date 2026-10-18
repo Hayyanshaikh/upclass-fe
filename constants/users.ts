@@ -9,6 +9,7 @@ export const initialUsers: UserAccount[] = [
     email: "imran@school.edu",
     role: "Super Admin",
     isActive: "Active",
+    isSystem: true,
   },
   {
     id: "USR-002",
@@ -16,6 +17,7 @@ export const initialUsers: UserAccount[] = [
     email: "sara@school.edu",
     role: "Teacher",
     isActive: "Active",
+    isSystem: false,
   },
   {
     id: "USR-003",
@@ -23,6 +25,7 @@ export const initialUsers: UserAccount[] = [
     email: "imran.khan@mail.com",
     role: "Parent",
     isActive: "Active",
+    isSystem: false,
   },
   {
     id: "USR-004",
@@ -30,6 +33,7 @@ export const initialUsers: UserAccount[] = [
     email: "—",
     role: "Student",
     isActive: "Active",
+    isSystem: false,
   },
   {
     id: "USR-005",
@@ -37,6 +41,7 @@ export const initialUsers: UserAccount[] = [
     email: "frontdesk@school.edu",
     role: "Admin",
     isActive: "Active",
+    isSystem: false,
   },
   {
     id: "USR-006",
@@ -44,6 +49,7 @@ export const initialUsers: UserAccount[] = [
     email: "omar@school.edu",
     role: "Teacher",
     isActive: "Inactive",
+    isSystem: false,
   },
   {
     id: "USR-007",
@@ -51,6 +57,7 @@ export const initialUsers: UserAccount[] = [
     email: "auditor@ext.com",
     role: "Admin",
     isActive: "Active",
+    isSystem: false,
   },
 ];
 

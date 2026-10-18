@@ -6,7 +6,7 @@ import { useUserControllerFindOne } from "@/app/api/endpoints";
 import type { UserFindOneResponseDto } from "@/app/api/schemas";
 import Loader from "@/components/ui/Loader";
 import { isAxiosError } from "axios";
-import type { UserAccount } from "@/types/user-management";
+import type { UserAccount, UserApiItem } from "@/types/user-management";
 
 export default function EditUserForm() {
   const { id } = useParams<{ id: string }>();
@@ -30,12 +30,14 @@ export default function EditUserForm() {
 
   if (!response?.data) return <p>User not found.</p>;
 
+  const userData: UserApiItem = response.data;
   const user: UserAccount = {
-    id: response.data.id,
-    email: response.data.email,
-    isActive: response.data.isActive ? "Active" : "Inactive",
-    name: response.data.name,
-    role: response.data.roleId ?? response.data.role?.id ?? "",
+    id: userData.id,
+    email: userData.email,
+    isActive: userData.isActive ? "Active" : "Inactive",
+    isSystem: userData.isSystem ?? false,
+    name: userData.name,
+    role: userData.roleId ?? userData.role?.id ?? "",
   };
 
   return <UserForm key={id} user={user} />;

@@ -5,6 +5,8 @@ export type ActionButtonsProps = {
   onView?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  deleteDisabled?: boolean;
+  deleteDisabledReason?: string;
   actions?: RecordAction[];
 };
 export type RecordAction = {

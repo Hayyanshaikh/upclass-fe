@@ -1,4 +1,8 @@
+import type { LoginResponseUserDto } from "@/app/api/schemas";
+
 export type UserStatus = "Active" | "Inactive";
+
+export type UserApiItem = LoginResponseUserDto & { isSystem?: boolean };
 
 export type UserAccount = {
   id: string;
@@ -6,6 +10,7 @@ export type UserAccount = {
   email: string;
   role: string;
   isActive: UserStatus;
+  isSystem: boolean;
 };
 
 export type UserFormValues = {

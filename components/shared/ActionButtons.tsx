@@ -74,6 +74,8 @@ export default function ActionButtons({
   onView,
   onEdit,
   onDelete,
+  deleteDisabled = false,
+  deleteDisabledReason,
   actions,
 }: ActionButtonsProps) {
   const buttons: RecordAction[] = actions ?? [
@@ -86,10 +88,11 @@ export default function ActionButtons({
     ...(onDelete
       ? [
           {
-            label: `Delete ${name}`,
+            label: deleteDisabledReason ?? `Delete ${name}`,
             icon: LuTrash2,
             onClick: onDelete,
             danger: true,
+            disabled: deleteDisabled,
           },
         ]
       : []),
