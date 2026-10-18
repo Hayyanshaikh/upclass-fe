@@ -6,13 +6,14 @@
  * OpenAPI spec version: 1.0
  */
 import type { LoginResponseUserDtoGender } from './loginResponseUserDtoGender';
-import type { LoginResponseUserDtoRole } from './loginResponseUserDtoRole';
+import type { RoleSummaryDto } from './roleSummaryDto';
 
 export interface LoginResponseUserDto {
   id: string;
   name: string;
   email: string;
-  role: LoginResponseUserDtoRole;
+  roleId?: string;
+  role?: RoleSummaryDto;
   isActive: boolean;
   gender: LoginResponseUserDtoGender;
 }

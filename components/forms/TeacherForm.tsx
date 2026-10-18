@@ -212,7 +212,11 @@ export default function TeacherForm({ teacher }: TeacherFormProps) {
             options={teacherSubjects.map((value) => ({ label: value, value }))}
             isRequird
           />
-          <Input name="qualification" label="Qualification" placeholder="Enter qualification, e.g. M.Ed." />
+          <Input
+            name="qualification"
+            label="Qualification"
+            placeholder="Enter qualification, e.g. M.Ed."
+          />
           <DatePicker name="joiningDate" label="Joining date" />
           <Select
             name="employment"
@@ -264,7 +268,12 @@ export default function TeacherForm({ teacher }: TeacherFormProps) {
             ]}
           />
           <div className="md:col-span-2">
-            <TextArea name="address" label="Address" placeholder="Enter home address" rows={3} />
+            <TextArea
+              name="address"
+              label="Address"
+              placeholder="Enter home address"
+              rows={3}
+            />
           </div>
         </div>
       </SectionCard>
@@ -286,9 +295,6 @@ export default function TeacherForm({ teacher }: TeacherFormProps) {
       </SectionCard>
 
       <div className="flex flex-wrap items-center justify-end gap-3 pb-4">
-        <p className="mr-auto text-xs text-gray">
-          Preview changes are kept until the page is refreshed.
-        </p>
         <Button variant="secondary" onClick={() => router.push("/teachers")}>
           Cancel
         </Button>

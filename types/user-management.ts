@@ -1,11 +1,11 @@
-export type UserStatus = "Active" | "Invited" | "Suspended";
+export type UserStatus = "Active" | "Inactive";
 
 export type UserAccount = {
   id: string;
   name: string;
   email: string;
   role: string;
-  status: UserStatus;
+  isActive: UserStatus;
 };
 
 export type UserFormValues = {

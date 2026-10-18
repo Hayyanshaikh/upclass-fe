@@ -5,6 +5,7 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import AntdProvider from "@/components/layout/AntdProvider";
 import "./globals.css";
 import { Providers } from "./providers";
+import Loader from "@/components/ui/Loader";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -20,16 +21,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${manrope.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <Suspense
-          fallback={
-            <div
-              role="status"
-              className="flex min-h-dvh items-center justify-center bg-foreground text-gray"
-            >
-              Loading…
-            </div>
-          }
-        >
+        <Suspense fallback={<Loader />}>
           <Providers>
             <AntdRegistry>
               <AntdProvider>{children}</AntdProvider>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import ActionButtons from "@/components/shared/ActionButtons";
+import Button from "@/components/ui/Button";
 import DeleteDialog from "@/components/shared/DeleteDialog";
 import PageHeader from "@/components/shared/PageHeader";
 import UserDetailsDialog from "@/components/dialogs/UserDetailsDialog";
@@ -19,10 +20,11 @@ import {
 import { exportCsv } from "@/utils/export-csv";
 import { useUserStore } from "@/stores/users";
 import type { UserAccount, UserStatus } from "@/types/user-management";
+import { useUserControllerFindAll } from "@/app/api/endpoints";
+import { userManipulator } from "@/lib/api/users";
 
 export default function UsersPage() {
   const router = useRouter();
-  const records = useUserStore((state) => state.records);
   const deleteUser = useUserStore((state) => state.deleteUser);
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<string>();
@@ -31,23 +33,24 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserAccount | null>(null);
 
-  const filteredUsers = records.filter(
-    (user) =>
-      `${user.name} ${user.email}`
-        .toLowerCase()
-        .includes(search.trim().toLowerCase()) &&
-      (!role || user.role === role) &&
-      (!status || user.status === status),
-  );
+  const {
+    data: users,
+    isFetching,
+    error,
+    refetch,
+  } = useUserControllerFindAll();
+
+  const records = Array.isArray(users) ? users : users?.data;
+  const userData = userManipulator(records);
 
   function downloadCsv() {
     exportCsv("users.csv", [
-      ["Name", "Email", "Role", "Status"],
-      ...filteredUsers.map((user) => [
+      ["Name", "Email", "Role", "isActive"],
+      ...(userData ?? []).map((user) => [
         user.name,
         user.email,
         user.role,
-        user.status,
+        String(user.isActive),
       ]),
     ]);
   }
@@ -78,7 +81,7 @@ export default function UsersPage() {
     },
     {
       title: "Status",
-      dataIndex: "status",
+      dataIndex: "isActive",
       render: (value: UserStatus) => (
         <StatusBadge variant={userStatusVariants[value]}>{value}</StatusBadge>
       ),
@@ -105,7 +108,21 @@ export default function UsersPage() {
       </div>
       <Table
         columns={columns}
-        data={filteredUsers}
+        data={userData}
+        loading={isFetching}
+        beforeTable={
+          error ? (
+            <div
+              role="alert"
+              className="flex items-center gap-3 rounded-md border border-danger bg-danger/10 px-4 py-3 text-sm text-danger"
+            >
+              <span>Unable to load users.</span>
+              <Button variant="link" onClick={() => void refetch()}>
+                Retry
+              </Button>
+            </div>
+          ) : undefined
+        }
         pageSize={7}
         current={page}
         onPageChange={setPage}

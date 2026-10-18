@@ -6,14 +6,21 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from './createRoleDto';
 export * from './createUserDto';
 export * from './createUserDtoGender';
-export * from './createUserDtoRole';
 export * from './loginDto';
 export * from './loginResponseDto';
 export * from './loginResponseUserDto';
 export * from './loginResponseUserDtoGender';
-export * from './loginResponseUserDtoRole';
+export * from './roleDataDto';
+export * from './roleDataDtoDescription';
+export * from './roleResponseDto';
+export * from './rolesResponseDto';
+export * from './roleSummaryDto';
+export * from './updateRoleDto';
+export * from './updateRoleDtoDescription';
 export * from './updateUserDto';
 export * from './updateUserDtoGender';
-export * from './updateUserDtoRole';
+export * from './userFindOneResponseDto';
+export * from './userResponseDto';

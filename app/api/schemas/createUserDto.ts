@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 import type { CreateUserDtoGender } from './createUserDtoGender';
-import type { CreateUserDtoRole } from './createUserDtoRole';
 
 export interface CreateUserDto {
   name: string;
@@ -14,6 +13,6 @@ export interface CreateUserDto {
   password: string;
   age?: number;
   gender?: CreateUserDtoGender;
-  role: CreateUserDtoRole;
+  roleId: string;
   isActive?: boolean;
 }

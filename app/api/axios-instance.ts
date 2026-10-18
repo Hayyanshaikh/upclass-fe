@@ -19,9 +19,9 @@ axiosInstance.interceptors.request.use((config) => {
 
 export const customInstance = <T>(
   url: string,
-  options?: RequestInit,
+  options?: RequestInit & { unwrapResponse?: boolean },
 ): Promise<T> => {
-  const { body, ...requestOptions } = options ?? {};
+  const { body, unwrapResponse = false, ...requestOptions } = options ?? {};
 
   return axiosInstance
     .request<T>({
@@ -30,9 +30,9 @@ export const customInstance = <T>(
       data: body,
     } as AxiosRequestConfig)
     .then(({ data }) => {
-      // Nest's global ResponseInterceptor wraps successful responses as
-      // { statusCode, message, data }; return the DTO Orval generated from Swagger.
+      // Generated response DTOs include the API envelope by default.
       if (
+        unwrapResponse &&
         data &&
         typeof data === "object" &&
         "statusCode" in data &&

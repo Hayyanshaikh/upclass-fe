@@ -26,7 +26,9 @@ import type {
 
 import type {
   CreateUserDto,
-  UpdateUserDto
+  UpdateUserDto,
+  UserFindOneResponseDto,
+  UserResponseDto
 } from '../../schemas';
 
 import { customInstance } from '../../axios-instance';
@@ -149,9 +151,9 @@ export const useUserControllerCreate = <TError = void,
 /**
  * @summary Get all users
  */
-export const userControllerFindAll = async ( options?: Parameters<typeof customInstance>[1]): Promise<void> => {
+export const userControllerFindAll = async ( options?: Parameters<typeof customInstance>[1]): Promise<UserResponseDto> => {
 
-  return customInstance<void>(getUserControllerFindAllUrl(),
+  return customInstance<UserResponseDto>(getUserControllerFindAllUrl(),
   {
     ...options,
     method: 'GET'
@@ -249,9 +251,9 @@ export const getUserControllerFindOneUrl = (id: string,) => {
 /**
  * @summary Get a user by ID
  */
-export const userControllerFindOne = async (id: string, options?: Parameters<typeof customInstance>[1]): Promise<void> => {
+export const userControllerFindOne = async (id: string, options?: Parameters<typeof customInstance>[1]): Promise<UserFindOneResponseDto> => {
 
-  return customInstance<void>(getUserControllerFindOneUrl(id),
+  return customInstance<UserFindOneResponseDto>(getUserControllerFindOneUrl(id),
   {
     ...options,
     method: 'GET'

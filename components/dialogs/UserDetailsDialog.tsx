@@ -34,8 +34,8 @@ export default function UserDetailsDialog({
           <div>
             <dt className="text-gray">Status</dt>
             <dd className="mt-1">
-              <StatusBadge variant={userStatusVariants[user.status]}>
-                {user.status}
+              <StatusBadge variant={userStatusVariants[user.isActive]}>
+                {user.isActive}
               </StatusBadge>
             </dd>
           </div>

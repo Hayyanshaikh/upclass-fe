@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 import type { UpdateUserDtoGender } from './updateUserDtoGender';
-import type { UpdateUserDtoRole } from './updateUserDtoRole';
 
 export interface UpdateUserDto {
   name?: string;
@@ -14,6 +13,6 @@ export interface UpdateUserDto {
   password?: string;
   age?: number;
   gender?: UpdateUserDtoGender;
-  role?: UpdateUserDtoRole;
+  roleId?: string;
   isActive?: boolean;
 }

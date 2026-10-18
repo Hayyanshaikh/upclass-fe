@@ -19,7 +19,9 @@ export default function LoginForm() {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const { setValue } = useStorageStore();
-  const { mutateAsync: login, isPending } = useAuthControllerLogin();
+  const { mutateAsync: login, isPending } = useAuthControllerLogin({
+    request: { unwrapResponse: true },
+  });
 
   const handleSubmit = async (data: Login) => {
     try {
