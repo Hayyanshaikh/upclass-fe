@@ -18,15 +18,23 @@ import {
   userStatusVariants,
 } from "@/constants/users";
 import { exportCsv } from "@/utils/export-csv";
+import { useStorageStore } from "@/stores/storage";
 import { useUserStore } from "@/stores/users";
 import type { UserAccount, UserStatus } from "@/types/user-management";
 import { useUserControllerFindAll } from "@/app/api/endpoints";
-import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
 import { userManipulator } from "@/lib/api/users";
 
 export default function UsersPage() {
   const router = useRouter();
-  const { isSuperAdmin } = useIsSuperAdmin();
+  const currentUserId = useStorageStore((state) => {
+    const user = state.values.user;
+    return user &&
+      typeof user === "object" &&
+      "id" in user &&
+      typeof user.id === "string"
+      ? user.id
+      : undefined;
+  });
   const deleteUser = useUserStore((state) => state.deleteUser);
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<string>();
@@ -43,6 +51,13 @@ export default function UsersPage() {
   } = useUserControllerFindAll();
 
   const records = Array.isArray(users) ? users : users?.data;
+  const isSuperAdmin = Boolean(
+    currentUserId &&
+      records?.some(
+        (user) =>
+          user.id === currentUserId && user.role?.slug === "super_admin",
+      ),
+  );
   const userData = userManipulator(records);
 
   function downloadCsv() {
