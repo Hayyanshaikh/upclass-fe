@@ -22,5 +22,5 @@ export const settingsUsers: SettingsUser[] = [
   { id: "imran", name: "Imran Sheikh", role: "Super admin", email: "imran@school.edu", status: "Active" },
   { id: "sara", name: "Sara Malik", role: "Teacher", email: "sara@school.edu", status: "Active" },
   { id: "desk", name: "Front Desk", role: "Staff", email: "frontdesk@school.edu", status: "Active" },
-  { id: "guest", name: "Guest Auditor", role: "Viewer", email: "—", status: "Invited" },
+  { id: "guest", name: "Guest Auditor", role: "Viewer", email: "—", status: "Inactive" },
 ];

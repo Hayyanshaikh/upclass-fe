@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Form, message } from "antd";
+import { useRouter } from "next/navigation";
 import PageHeader from "@/components/shared/PageHeader";
 import AcademicYearTab from "@/components/settings/AcademicYearTab";
 import FeeHeadsTab from "@/components/settings/FeeHeadsTab";
@@ -14,6 +15,7 @@ import Dialog from "@/components/ui/Dialog";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Tabs from "@/components/ui/Tabs";
+import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
 import { academicYears, feeHeads, leaveTypes, settingsUsers } from "@/constants/settings";
 import type { AcademicYear, FeeHead, SettingsUser } from "@/types/settings";
 
@@ -49,6 +51,8 @@ const initialValues = {
 };
 
 export default function Settings() {
+  const router = useRouter();
+  const { isSuperAdmin } = useIsSuperAdmin();
   const [form] = Form.useForm();
   const [dialogForm] = Form.useForm();
   const [activeTab, setActiveTab] = useState("profile");
@@ -119,7 +123,7 @@ export default function Settings() {
         setFees((current) => [...current, { id, name: String(values.name).trim(), required: values.required === "Yes", amount: Number(values.amount) }]);
       }
       if (dialog === "user") {
-        const record: SettingsUser = { id, name: String(values.name).trim(), role: String(values.role), email: String(values.email).trim(), status: editingUser ? "Active" : "Invited" };
+        const record: SettingsUser = { id, name: String(values.name).trim(), role: String(values.role), email: String(values.email).trim(), status: "Active" };
         setUsers((current) => editingUser ? current.map((user) => user.id === editingUser ? record : user) : [...current, record]);
       }
       setDialog(null);
@@ -132,7 +136,7 @@ export default function Settings() {
     { key: "academic", label: "Academic year", children: <AcademicYearTab years={years} onAdd={() => openDialog("year")} /> },
     { key: "leave", label: "Leave policy", children: <LeavePolicyTab /> },
     { key: "fees", label: "Fee heads", children: <FeeHeadsTab fees={fees} onAdd={() => openDialog("fee")} /> },
-    { key: "users", label: "Roles & users", children: <RolesUsersTab users={users} onInvite={() => openDialog("user")} onEdit={(user) => openDialog("user", user)} onRemove={(id) => setUsers((current) => current.filter((user) => user.id !== id))} /> },
+    { key: "users", label: "Roles & users", children: <RolesUsersTab users={users} onAdd={() => router.push("/users/add")} canAdd={isSuperAdmin} onEdit={(user) => openDialog("user", user)} onRemove={(id) => setUsers((current) => current.filter((user) => user.id !== id))} /> },
     { key: "notifications", label: "Notifications", children: <NotificationsTab /> },
   ];
 
@@ -147,7 +151,7 @@ export default function Settings() {
     <Form form={form} layout="vertical" initialValues={initialValues} onFinish={saveSettings} className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <Tabs items={tabs} activeKey={activeTab} onChange={setActiveTab} scrollable />
     </Form>
-    <Dialog open={dialog !== null} title={dialog === "year" ? "Add academic year" : dialog === "fee" ? "Add fee head" : editingUser ? "Edit user" : "Invite user"} okText={dialog === "user" && !editingUser ? "Invite user" : "Add"} onClose={() => setDialog(null)} onConfirm={submitDialog}>
+    <Dialog open={dialog !== null} title={dialog === "year" ? "Add academic year" : dialog === "fee" ? "Add fee head" : editingUser ? "Edit user" : "Add user"} okText={dialog === "user" && !editingUser ? "Add user" : "Add"} onClose={() => setDialog(null)} onConfirm={submitDialog}>
       <Form form={dialogForm} layout="vertical" className="space-y-4">
         {dialog === "year" && <><Input name="year" label="Academic year" isRequird placeholder="2027-28" /><Input name="duration" label="Duration" isRequird placeholder="Aug 2027 - Jun 2028" /></>}
         {dialog === "fee" && <><Input name="name" label="Fee head" isRequird /><Input name="amount" label="Default amount (Rs.)" type="number" isRequird /><Select name="required" label="Required" isRequird options={[{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }]} /></>}

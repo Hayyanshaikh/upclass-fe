@@ -12,7 +12,8 @@ import type { RolesUsersTabProps, SettingsUser } from "@/types/settings";
 
 export default function RolesUsersTab({
   users,
-  onInvite,
+  onAdd,
+  canAdd,
   onEdit,
   onRemove,
 }: RolesUsersTabProps) {
@@ -52,7 +53,10 @@ export default function RolesUsersTab({
 
   return (
     <SectionCard className="h-auto! min-h-full">
-      <SectionTitle icon={LuUsersRound} action={<Button onClick={onInvite}>Invite user</Button>}>
+      <SectionTitle
+        icon={LuUsersRound}
+        action={canAdd ? <Button onClick={onAdd}>Add user</Button> : undefined}
+      >
         Roles & users
       </SectionTitle>
       <Table columns={columns} data={users} pagination={false} autoHeight />

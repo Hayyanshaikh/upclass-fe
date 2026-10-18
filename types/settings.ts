@@ -32,7 +32,7 @@ export type SettingsUser = {
   name: string;
   role: string;
   email: string;
-  status: "Active" | "Invited";
+  status: "Active" | "Inactive";
 };
 
 export type AcademicYearTabProps = {
@@ -47,7 +47,8 @@ export type FeeHeadsTabProps = {
 
 export type RolesUsersTabProps = {
   users: SettingsUser[];
-  onInvite: () => void;
+  onAdd: () => void;
+  canAdd: boolean;
   onEdit: (user: SettingsUser) => void;
   onRemove: (id: string) => void;
 };

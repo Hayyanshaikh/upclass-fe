@@ -21,10 +21,12 @@ import { exportCsv } from "@/utils/export-csv";
 import { useUserStore } from "@/stores/users";
 import type { UserAccount, UserStatus } from "@/types/user-management";
 import { useUserControllerFindAll } from "@/app/api/endpoints";
+import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
 import { userManipulator } from "@/lib/api/users";
 
 export default function UsersPage() {
   const router = useRouter();
+  const { isSuperAdmin } = useIsSuperAdmin();
   const deleteUser = useUserStore((state) => state.deleteUser);
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<string>();
@@ -145,7 +147,9 @@ export default function UsersPage() {
         ]}
         actions={[
           { label: "Export CSV", variant: "secondary", onClick: downloadCsv },
-          { label: "Invite user", onClick: () => router.push("/users/invite") },
+          ...(isSuperAdmin
+            ? [{ label: "Add user", onClick: () => router.push("/users/add") }]
+            : []),
         ]}
       />
       <UserDetailsDialog

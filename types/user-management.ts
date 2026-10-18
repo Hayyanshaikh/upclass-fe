@@ -13,6 +13,7 @@ export type UserFormValues = {
   email: string;
   role: string;
   status: UserStatus;
+  password?: string;
 };
 
 export type UserStore = {
