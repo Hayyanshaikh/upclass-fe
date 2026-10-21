@@ -46,7 +46,7 @@ export default function EditRoleForm() {
 
   return (
     <RoleForm
-      key={`${id}:${response.data.permissionKeys.join(",")}`}
+      key={id}
       role={response.data}
       onSaved={refetch}
     />

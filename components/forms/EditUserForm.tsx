@@ -3,6 +3,8 @@
 import { useParams } from "next/navigation";
 import UserForm from "@/components/forms/UserForm";
 import { useUserControllerFindOne } from "@/app/api/endpoints";
+import PageHeader from "@/components/shared/PageHeader";
+import { ROUTE_NAMES } from "@/constants/routes";
 import type { UserFindOneResponseDto } from "@/app/api/schemas";
 import Loader from "@/components/ui/Loader";
 import { isAxiosError } from "axios";
@@ -16,19 +18,46 @@ export default function EditUserForm() {
     unknown
   >(id);
 
-  if (isLoading) return <Loader />;
+  const editHeader = (
+    <PageHeader
+      title="Edit user"
+      breadcrumbs={[
+        { title: "Users", href: ROUTE_NAMES.userListing },
+        { title: "Edit user" },
+      ]}
+    />
+  );
 
-  if (error) {
+  if (isLoading) {
     return (
-      <p>
-        {isAxiosError(error) && error.response?.status === 404
-          ? "User not found."
-          : "Unable to load user."}
-      </p>
+      <>
+        {editHeader}
+        <Loader />
+      </>
     );
   }
 
-  if (!response?.data) return <p>User not found.</p>;
+  if (error) {
+    return (
+      <>
+        {editHeader}
+        <p>
+          {isAxiosError(error) && error.response?.status === 404
+            ? "User not found."
+            : "Unable to load user."}
+        </p>
+      </>
+    );
+  }
+
+  if (!response?.data) {
+    return (
+      <>
+        {editHeader}
+        <p>User not found.</p>
+      </>
+    );
+  }
 
   const userData: UserApiItem = response.data;
   const user: UserAccount = {

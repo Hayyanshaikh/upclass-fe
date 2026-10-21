@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Form } from "antd";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/shared/PageHeader";
-import Alert from "@/components/ui/Alert";
+import ErrorDialog from "@/components/shared/ErrorDialog";
+import SuccessDialog from "@/components/shared/SuccessDialog";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import SectionCard from "@/components/ui/SectionCard";
@@ -37,9 +38,16 @@ export default function RoleForm({ role, onSaved }: RoleFormProps) {
   const router = useRouter();
   const [form] = Form.useForm<RoleFormValues>();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const [successRedirect, setSuccessRedirect] = useState<string | null>(null);
   const [permissionKeys, setPermissionKeys] = useState<string[]>(
     role?.permissionKeys ?? [],
   );
+
+  useEffect(() => {
+    if (role) return;
+    return () => form.resetFields();
+  }, [form, role]);
 
   const {
     data: permissionResponse,
@@ -68,12 +76,14 @@ export default function RoleForm({ role, onSaved }: RoleFormProps) {
     const name = isSystemRole ? role.name : values.name.trim();
     const description = values.description?.trim() ?? "";
     setSubmitError(null);
+    setSubmitSuccess(null);
 
     try {
       if (role) {
         const data: UpdateRoleDto = { name, description, permissionKeys };
         await updateRole({ id: role.id, data });
         await onSaved?.();
+        setSubmitSuccess("Role updated successfully.");
       } else {
         const slug = slugFromName(name);
         if (!slug) {
@@ -87,18 +97,17 @@ export default function RoleForm({ role, onSaved }: RoleFormProps) {
         }
         const data: CreateRoleDto = { name, slug, description };
         const res = await createRole({ data });
-
-        // console.log({ res });
-
-        router.push(
+        setSuccessRedirect(
           ROUTE_NAMES.editRole.replace(":id", encodeURIComponent(res.data.id)),
         );
+        setSubmitSuccess("Role added successfully.");
       }
     } catch (error) {
       const message = isAxiosError(error)
         ? (error.response?.data as { message?: string } | undefined)?.message
         : undefined;
       if (isAxiosError(error) && error.response?.status === 409) {
+        setSubmitError(message ?? "A role with this name already exists.");
         form.setFields([
           {
             name: "name",
@@ -124,7 +133,10 @@ export default function RoleForm({ role, onSaved }: RoleFormProps) {
             <Button
               variant="secondary"
               disabled={isPending || isReassigning}
-              onClick={() => router.push(ROUTE_NAMES.roleListing)}
+              onClick={() => {
+                if (!role) form.resetFields();
+                router.push(ROUTE_NAMES.roleListing);
+              }}
             >
               Cancel
             </Button>
@@ -139,7 +151,22 @@ export default function RoleForm({ role, onSaved }: RoleFormProps) {
         }
       />
 
-      {submitError && <Alert type="error" role="alert" message={submitError} />}
+      <ErrorDialog
+        open={submitError !== null}
+        message={submitError ?? ""}
+        onClose={() => setSubmitError(null)}
+      />
+      <SuccessDialog
+        open={submitSuccess !== null}
+        message={submitSuccess ?? ""}
+        onClose={() => {
+          setSubmitSuccess(null);
+          if (successRedirect) {
+            router.push(successRedirect);
+            setSuccessRedirect(null);
+          }
+        }}
+      />
 
       <Form
         form={form}

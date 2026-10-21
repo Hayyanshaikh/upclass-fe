@@ -54,13 +54,19 @@ export default function RolePermissionsSection({
       className="flex flex-col gap-4"
       aria-labelledby="role-permissions-title"
     >
-      <h2
-        id="role-permissions-title"
-        className="text-lg font-extrabold text-dark"
-      >
-        Permissions
-      </h2>
-      {isLoading && <p className="text-sm text-gray">Loading permissions...</p>}
+      <div className="">
+        <h2
+          id="role-permissions-title"
+          className="text-lg font-extrabold text-dark"
+        >
+          Permissions
+        </h2>
+
+        <p className="text-xs text-gray">
+          Select a permission to turn it on or off for this role. Filled buttons
+          are on.
+        </p>
+      </div>
       {Boolean(error) && (
         <div>
           <Alert
@@ -120,10 +126,6 @@ export default function RolePermissionsSection({
           </div>
         </details>
       ))}
-      <p className="text-xs text-gray">
-        Select a permission to turn it on or off for this role. Filled buttons
-        are on.
-      </p>
     </section>
   );
 }

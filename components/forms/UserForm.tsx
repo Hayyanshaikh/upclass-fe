@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { Form } from "antd";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import ErrorDialog from "@/components/shared/ErrorDialog";
+import PageHeader from "@/components/shared/PageHeader";
+import SuccessDialog from "@/components/shared/SuccessDialog";
 import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -29,6 +32,8 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
   const router = useRouter();
   const [form] = Form.useForm<UserFormValues>();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const [successRedirect, setSuccessRedirect] = useState<string | null>(null);
   const {
     options,
     isLoading: rolesLoading,
@@ -52,10 +57,16 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
     });
   }, [form, user]);
 
+  useEffect(() => {
+    if (user) return;
+    return () => form.resetFields();
+  }, [form, user]);
+
   const handleSubmit = async (values: UserFormValues) => {
     if (isPending) return;
 
     setSubmitError(null);
+    setSubmitSuccess(null);
     const fields = {
       name: values.name.trim(),
       email: values.email.trim(),
@@ -71,6 +82,7 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
         };
         await updateUser({ data: payload, id: user.id });
         await onSaved?.();
+        setSubmitSuccess("User updated successfully.");
       } else {
         const payload: CreateUserDto = {
           ...fields,
@@ -79,12 +91,13 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
         const response = (await createUser({ data: payload })) as unknown as {
           data: { id: string };
         };
-        router.push(
+        setSuccessRedirect(
           ROUTE_NAMES.editUser.replace(
             ":id",
             encodeURIComponent(response.data.id),
           ),
         );
+        setSubmitSuccess("User added successfully.");
       }
     } catch (error) {
       if (isAxiosError(error)) {
@@ -94,6 +107,7 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
         const message = body?.data?.errors?.[0] ?? body?.message;
 
         if (error.response?.status === 409) {
+          setSubmitError(message ?? "Email already exists.");
           form.setFields([
             { name: "email", errors: [message ?? "Email already exists."] },
           ]);
@@ -110,93 +124,126 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
   };
 
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      initialValues={{ status: "Active" }}
-      onFinish={handleSubmit}
-      onValuesChange={() => setSubmitError(null)}
-      requiredMark={false}
-      className="flex flex-col gap-6"
-    >
-      {submitError && <Alert type="error" role="alert" message={submitError} />}
-      {rolesError && (
-        <Alert type="warning" message="Unable to load role options." />
-      )}
-      <SectionCard title="Account" autoHeight>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <Input
-            name="name"
-            label="Full name"
-            placeholder="Enter full name"
-            autoComplete="name"
-            isRequird
-          />
-          <Input
-            name="email"
-            label="Email"
-            type="email"
-            placeholder="name@school.edu"
-            autoComplete="email"
-            isRequird
-            rules={[
-              {
-                pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: "Enter a valid email address.",
-              },
-            ]}
-          />
-          {isSuperAdmin && (
+    <div>
+      <PageHeader
+        title={user?.name ?? "Add user"}
+        breadcrumbs={[
+          { title: "Users", href: ROUTE_NAMES.userListing },
+          { title: user ? "Edit user" : "Add user" },
+        ]}
+        actions={
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="secondary"
+              disabled={isPending}
+              onClick={() => {
+                if (!user) form.resetFields();
+                router.push(ROUTE_NAMES.userListing);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              loading={isPending}
+              disabled={!user && (rolesLoading || rolesError)}
+              onClick={() => form.submit()}
+            >
+              {user ? "Update user" : "Add user"}
+            </Button>
+          </div>
+        }
+      />
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{ status: "Active" }}
+        onFinish={handleSubmit}
+        onValuesChange={() => setSubmitError(null)}
+        requiredMark={false}
+        className="flex flex-col gap-6"
+      >
+        <ErrorDialog
+          open={submitError !== null}
+          message={submitError ?? ""}
+          onClose={() => setSubmitError(null)}
+        />
+        <SuccessDialog
+          open={submitSuccess !== null}
+          message={submitSuccess ?? ""}
+          onClose={() => {
+            setSubmitSuccess(null);
+            if (successRedirect) {
+              router.push(successRedirect);
+              setSuccessRedirect(null);
+            }
+          }}
+        />
+        {rolesError && (
+          <Alert type="warning" message="Unable to load role options." />
+        )}
+        <SectionCard title="Account" autoHeight>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <Input
-              name="password"
-              label="Password"
-              type="password"
-              placeholder={
-                user ? "Leave blank to keep current password" : "Enter password"
-              }
-              autoComplete="new-password"
-              isRequird={!user}
+              name="name"
+              label="Full name"
+              placeholder="Enter full name"
+              autoComplete="name"
+              isRequird
+            />
+            <Input
+              name="email"
+              label="Email"
+              type="email"
+              placeholder="name@school.edu"
+              autoComplete="email"
+              isRequird
               rules={[
-                { min: 8, message: "Password must be at least 8 characters." },
-                { pattern: /\S/, message: "Password cannot be blank." },
+                {
+                  pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Enter a valid email address.",
+                },
               ]}
             />
-          )}
-          <Select
-            name="role"
-            label="Role"
-            options={options}
-            placeholder="Select role"
-            loading={rolesLoading}
-            disabled={rolesError}
-            isRequird
-          />
-          <Select
-            name="status"
-            label="Status"
-            options={userStatusOptions}
-            placeholder="Select status"
-            isRequird
-          />
-        </div>
-      </SectionCard>
-
-      <div className="flex flex-wrap items-center justify-end gap-3 pb-4">
-        <Button
-          variant="secondary"
-          disabled={isPending}
-          onClick={() => router.push(ROUTE_NAMES.userListing)}
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          loading={isPending}
-          disabled={!user && (rolesLoading || rolesError)}
-        >
-          {user ? "Update user" : "Add user"}
-        </Button>
-      </div>
-    </Form>
+            {isSuperAdmin && (
+              <Input
+                name="password"
+                label="Password"
+                type="password"
+                placeholder={
+                  user
+                    ? "Leave blank to keep current password"
+                    : "Enter password"
+                }
+                autoComplete="new-password"
+                isRequird={!user}
+                rules={[
+                  {
+                    min: 8,
+                    message: "Password must be at least 8 characters.",
+                  },
+                  { pattern: /\S/, message: "Password cannot be blank." },
+                ]}
+              />
+            )}
+            <Select
+              name="role"
+              label="Role"
+              options={options}
+              placeholder="Select role"
+              loading={rolesLoading}
+              disabled={rolesError}
+              isRequird
+            />
+            <Select
+              name="status"
+              label="Status"
+              options={userStatusOptions}
+              placeholder="Select status"
+              isRequird
+            />
+          </div>
+        </SectionCard>
+      </Form>
+    </div>
   );
 }
