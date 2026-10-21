@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Form } from "antd";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import { LuSave, LuX } from "react-icons/lu";
 import ErrorDialog from "@/components/shared/ErrorDialog";
 import PageHeader from "@/components/shared/PageHeader";
 import SuccessDialog from "@/components/shared/SuccessDialog";
@@ -127,28 +128,33 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
     <div>
       <PageHeader
         title={user?.name ?? "Add user"}
+        compactMobile
         breadcrumbs={[
           { title: "Users", href: ROUTE_NAMES.userListing },
           { title: user ? "Edit user" : "Add user" },
         ]}
         actions={
-          <div className="flex flex-wrap gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <Button
               variant="secondary"
+              className="size-11! p-0! sm:h-11! sm:w-auto! sm:px-4!"
               disabled={isPending}
               onClick={() => {
                 if (!user) form.resetFields();
                 router.push(ROUTE_NAMES.userListing);
               }}
             >
-              Cancel
+              <LuX size={18} aria-hidden="true" />
+              <span className="sr-only sm:not-sr-only">Cancel</span>
             </Button>
             <Button
+              className="size-11! p-0! sm:h-11! sm:w-auto! sm:px-4!"
               loading={isPending}
               disabled={!user && (rolesLoading || rolesError)}
               onClick={() => form.submit()}
             >
-              {user ? "Update user" : "Add user"}
+              <LuSave size={18} aria-hidden="true" />
+              <span className="sr-only sm:not-sr-only">{user ? "Update user" : "Add user"}</span>
             </Button>
           </div>
         }

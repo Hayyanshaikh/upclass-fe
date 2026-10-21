@@ -5,6 +5,7 @@ import { flushSync } from "react-dom";
 import { isAxiosError } from "axios";
 import type { TableColumnsType } from "antd";
 import { useRouter } from "next/navigation";
+import { LuPlus } from "react-icons/lu";
 import ActionButtons from "@/components/shared/ActionButtons";
 import DeleteDialog from "@/components/shared/DeleteDialog";
 import ErrorDialog from "@/components/shared/ErrorDialog";
@@ -181,6 +182,7 @@ export default function RolesPage() {
   const actions: TableAction[] = [
     {
       label: "Add role",
+      icon: <LuPlus size={18} aria-hidden="true" />,
       onClick: () => router.push(ROUTE_NAMES.createRole),
     },
   ];

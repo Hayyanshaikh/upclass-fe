@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Form } from "antd";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import { LuSave, LuX } from "react-icons/lu";
 import PageHeader from "@/components/shared/PageHeader";
 import ErrorDialog from "@/components/shared/ErrorDialog";
 import SuccessDialog from "@/components/shared/SuccessDialog";
@@ -124,28 +125,33 @@ export default function RoleForm({ role, onSaved }: RoleFormProps) {
     <div>
       <PageHeader
         title={role?.name ?? "Add role"}
+        compactMobile
         breadcrumbs={[
           { title: "Roles", href: ROUTE_NAMES.roleListing },
           { title: role ? "Edit role" : "Add role" },
         ]}
         actions={
-          <div className="flex flex-wrap gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <Button
               variant="secondary"
+              className="size-11! p-0! sm:h-11! sm:w-auto! sm:px-4!"
               disabled={isPending || isReassigning}
               onClick={() => {
                 if (!role) form.resetFields();
                 router.push(ROUTE_NAMES.roleListing);
               }}
             >
-              Cancel
+              <LuX size={18} aria-hidden="true" />
+              <span className="sr-only sm:not-sr-only">Cancel</span>
             </Button>
             <Button
+              className="size-11! p-0! sm:h-11! sm:w-auto! sm:px-4!"
               loading={isPending}
               disabled={permissionsUnavailable || isReassigning}
               onClick={() => form.submit()}
             >
-              {role ? "Save role" : "Add role"}
+              <LuSave size={18} aria-hidden="true" />
+              <span className="sr-only sm:not-sr-only">{role ? "Save role" : "Add role"}</span>
             </Button>
           </div>
         }

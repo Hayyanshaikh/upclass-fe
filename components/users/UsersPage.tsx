@@ -5,6 +5,7 @@ import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { flushSync } from "react-dom";
+import { LuDownload, LuPlus } from "react-icons/lu";
 import ActionButtons from "@/components/shared/ActionButtons";
 import Button from "@/components/ui/Button";
 import DeleteDialog from "@/components/shared/DeleteDialog";
@@ -22,7 +23,6 @@ import {
   useUserControllerRemove,
 } from "@/app/api/endpoints";
 import { userManipulator } from "@/lib/api/users";
-import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
 import { useRoleDropdown } from "@/hooks/useRoleDropdown";
 import { useTable } from "@/hooks/useTable";
 import type {
@@ -35,7 +35,6 @@ import { useRolePermission } from "@/hooks/useRolePermission";
 export default function UsersPage() {
   const router = useRouter();
   const { options: roleOptions, isError: rolesError } = useRoleDropdown();
-  const { isSuperAdmin } = useIsSuperAdmin();
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserAccount | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -188,6 +187,7 @@ export default function UsersPage() {
   const actions: TableAction[] = [
     {
       label: "Export page CSV",
+      icon: <LuDownload size={18} aria-hidden="true" />,
       variant: "secondary",
       onClick: downloadCsv,
       showButton: true,
@@ -195,6 +195,7 @@ export default function UsersPage() {
     },
     {
       label: "Add user",
+      icon: <LuPlus size={18} aria-hidden="true" />,
       showButton: canCreate,
       onClick: () => router.push(ROUTE_NAMES.createUser),
     },
