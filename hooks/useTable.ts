@@ -26,17 +26,20 @@ export function useTable<
   }
 
   function setFilters(changedValues: Partial<TFilters>) {
+    const changes = Object.entries(changedValues);
+    if (changes.length === 0) return;
+
     setState((previous) => {
-      const hasChanges = Object.entries(changedValues).some(
-        ([name, value]) => previous.filters[name as keyof TFilters] !== value,
+      const isUnchanged = changes.every(
+        ([name, value]) => previous.filters[name as keyof TFilters] === value,
       );
-      return hasChanges
-        ? {
-            ...previous,
-            page: 1,
-            filters: { ...previous.filters, ...changedValues },
-          }
-        : previous;
+      if (isUnchanged) return previous;
+
+      return {
+        ...previous,
+        page: 1,
+        filters: { ...previous.filters, ...changedValues },
+      };
     });
   }
 

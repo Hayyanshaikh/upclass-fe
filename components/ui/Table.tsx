@@ -56,10 +56,10 @@ function useTableBodyHeight(autoHeight: boolean, rowCount: number) {
 
     const observer = new ResizeObserver(updateHeight);
     observer.observe(area);
-    const header = area.querySelector(".ant-table-thead");
-    if (header) observer.observe(header);
-    const body = area.querySelector(".ant-table-tbody");
-    if (body) observer.observe(body);
+    for (const selector of [".ant-table-thead", ".ant-table-tbody"]) {
+      const element = area.querySelector(selector);
+      if (element) observer.observe(element);
+    }
     updateHeight();
     return () => observer.disconnect();
   }, [autoHeight, rowCount, needsVerticalScroll]);
@@ -149,13 +149,14 @@ export default function Table<
     autoHeight,
     rows.length,
   );
+  const visibleActions = actions.filter((action) => action.showButton);
   const hasToolbar = Boolean(
-    (showSearch && search) || filterFields.length || actions.length,
+    (showSearch && search) || filterFields.length || visibleActions.length,
   );
 
   function changePage(nextPage: number) {
     if (!interactive) return;
-    setPage(nextPage);
+    if (current === undefined) setPage(nextPage);
     onPageChange?.(nextPage);
   }
 
@@ -192,7 +193,7 @@ export default function Table<
           filterFields={filterFields}
           filterValues={filterValues}
           onValuesChange={handleToolbarValuesChange}
-          actions={actions}
+          actions={visibleActions}
         />
       )}
       {beforeTable}

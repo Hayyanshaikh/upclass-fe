@@ -35,7 +35,7 @@ export type TableAction = {
   onClick?: () => void;
   disabled?: boolean;
   loading?: boolean;
-  showButton: boolean;
+  showButton?: boolean;
 };
 
 export type TableToolbarProps = {

@@ -23,7 +23,11 @@ import { userManipulator } from "@/lib/api/users";
 import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
 import { useRoleDropdown } from "@/hooks/useRoleDropdown";
 import { useTable } from "@/hooks/useTable";
-import type { FilterField, TableAction } from "@/types/table-toolbar";
+import type {
+  FilterField,
+  TableAction,
+  TableSearch,
+} from "@/types/table-toolbar";
 
 export default function UsersPage() {
   const router = useRouter();
@@ -64,7 +68,7 @@ export default function UsersPage() {
   function downloadCsv() {
     exportCsv("users-page.csv", [
       ["Name", "Email", "Role", "isActive"],
-      ...(userData ?? []).map((user) => [
+      ...userData.map((user) => [
         user.name,
         user.email,
         user.role,
@@ -158,6 +162,11 @@ export default function UsersPage() {
     },
   ];
 
+  const tableSearch: TableSearch = {
+    placeholder: "Search by Name",
+    onChange: setSearch,
+  };
+
   const actions: TableAction[] = [
     {
       label: "Export page CSV",
@@ -203,13 +212,7 @@ export default function UsersPage() {
         beforeTable={beforeTable}
         pageSize={pageSize}
         current={page}
-        showSearch
-        search={{
-          placeholder: "Search by Name",
-          onChange(value) {
-            setSearch(value);
-          },
-        }}
+        search={tableSearch}
         onPageChange={setPage}
         filterValues={filters}
         onFilterValuesChange={setFilters}

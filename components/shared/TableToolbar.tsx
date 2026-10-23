@@ -21,7 +21,7 @@ export default function TableToolbar({
   const [showFilters, setShowFilters] = useState(false);
   const [form] = Form.useForm();
   const filterId = useId();
-  const initialValues = useMemo(
+  const formValues = useMemo(
     () => ({
       ...Object.fromEntries(
         filterFields
@@ -35,19 +35,22 @@ export default function TableToolbar({
   );
 
   useEffect(() => {
-    form.setFieldsValue(initialValues);
-  }, [form, initialValues]);
+    form.setFieldsValue(formValues);
+  }, [form, formValues]);
+
+  const hasTopRow = Boolean(
+    (showSearch && (search || filterFields.length > 0)) || actions.length > 0,
+  );
 
   return (
     <Form
       form={form}
-      initialValues={initialValues}
+      initialValues={formValues}
       className="shrink-0"
       onValuesChange={onValuesChange}
       onFinish={() => {}}
     >
-      {((showSearch && (search || filterFields.length > 0)) ||
-        actions.length > 0) && (
+      {hasTopRow && (
         <div className="flex flex-wrap items-end gap-3">
           {showSearch && search && (
             <div className="min-w-0 grow basis-full sm:basis-0">
@@ -70,20 +73,17 @@ export default function TableToolbar({
               </span>
             </Button>
           )}
-          {actions.map(
-            (action) =>
-              action?.showButton && (
-                <Button
-                  key={action.label}
-                  variant={action.variant}
-                  disabled={action.disabled}
-                  loading={action.loading}
-                  onClick={action.onClick}
-                >
-                  {action.label}
-                </Button>
-              ),
-          )}
+          {actions.map((action) => (
+            <Button
+              key={action.label}
+              variant={action.variant}
+              disabled={action.disabled}
+              loading={action.loading}
+              onClick={action.onClick}
+            >
+              {action.label}
+            </Button>
+          ))}
         </div>
       )}
       {filterFields.length > 0 && (
