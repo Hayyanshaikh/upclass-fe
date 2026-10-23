@@ -22,5 +22,6 @@ export * from './updateRoleDto';
 export * from './updateRoleDtoDescription';
 export * from './updateUserDto';
 export * from './updateUserDtoGender';
+export * from './userControllerFindAllParams';
 export * from './userFindOneResponseDto';
 export * from './userResponseDto';

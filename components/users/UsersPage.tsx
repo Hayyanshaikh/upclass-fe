@@ -3,7 +3,6 @@
 import type { TableColumnsType } from "antd";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import ActionButtons from "@/components/shared/ActionButtons";
@@ -13,35 +12,23 @@ import PageHeader from "@/components/shared/PageHeader";
 import UserDetailsDialog from "@/components/dialogs/UserDetailsDialog";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
-import {
-  userRoleOptions,
-  userStatusOptions,
-  userStatusVariants,
-} from "@/constants/users";
+import { userStatusVariants } from "@/constants/users";
 import { exportCsv } from "@/utils/export-csv";
-import { useStorageStore } from "@/stores/storage";
 import type { UserAccount, UserStatus } from "@/types/user-management";
 import {
   useUserControllerFindAll,
   useUserControllerRemove,
 } from "@/app/api/endpoints";
 import { userManipulator } from "@/lib/api/users";
+import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
+import { useRoleDropdown } from "@/hooks/useRoleDropdown";
+import { useTable } from "@/hooks/useTable";
+import type { FilterField, TableAction } from "@/types/table-toolbar";
 
 export default function UsersPage() {
   const router = useRouter();
-  const currentUserId = useStorageStore((state) => {
-    const user = state.values.user;
-    return user &&
-      typeof user === "object" &&
-      "id" in user &&
-      typeof user.id === "string"
-      ? user.id
-      : undefined;
-  });
-  const [search, setSearch] = useState("");
-  const [role, setRole] = useState<string>();
-  const [status, setStatus] = useState<string>();
-  const [page, setPage] = useState(1);
+  const { options: roleOptions, isError: rolesError } = useRoleDropdown();
+  const { isSuperAdmin } = useIsSuperAdmin();
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserAccount | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -49,23 +36,33 @@ export default function UsersPage() {
     useUserControllerRemove();
 
   const {
+    page,
+    pageSize,
+    offset,
+    search,
+    filters,
+    setPage,
+    setFilters,
+    setSearch,
+  } = useTable();
+
+  const {
     data: users,
     isFetching,
     error,
     refetch,
-  } = useUserControllerFindAll();
+  } = useUserControllerFindAll({
+    limit: pageSize,
+    offset,
+    searchKey: search,
+    role: filters.role,
+  });
 
-  const records = Array.isArray(users) ? users : users?.data;
-  const isSuperAdmin = Boolean(
-    currentUserId &&
-    records?.some(
-      (user) => user.id === currentUserId && user.role?.slug === "super_admin",
-    ),
-  );
-  const userData = userManipulator(records);
+  const total = users?.total ?? 0;
+  const userData = userManipulator(users?.data);
 
   function downloadCsv() {
-    exportCsv("users.csv", [
+    exportCsv("users-page.csv", [
       ["Name", "Email", "Role", "isActive"],
       ...(userData ?? []).map((user) => [
         user.name,
@@ -90,7 +87,11 @@ export default function UsersPage() {
     try {
       await removeUser({ id });
       setUserToDelete(null);
-      refetch();
+      if (page > 1 && offset >= total - 1) {
+        setPage(page - 1);
+      } else {
+        void refetch();
+      }
     } catch (error) {
       const message = isAxiosError(error)
         ? (error.response?.data as { message?: string } | undefined)?.message
@@ -148,54 +149,72 @@ export default function UsersPage() {
     },
   ];
 
+  const filterFields: FilterField[] = [
+    {
+      name: "role",
+      label: "Role",
+      placeholder: "Any role",
+      options: roleOptions,
+    },
+  ];
+
+  const actions: TableAction[] = [
+    {
+      label: "Export page CSV",
+      variant: "secondary",
+      onClick: downloadCsv,
+      showButton: true,
+      disabled: userData.length === 0,
+    },
+    {
+      label: "Add user",
+      showButton: isSuperAdmin,
+      onClick: () => router.push("/users/add"),
+    },
+  ];
+
+  const beforeTable =
+    error || rolesError ? (
+      <div
+        role="alert"
+        className="flex items-center gap-3 rounded-md border border-danger bg-danger/10 px-4 py-3 text-sm text-danger"
+      >
+        <span>
+          {error ? "Unable to load users." : "Unable to load role options."}
+        </span>
+        {Boolean(error) && (
+          <Button variant="link" onClick={() => void refetch()}>
+            Retry
+          </Button>
+        )}
+      </div>
+    ) : undefined;
+
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col">
       <div className="shrink-0">
         <PageHeader title="Users" />
       </div>
       <Table
         columns={columns}
         data={userData}
+        total={total}
         loading={isFetching}
-        beforeTable={
-          error ? (
-            <div
-              role="alert"
-              className="flex items-center gap-3 rounded-md border border-danger bg-danger/10 px-4 py-3 text-sm text-danger"
-            >
-              <span>Unable to load users.</span>
-              <Button variant="link" onClick={() => void refetch()}>
-                Retry
-              </Button>
-            </div>
-          ) : undefined
-        }
-        pageSize={7}
+        beforeTable={beforeTable}
+        pageSize={pageSize}
         current={page}
+        showSearch
+        search={{
+          placeholder: "Search by Name",
+          onChange(value) {
+            setSearch(value);
+          },
+        }}
         onPageChange={setPage}
-        search={{ placeholder: "Name or email", onChange: setSearch }}
-        filterFields={[
-          {
-            name: "role",
-            label: "Role",
-            placeholder: "Any role",
-            options: userRoleOptions,
-            onChange: setRole,
-          },
-          {
-            name: "status",
-            label: "Status",
-            placeholder: "Any status",
-            options: userStatusOptions,
-            onChange: setStatus,
-          },
-        ]}
-        actions={[
-          { label: "Export CSV", variant: "secondary", onClick: downloadCsv },
-          ...(isSuperAdmin
-            ? [{ label: "Add user", onClick: () => router.push("/users/add") }]
-            : []),
-        ]}
+        filterValues={filters}
+        onFilterValuesChange={setFilters}
+        filterFields={filterFields}
+        actions={actions}
       />
       <UserDetailsDialog
         user={selectedUser}

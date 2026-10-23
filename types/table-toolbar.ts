@@ -35,11 +35,15 @@ export type TableAction = {
   onClick?: () => void;
   disabled?: boolean;
   loading?: boolean;
+  showButton: boolean;
 };
 
 export type TableToolbarProps = {
   search?: TableSearch;
+  searchValue?: string;
   showSearch?: boolean;
   filterFields?: FilterField[];
+  filterValues?: Record<string, unknown>;
+  onValuesChange?: (changedValues: Record<string, unknown>) => void;
   actions?: TableAction[];
 };

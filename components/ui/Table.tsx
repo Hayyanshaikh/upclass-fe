@@ -6,7 +6,6 @@ import type { PaginationProps } from "antd";
 import type { Dayjs } from "dayjs";
 import TableToolbar from "@/components/shared/TableToolbar";
 import type { TablePaginationFooterProps, TableProps } from "@/types/table";
-import type { FilterField, TableSearch } from "@/types/table-toolbar";
 
 export const TableSummary = AntTable.Summary;
 
@@ -33,9 +32,10 @@ function getVisibleRows<T>(
     : data;
 }
 
-function useTableBodyHeight(autoHeight: boolean) {
+function useTableBodyHeight(autoHeight: boolean, rowCount: number) {
   const tableArea = useRef<HTMLDivElement>(null);
   const [bodyHeight, setBodyHeight] = useState(200);
+  const [needsVerticalScroll, setNeedsVerticalScroll] = useState(false);
 
   useEffect(() => {
     if (autoHeight) return;
@@ -46,52 +46,25 @@ function useTableBodyHeight(autoHeight: boolean) {
       if (!area) return;
       const header = area.querySelector(".ant-table-thead");
       const headerHeight = header?.getBoundingClientRect().height ?? 55;
-      setBodyHeight(Math.max(0, area.clientHeight - headerHeight - 8));
+      const availableHeight = Math.max(0, area.clientHeight - headerHeight - 8);
+      const contentHeight =
+        area.querySelector(".ant-table-tbody")?.getBoundingClientRect().height ??
+        0;
+      setBodyHeight(availableHeight);
+      setNeedsVerticalScroll(contentHeight > availableHeight + 1);
     }
 
     const observer = new ResizeObserver(updateHeight);
     observer.observe(area);
     const header = area.querySelector(".ant-table-thead");
     if (header) observer.observe(header);
+    const body = area.querySelector(".ant-table-tbody");
+    if (body) observer.observe(body);
     updateHeight();
     return () => observer.disconnect();
-  }, [autoHeight]);
+  }, [autoHeight, rowCount, needsVerticalScroll]);
 
-  return { tableArea, bodyHeight };
-}
-
-function getToolbarSearch(
-  search: TableSearch | undefined,
-  onFilterChange: (callback: () => void) => void,
-) {
-  if (!search) return undefined;
-  return {
-    ...search,
-    onChange: (value: string) => onFilterChange(() => search.onChange?.(value)),
-  };
-}
-
-function getToolbarFilters(
-  fields: FilterField[],
-  onFilterChange: (callback: () => void) => void,
-): FilterField[] {
-  return fields.map((field) => {
-    if (field.type === "date") {
-      return {
-        ...field,
-        onChange: (value: Dayjs | null) => {
-          onFilterChange(() => field.onChange?.(value));
-        },
-      };
-    } else {
-      return {
-        ...field,
-        onChange: (value: string | undefined) => {
-          onFilterChange(() => field.onChange?.(value));
-        },
-      };
-    }
-  });
+  return { tableArea, bodyHeight, needsVerticalScroll };
 }
 
 const renderPaginationItem: NonNullable<PaginationProps["itemRender"]> = (
@@ -135,7 +108,10 @@ function TablePaginationFooter({
   );
 }
 
-export default function Table<T extends object>({
+export default function Table<
+  T extends object,
+  TFilters extends object = Record<string, unknown>,
+>({
   columns,
   data,
   rowKey = "id",
@@ -147,8 +123,11 @@ export default function Table<T extends object>({
   scrollX = "max-content",
   onPageChange,
   search,
+  searchValue,
   showSearch = true,
   filterFields = [],
+  filterValues,
+  onFilterValuesChange,
   actions = [],
   header: cardHeader,
   beforeTable,
@@ -156,9 +135,8 @@ export default function Table<T extends object>({
   pagination = true,
   autoHeight = false,
   summary,
-}: TableProps<T>) {
+}: TableProps<T, TFilters>) {
   const [page, setPage] = useState(1);
-  const { tableArea, bodyHeight } = useTableBodyHeight(autoHeight);
   const count = total ?? data.length;
   const { activePage, start } = getPaginationState(
     count,
@@ -167,6 +145,10 @@ export default function Table<T extends object>({
     page,
   );
   const rows = getVisibleRows(data, start, pageSize, pagination, total);
+  const { tableArea, bodyHeight, needsVerticalScroll } = useTableBodyHeight(
+    autoHeight,
+    rows.length,
+  );
   const hasToolbar = Boolean(
     (showSearch && search) || filterFields.length || actions.length,
   );
@@ -177,9 +159,27 @@ export default function Table<T extends object>({
     onPageChange?.(nextPage);
   }
 
-  function onFilterChange(callback: () => void) {
+  function handleToolbarValuesChange(changedValues: Record<string, unknown>) {
+    if (!interactive) return;
     changePage(1);
-    if (interactive) callback();
+    if ("search" in changedValues) {
+      search?.onChange?.(String(changedValues.search ?? ""));
+    }
+
+    const filterChanges = Object.fromEntries(
+      Object.entries(changedValues).filter(([name]) => name !== "search"),
+    );
+    if (Object.keys(filterChanges).length === 0) return;
+
+    onFilterValuesChange?.(filterChanges as Partial<TFilters>);
+    for (const [name, value] of Object.entries(filterChanges)) {
+      const field = filterFields.find((item) => item.name === name);
+      if (field?.type === "date") {
+        field.onChange?.(value as Dayjs | null);
+      } else {
+        field?.onChange?.(value as string | undefined);
+      }
+    }
   }
 
   return (
@@ -187,8 +187,11 @@ export default function Table<T extends object>({
       {hasToolbar && (
         <TableToolbar
           showSearch={showSearch}
-          search={getToolbarSearch(search, onFilterChange)}
-          filterFields={getToolbarFilters(filterFields, onFilterChange)}
+          search={search}
+          searchValue={searchValue}
+          filterFields={filterFields}
+          filterValues={filterValues}
+          onValuesChange={handleToolbarValuesChange}
           actions={actions}
         />
       )}
@@ -207,7 +210,10 @@ export default function Table<T extends object>({
             rowKey={rowKey}
             loading={loading}
             pagination={false}
-            scroll={{ x: scrollX, y: autoHeight ? undefined : bodyHeight }}
+            scroll={{
+              x: scrollX,
+              y: autoHeight || !needsVerticalScroll ? undefined : bodyHeight,
+            }}
             summary={summary}
           />
         </div>

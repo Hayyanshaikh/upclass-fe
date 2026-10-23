@@ -10,7 +10,11 @@ import Table from "@/components/ui/Table";
 import ReviewLeaveRequestDialog from "@/components/dialogs/ReviewLeaveRequestDialog";
 import RejectLeaveRequestDialog from "@/components/dialogs/RejectLeaveRequestDialog";
 import CancelLeaveRequestDialog from "@/components/dialogs/CancelLeaveRequestDialog";
-import { leaveRequestFilterFields, leaveRequests as initialLeaveRequests, leaveRequestsTotal } from "@/constants/leave-requests";
+import {
+  leaveRequestFilterFields,
+  leaveRequests as initialLeaveRequests,
+  leaveRequestsTotal,
+} from "@/constants/leave-requests";
 import type { LeaveRequest } from "@/types/leave-request";
 
 const statusVariants = {
@@ -22,7 +26,9 @@ const statusVariants = {
 
 export default function LeaveRequests() {
   const [requests, setRequests] = useState(initialLeaveRequests);
-  const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(
+    null,
+  );
   const [reviewOpen, setReviewOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -32,12 +38,21 @@ export default function LeaveRequests() {
     setReviewOpen(true);
   }
 
-  function updateStatus(status: LeaveRequest["status"], rejectionReason?: string) {
+  function updateStatus(
+    status: LeaveRequest["status"],
+    rejectionReason?: string,
+  ) {
     if (!selectedRequest) return;
-    setRequests((current) => current.map((request) =>
-      request.id === selectedRequest.id ? { ...request, status, rejectionReason } : request,
-    ));
-    setSelectedRequest((request) => request ? { ...request, status, rejectionReason } : request);
+    setRequests((current) =>
+      current.map((request) =>
+        request.id === selectedRequest.id
+          ? { ...request, status, rejectionReason }
+          : request,
+      ),
+    );
+    setSelectedRequest((request) =>
+      request ? { ...request, status, rejectionReason } : request,
+    );
     setReviewOpen(false);
     setRejectOpen(false);
     setCancelOpen(false);
@@ -54,7 +69,10 @@ export default function LeaveRequests() {
       width: 250,
       render: (_, request) => (
         <div className="flex items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-success/10 font-bold text-primary" aria-hidden="true">
+          <span
+            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-success/10 font-bold text-primary"
+            aria-hidden="true"
+          >
             {request.teacherName.charAt(0)}
           </span>
           <span className="flex min-w-0 flex-col">
@@ -91,14 +109,27 @@ export default function LeaveRequests() {
         return (
           <ActionButtons
             actions={[
-              { label: `Review ${request.teacherName}'s leave request`, icon: LuEye, onClick: () => openReview(request) },
-              { label: "Review and approve leave request", icon: LuCheck, success: true, disabled: !isPending, onClick: () => openReview(request) },
+              {
+                label: `Review ${request.teacherName}'s leave request`,
+                icon: LuEye,
+                onClick: () => openReview(request),
+              },
+              {
+                label: "Review and approve leave request",
+                icon: LuCheck,
+                success: true,
+                disabled: !isPending,
+                onClick: () => openReview(request),
+              },
               {
                 label: "Reject leave request",
                 icon: LuX,
                 danger: true,
                 disabled: !isPending,
-                onClick: () => { setSelectedRequest(request); setRejectOpen(true); },
+                onClick: () => {
+                  setSelectedRequest(request);
+                  setRejectOpen(true);
+                },
               },
             ]}
           />
@@ -108,7 +139,7 @@ export default function LeaveRequests() {
   ];
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col">
       <div className="shrink-0">
         <PageHeader title="Leave requests" />
       </div>
@@ -125,31 +156,39 @@ export default function LeaveRequests() {
         actions={[{ label: "Export CSV", variant: "secondary" }]}
       />
 
-      {selectedRequest && <>
-        <ReviewLeaveRequestDialog
-          request={selectedRequest}
-          open={reviewOpen}
-          onClose={() => setReviewOpen(false)}
-          onApprove={() => updateStatus("Approved")}
-          onReject={() => { setReviewOpen(false); setRejectOpen(true); }}
-          onCancelRequest={() => { setReviewOpen(false); setCancelOpen(true); }}
-          afterClose={finishDialogClose}
-        />
-        <RejectLeaveRequestDialog
-          request={selectedRequest}
-          open={rejectOpen}
-          onClose={() => setRejectOpen(false)}
-          onReject={(reason) => updateStatus("Rejected", reason)}
-          afterClose={finishDialogClose}
-        />
-        <CancelLeaveRequestDialog
-          request={selectedRequest}
-          open={cancelOpen}
-          onClose={() => setCancelOpen(false)}
-          onConfirm={() => updateStatus("Cancelled")}
-          afterClose={finishDialogClose}
-        />
-      </>}
+      {selectedRequest && (
+        <>
+          <ReviewLeaveRequestDialog
+            request={selectedRequest}
+            open={reviewOpen}
+            onClose={() => setReviewOpen(false)}
+            onApprove={() => updateStatus("Approved")}
+            onReject={() => {
+              setReviewOpen(false);
+              setRejectOpen(true);
+            }}
+            onCancelRequest={() => {
+              setReviewOpen(false);
+              setCancelOpen(true);
+            }}
+            afterClose={finishDialogClose}
+          />
+          <RejectLeaveRequestDialog
+            request={selectedRequest}
+            open={rejectOpen}
+            onClose={() => setRejectOpen(false)}
+            onReject={(reason) => updateStatus("Rejected", reason)}
+            afterClose={finishDialogClose}
+          />
+          <CancelLeaveRequestDialog
+            request={selectedRequest}
+            open={cancelOpen}
+            onClose={() => setCancelOpen(false)}
+            onConfirm={() => updateStatus("Cancelled")}
+            afterClose={finishDialogClose}
+          />
+        </>
+      )}
     </div>
   );
 }

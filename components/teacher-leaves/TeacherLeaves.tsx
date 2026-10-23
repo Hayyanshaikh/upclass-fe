@@ -76,7 +76,7 @@ export default function TeacherLeaves() {
   ];
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col">
       <PageHeader
         title="Teacher leaves"
         subtitle="Your leave balance and requests"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { Form } from "antd";
 import { LuListFilter } from "react-icons/lu";
 import Input from "@/components/ui/Input";
@@ -11,34 +11,39 @@ import type { TableToolbarProps } from "@/types/table-toolbar";
 
 export default function TableToolbar({
   search,
+  searchValue,
   showSearch = true,
   filterFields = [],
+  filterValues,
+  onValuesChange,
   actions = [],
 }: TableToolbarProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [form] = Form.useForm();
   const filterId = useId();
-  const fieldValues = Object.fromEntries(
-    filterFields
-      .filter((field) => "value" in field)
-      .map((field) => [field.name, field.value]),
-  );
-
-  useEffect(() => {
-    form.setFieldsValue(
-      Object.fromEntries(
+  const initialValues = useMemo(
+    () => ({
+      ...Object.fromEntries(
         filterFields
           .filter((field) => "value" in field)
           .map((field) => [field.name, field.value]),
       ),
-    );
-  }, [filterFields, form]);
+      ...filterValues,
+      ...(searchValue !== undefined ? { search: searchValue } : {}),
+    }),
+    [filterFields, filterValues, searchValue],
+  );
+
+  useEffect(() => {
+    form.setFieldsValue(initialValues);
+  }, [form, initialValues]);
 
   return (
     <Form
       form={form}
-      initialValues={fieldValues}
+      initialValues={initialValues}
       className="shrink-0"
+      onValuesChange={onValuesChange}
       onFinish={() => {}}
     >
       {((showSearch && (search || filterFields.length > 0)) ||
@@ -51,7 +56,6 @@ export default function TableToolbar({
                 label={search.label}
                 placeholder={search.placeholder || "Search records"}
                 allowClear
-                onChange={(event) => search.onChange?.(event.target.value)}
               />
             </div>
           )}
@@ -66,17 +70,20 @@ export default function TableToolbar({
               </span>
             </Button>
           )}
-          {actions.map((action) => (
-            <Button
-              key={action.label}
-              variant={action.variant}
-              disabled={action.disabled}
-              loading={action.loading}
-              onClick={action.onClick}
-            >
-              {action.label}
-            </Button>
-          ))}
+          {actions.map(
+            (action) =>
+              action?.showButton && (
+                <Button
+                  key={action.label}
+                  variant={action.variant}
+                  disabled={action.disabled}
+                  loading={action.loading}
+                  onClick={action.onClick}
+                >
+                  {action.label}
+                </Button>
+              ),
+          )}
         </div>
       )}
       {filterFields.length > 0 && (
@@ -92,7 +99,6 @@ export default function TableToolbar({
                   key={field.name}
                   name={field.name}
                   pastOnly={field.pastOnly}
-                  onChange={field.onChange}
                 />
               ) : (
                 <Select
@@ -101,7 +107,6 @@ export default function TableToolbar({
                   options={field.options}
                   placeholder={field.placeholder || "Any"}
                   allowClear={field.allowClear ?? true}
-                  onChange={field.onChange}
                 />
               ),
             )}

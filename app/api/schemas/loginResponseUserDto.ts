@@ -15,5 +15,6 @@ export interface LoginResponseUserDto {
   roleId?: string;
   role?: RoleSummaryDto;
   isActive: boolean;
+  isSystem: boolean;
   gender: LoginResponseUserDtoGender;
 }

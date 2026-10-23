@@ -97,7 +97,14 @@ export default function Results() {
       render: (_, student) => (
         <ActionButtons
           actions={[
-            { label: "View result", icon: LuEye, onClick: () => router.push(`/exams/results/card?student=${student.id}&exam=${exam.id}`) },
+            {
+              label: "View result",
+              icon: LuEye,
+              onClick: () =>
+                router.push(
+                  `/exams/results/card?student=${student.id}&exam=${exam.id}`,
+                ),
+            },
             { label: "Print card", icon: LuPrinter },
           ]}
         />
@@ -106,7 +113,7 @@ export default function Results() {
   ];
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col">
       <div className="shrink-0">
         <PageHeader
           title="Results"
@@ -117,11 +124,18 @@ export default function Results() {
           actions={
             <div className="flex flex-wrap gap-3">
               {resultsHeaderActions.map((action) => (
-                <Button key={action.label} variant={action.variant}
-                  onClick={action.label === "Publish results" ? () => {
-                    setExamToPublish(exam);
-                    setPublishOpen(true);
-                  } : action.onClick}>
+                <Button
+                  key={action.label}
+                  variant={action.variant}
+                  onClick={
+                    action.label === "Publish results"
+                      ? () => {
+                          setExamToPublish(exam);
+                          setPublishOpen(true);
+                        }
+                      : action.onClick
+                  }
+                >
                   {action.label}
                 </Button>
               ))}
@@ -142,8 +156,14 @@ export default function Results() {
           field.name === "exam" ? { ...field, value: exam.id } : field,
         )}
       />
-      {examToPublish && <PublishResultsDialog exam={examToPublish} open={publishOpen}
-        onClose={() => setPublishOpen(false)} afterClose={() => setExamToPublish(null)} />}
+      {examToPublish && (
+        <PublishResultsDialog
+          exam={examToPublish}
+          open={publishOpen}
+          onClose={() => setPublishOpen(false)}
+          afterClose={() => setExamToPublish(null)}
+        />
+      )}
     </div>
   );
 }

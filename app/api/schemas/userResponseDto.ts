@@ -9,6 +9,9 @@ import type { LoginResponseUserDto } from './loginResponseUserDto';
 
 export interface UserResponseDto {
   data: LoginResponseUserDto[];
+  /** Total users matching the filters */
+  total: number;
   message: string;
   statusCode: number;
+  warning?: string;
 }

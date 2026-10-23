@@ -71,16 +71,25 @@ export default function Exams() {
               icon: LuEye,
               onClick: () => viewExam(exam),
             },
-            { label: "Enter marks", icon: LuFileText, onClick: () => router.push(`/exams/marks?exam=${exam.id}`) },
+            {
+              label: "Enter marks",
+              icon: LuFileText,
+              onClick: () => router.push(`/exams/marks?exam=${exam.id}`),
+            },
             {
               label: "Edit ",
               icon: LuPencil,
               onClick: () => router.push(`/exams/edit/${exam.id}`),
             },
-            { label: "Delete ", icon: LuTrash2, danger: true, onClick: () => {
-              setExamToDelete(exam);
-              setDeleteOpen(true);
-            } },
+            {
+              label: "Delete ",
+              icon: LuTrash2,
+              danger: true,
+              onClick: () => {
+                setExamToDelete(exam);
+                setDeleteOpen(true);
+              },
+            },
           ]}
         />
       ),
@@ -88,7 +97,7 @@ export default function Exams() {
   ];
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col">
       <div className="shrink-0">
         <PageHeader title="Exams & Results" />
       </div>
@@ -106,7 +115,7 @@ export default function Exams() {
             ? { ...action, onClick: () => router.push("/exams/create") }
             : action.label === "Results"
               ? { ...action, onClick: () => router.push("/exams/results") }
-            : action,
+              : action,
         )}
       />
       {selectedExam && (

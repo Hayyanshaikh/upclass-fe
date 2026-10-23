@@ -11,4 +11,5 @@ export interface UserFindOneResponseDto {
   statusCode: number;
   message: string;
   data: LoginResponseUserDto;
+  warning?: string;
 }
