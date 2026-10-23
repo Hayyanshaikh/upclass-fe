@@ -1,4 +1,8 @@
-import type { RoleDetailDataDto, RoleListItemDto } from "@/app/api/schemas";
+import type {
+  PermissionDataDto,
+  RoleDetailDataDto,
+  RoleListItemDto,
+} from "@/app/api/schemas";
 
 export type SchoolRole = {
   id: string;
@@ -19,6 +23,24 @@ export type RoleFormValues = {
 
 export type RoleReassignmentValues = {
   targetRoleId: string;
+};
+
+export type RoleAssignedUsersSectionProps = {
+  roleId: string;
+  roleName: string;
+  disabled: boolean;
+  isMoving: boolean;
+  onMoveUser: (userId: string, targetRoleId: string) => Promise<void>;
+};
+
+export type RolePermissionsSectionProps = {
+  permissions: PermissionDataDto[];
+  permissionKeys: string[];
+  onPermissionKeysChange: (keys: string[]) => void;
+  isLoading: boolean;
+  error: unknown;
+  onRetry: () => void;
+  disabled: boolean;
 };
 
 export type RoleFormProps = {

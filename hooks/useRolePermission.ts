@@ -21,6 +21,6 @@ export function useRolePermission(module: string) {
     canCreate: addPermission,
     canEdit: editPermission,
     canDelete: deletePermission,
-    showActions: editPermission || deletePermission,
+    showActions: viewPermission || editPermission || deletePermission,
   };
 }

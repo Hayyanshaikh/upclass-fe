@@ -12,7 +12,9 @@ import Loader from "@/components/ui/Loader";
 export default function EditRoleForm() {
   const { id } = useParams<{ id: string }>();
   const { data: response, isLoading, error, refetch } =
-    useRolesControllerFindOne(id);
+    useRolesControllerFindOne(id, {
+      query: { refetchOnMount: "always" },
+    });
 
   if (isLoading) return <Loader />;
 
@@ -38,5 +40,10 @@ export default function EditRoleForm() {
     );
   }
 
-  return <RoleForm key={id} role={response.data} />;
+  return (
+    <RoleForm
+      key={`${id}:${response.data.permissionKeys.join(",")}`}
+      role={response.data}
+    />
+  );
 }

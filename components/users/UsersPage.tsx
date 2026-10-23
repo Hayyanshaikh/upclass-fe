@@ -40,7 +40,8 @@ export default function UsersPage() {
   const { mutateAsync: removeUser, isPending: isDeleting } =
     useUserControllerRemove();
 
-  const { canCreate, canDelete, canEdit, canView } = useRolePermission("users");
+  const { canCreate, canDelete, canEdit, canView, showActions } =
+    useRolePermission("users");
 
   const {
     page,
@@ -107,7 +108,7 @@ export default function UsersPage() {
     }
   }
 
-  const columns: TableColumnsType<UserAccount> = [
+  let columns: TableColumnsType<UserAccount> = [
     {
       title: "Name",
       dataIndex: "name",
@@ -158,6 +159,10 @@ export default function UsersPage() {
       ),
     },
   ];
+
+  if (!showActions) {
+    columns = columns?.filter((col) => col.key !== "actions");
+  }
 
   const filterFields: FilterField[] = [
     {

@@ -12,6 +12,7 @@ export default function Button({
   loading = false,
   danger = false,
   className = "",
+  ariaPressed,
   onClick,
 }: ButtonProps) {
   return (
@@ -23,6 +24,7 @@ export default function Button({
       loading={loading}
       danger={danger}
       className={`${variant === "link" ? "h-auto! p-0! font-semibold! text-primary!" : ""} ${className}`}
+      aria-pressed={ariaPressed}
       onClick={onClick}
     >
       {children}

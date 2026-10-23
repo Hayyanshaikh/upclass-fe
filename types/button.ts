@@ -9,5 +9,6 @@ export type ButtonProps = {
   loading?: boolean;
   danger?: boolean;
   className?: string;
+  ariaPressed?: boolean;
   onClick?: () => void;
 };
