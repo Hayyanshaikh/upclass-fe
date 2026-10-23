@@ -144,13 +144,13 @@ export default function UsersPage() {
           showView={canView}
           showEdit={canEdit}
           showDelete={canDelete}
-          // onView={() => setSelectedUser(user)}
-          // onEdit={() => editUser(user)}
-          // onDelete={() => {
-          //   if (user.isSystem) return;
-          //   setDeleteError(null);
-          //   setUserToDelete(user);
-          // }}
+          onView={() => setSelectedUser(user)}
+          onEdit={() => editUser(user)}
+          onDelete={() => {
+            if (user.isSystem) return;
+            setDeleteError(null);
+            setUserToDelete(user);
+          }}
           deleteDisabled={user.isSystem || isDeleting}
           deleteDisabledReason={
             user.isSystem ? "System users cannot be deleted" : undefined
