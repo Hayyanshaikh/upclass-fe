@@ -149,7 +149,7 @@ export default function Table<
     autoHeight,
     rows.length,
   );
-  const visibleActions = actions.filter((action) => action.showButton);
+  const visibleActions = actions.filter((action) => action.showButton !== false);
   const hasToolbar = Boolean(
     (showSearch && search) || filterFields.length || visibleActions.length,
   );
