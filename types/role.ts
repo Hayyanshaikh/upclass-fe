@@ -45,6 +45,7 @@ export type RolePermissionsSectionProps = {
 
 export type RoleFormProps = {
   role?: RoleDetailDataDto;
+  onSaved?: () => Promise<unknown>;
 };
 
 export type RoleDetailsDialogProps = {

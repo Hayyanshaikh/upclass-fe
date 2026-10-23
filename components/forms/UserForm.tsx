@@ -10,6 +10,7 @@ import Input from "@/components/ui/Input";
 import SectionCard from "@/components/ui/SectionCard";
 import Select from "@/components/ui/Select";
 import { userStatusOptions } from "@/constants/users";
+import { ROUTE_NAMES } from "@/constants/routes";
 import type { UserAccount, UserFormValues } from "@/types/user-management";
 import {
   useUserControllerCreate,
@@ -21,15 +22,19 @@ import { useRoleDropdown } from "@/hooks/useRoleDropdown";
 
 type UserFormProps = {
   user?: UserAccount;
+  onSaved?: () => Promise<unknown>;
 };
 
-export default function UserForm({ user }: UserFormProps) {
+export default function UserForm({ user, onSaved }: UserFormProps) {
   const router = useRouter();
   const [form] = Form.useForm<UserFormValues>();
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const { options, isLoading: rolesLoading, isError: rolesError } =
-    useRoleDropdown();
-  const { isSuperAdmin, isLoading: isCheckingRole } = useIsSuperAdmin();
+  const {
+    options,
+    isLoading: rolesLoading,
+    isError: rolesError,
+  } = useRoleDropdown();
+  const { isSuperAdmin } = useIsSuperAdmin();
 
   const { mutateAsync: createUser, isPending: isCreating } =
     useUserControllerCreate();
@@ -49,10 +54,6 @@ export default function UserForm({ user }: UserFormProps) {
 
   const handleSubmit = async (values: UserFormValues) => {
     if (isPending) return;
-    if (!user && !isSuperAdmin) {
-      setSubmitError("Only super admins can add users.");
-      return;
-    }
 
     setSubmitError(null);
     const fields = {
@@ -66,21 +67,25 @@ export default function UserForm({ user }: UserFormProps) {
       if (user) {
         const payload: UpdateUserDto = {
           ...fields,
-          ...(isSuperAdmin && values.password
-            ? { password: values.password }
-            : {}),
+          ...(values.password ? { password: values.password } : {}),
         };
         await updateUser({ data: payload, id: user.id });
+        await onSaved?.();
       } else {
-        if (!values.password) return;
         const payload: CreateUserDto = {
           ...fields,
-          password: values.password,
+          password: values.password ?? "",
         };
-        await createUser({ data: payload });
+        const response = (await createUser({ data: payload })) as unknown as {
+          data: { id: string };
+        };
+        router.push(
+          ROUTE_NAMES.editUser.replace(
+            ":id",
+            encodeURIComponent(response.data.id),
+          ),
+        );
       }
-
-      router.push("/users");
     } catch (error) {
       if (isAxiosError(error)) {
         const body = error.response?.data as
@@ -117,9 +122,6 @@ export default function UserForm({ user }: UserFormProps) {
       {submitError && <Alert type="error" role="alert" message={submitError} />}
       {rolesError && (
         <Alert type="warning" message="Unable to load role options." />
-      )}
-      {!user && !isCheckingRole && !rolesError && !isSuperAdmin && (
-        <Alert type="warning" message="Only super admins can add users." />
       )}
       <SectionCard title="Account" autoHeight>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -183,17 +185,14 @@ export default function UserForm({ user }: UserFormProps) {
         <Button
           variant="secondary"
           disabled={isPending}
-          onClick={() => router.push("/users")}
+          onClick={() => router.push(ROUTE_NAMES.userListing)}
         >
           Cancel
         </Button>
         <Button
           type="submit"
           loading={isPending}
-          disabled={
-            !user &&
-            (isCheckingRole || !isSuperAdmin || rolesLoading || rolesError)
-          }
+          disabled={!user && (rolesLoading || rolesError)}
         >
           {user ? "Update user" : "Add user"}
         </Button>

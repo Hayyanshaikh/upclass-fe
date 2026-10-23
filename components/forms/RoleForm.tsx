@@ -18,6 +18,7 @@ import {
   useUserControllerUpdate,
 } from "@/app/api/endpoints";
 import { RoleDetailDataDtoType } from "@/app/api/schemas";
+import { ROUTE_NAMES } from "@/constants/routes";
 import type { CreateRoleDto, UpdateRoleDto } from "@/app/api/schemas";
 import type { RoleFormProps, RoleFormValues } from "@/types/role";
 
@@ -32,7 +33,7 @@ function slugFromName(name: string) {
     .replace(/_+$/g, "");
 }
 
-export default function RoleForm({ role }: RoleFormProps) {
+export default function RoleForm({ role, onSaved }: RoleFormProps) {
   const router = useRouter();
   const [form] = Form.useForm<RoleFormValues>();
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -72,6 +73,7 @@ export default function RoleForm({ role }: RoleFormProps) {
       if (role) {
         const data: UpdateRoleDto = { name, description, permissionKeys };
         await updateRole({ id: role.id, data });
+        await onSaved?.();
       } else {
         const slug = slugFromName(name);
         if (!slug) {
@@ -84,10 +86,14 @@ export default function RoleForm({ role }: RoleFormProps) {
           return;
         }
         const data: CreateRoleDto = { name, slug, description };
-        await createRole({ data });
-      }
+        const res = await createRole({ data });
 
-      // router.push("/roles");
+        // console.log({ res });
+
+        router.push(
+          ROUTE_NAMES.editRole.replace(":id", encodeURIComponent(res.data.id)),
+        );
+      }
     } catch (error) {
       const message = isAxiosError(error)
         ? (error.response?.data as { message?: string } | undefined)?.message
@@ -110,7 +116,7 @@ export default function RoleForm({ role }: RoleFormProps) {
       <PageHeader
         title={role?.name ?? "Add role"}
         breadcrumbs={[
-          { title: "Roles", href: "/roles" },
+          { title: "Roles", href: ROUTE_NAMES.roleListing },
           { title: role ? "Edit role" : "Add role" },
         ]}
         actions={
@@ -118,7 +124,7 @@ export default function RoleForm({ role }: RoleFormProps) {
             <Button
               variant="secondary"
               disabled={isPending || isReassigning}
-              onClick={() => router.push("/roles")}
+              onClick={() => router.push(ROUTE_NAMES.roleListing)}
             >
               Cancel
             </Button>
@@ -199,7 +205,6 @@ export default function RoleForm({ role }: RoleFormProps) {
           />
         )}
       </Form>
-
     </div>
   );
 }

@@ -13,6 +13,7 @@ import Button from "@/components/ui/Button";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
 import { roleTypeOptions } from "@/constants/roles";
+import { ROUTE_NAMES } from "@/constants/routes";
 import { useTable } from "@/hooks/useTable";
 import {
   useRolesControllerFindAll,
@@ -62,7 +63,9 @@ export default function RolesPage() {
 
   function editRole(role: RoleListItemDto) {
     flushSync(() => setSelectedRole(null));
-    router.push(`/roles/edit/${encodeURIComponent(role.id)}`);
+    router.push(
+      ROUTE_NAMES.editRole.replace(":id", encodeURIComponent(role.id)),
+    );
   }
 
   async function confirmDelete() {
@@ -174,7 +177,7 @@ export default function RolesPage() {
   const actions: TableAction[] = [
     {
       label: "Add role",
-      onClick: () => router.push("/roles/add"),
+      onClick: () => router.push(ROUTE_NAMES.createRole),
     },
   ];
 

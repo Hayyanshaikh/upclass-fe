@@ -11,7 +11,7 @@ import type { UserAccount, UserApiItem } from "@/types/user-management";
 export default function EditUserForm() {
   const { id } = useParams<{ id: string }>();
 
-  const { data: response, isLoading, error } = useUserControllerFindOne<
+  const { data: response, isLoading, error, refetch } = useUserControllerFindOne<
     UserFindOneResponseDto,
     unknown
   >(id);
@@ -40,5 +40,5 @@ export default function EditUserForm() {
     role: userData.roleId ?? userData.role?.id ?? "",
   };
 
-  return <UserForm key={id} user={user} />;
+  return <UserForm key={id} user={user} onSaved={refetch} />;
 }

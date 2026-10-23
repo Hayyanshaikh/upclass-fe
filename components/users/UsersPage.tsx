@@ -13,6 +13,7 @@ import UserDetailsDialog from "@/components/dialogs/UserDetailsDialog";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
 import { userStatusVariants } from "@/constants/users";
+import { ROUTE_NAMES } from "@/constants/routes";
 import { exportCsv } from "@/utils/export-csv";
 import type { UserAccount, UserStatus } from "@/types/user-management";
 import {
@@ -83,7 +84,9 @@ export default function UsersPage() {
 
   function editUser(user: UserAccount) {
     flushSync(() => setSelectedUser(null));
-    router.push(`/users/edit/${encodeURIComponent(user.id)}`);
+    router.push(
+      ROUTE_NAMES.editUser.replace(":id", encodeURIComponent(user.id)),
+    );
   }
 
   async function confirmDelete() {
@@ -189,7 +192,7 @@ export default function UsersPage() {
     {
       label: "Add user",
       showButton: canCreate,
-      onClick: () => router.push("/users/add"),
+      onClick: () => router.push(ROUTE_NAMES.createUser),
     },
   ];
 
