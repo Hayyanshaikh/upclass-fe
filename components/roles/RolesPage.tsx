@@ -7,6 +7,7 @@ import type { TableColumnsType } from "antd";
 import { useRouter } from "next/navigation";
 import ActionButtons from "@/components/shared/ActionButtons";
 import DeleteDialog from "@/components/shared/DeleteDialog";
+import ErrorDialog from "@/components/shared/ErrorDialog";
 import RoleDetailsDialog from "@/components/dialogs/RoleDetailsDialog";
 import PageHeader from "@/components/shared/PageHeader";
 import Button from "@/components/ui/Button";
@@ -33,6 +34,7 @@ export default function RolesPage() {
     null,
   );
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleteErrorOpen, setIsDeleteErrorOpen] = useState(false);
   const { mutateAsync: removeRole, isPending: isDeleting } =
     useRolesControllerRemove();
   const {
@@ -84,6 +86,7 @@ export default function RolesPage() {
       const message = isAxiosError(error)
         ? (error.response?.data as { message?: string } | undefined)?.message
         : undefined;
+      setRoleToDelete(null);
       setDeleteError(message ?? "Unable to delete role. Please try again.");
     }
   }
@@ -131,6 +134,7 @@ export default function RolesPage() {
           onEdit={() => editRole(role)}
           onDelete={() => {
             setDeleteError(null);
+            setIsDeleteErrorOpen(false);
             setRoleToDelete(role);
           }}
           deleteDisabled={
@@ -210,21 +214,25 @@ export default function RolesPage() {
         open={roleToDelete !== null}
         title="Delete role?"
         message={`Remove ${roleToDelete?.name ?? "this role"} from the role list?`}
-        description={
-          deleteError ? (
-            <span role="alert" className="text-danger">
-              {deleteError}
-            </span>
-          ) : (
-            "This permanently deletes the role."
-          )
-        }
+        description="This permanently deletes the role."
         okText="Delete role"
         confirmLoading={isDeleting}
         onClose={() => {
           if (!isDeleting) setRoleToDelete(null);
         }}
         onConfirm={() => void confirmDelete()}
+        afterClose={() => {
+          if (deleteError) setIsDeleteErrorOpen(true);
+        }}
+      />
+      <ErrorDialog
+        open={isDeleteErrorOpen}
+        title="Unable to delete role"
+        message={deleteError ?? "Unable to delete role. Please try again."}
+        onClose={() => {
+          setIsDeleteErrorOpen(false);
+          setDeleteError(null);
+        }}
       />
     </div>
   );

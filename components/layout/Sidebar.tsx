@@ -12,7 +12,7 @@ import Logo from "@/components/shared/Logo";
 import { menuItems } from "@/constants/menu";
 import type { MenuItemProps } from "@/types/sidebar";
 import { useStorageStore } from "@/stores/storage";
-import { LoginResponseUserDto } from "@/app/api/schemas";
+import type { LoginResponseUserDto } from "@/app/api/schemas";
 import { useUserControllerFindOne } from "@/app/api/endpoints";
 
 function SidebarHeader() {
@@ -57,8 +57,15 @@ function MenuItem({ item, active }: MenuItemProps) {
   );
 }
 
-function SidebarMenu() {
-  const { user } = useStorageStore((state) => state.values);
+function SidebarMenu({
+  user,
+  isLoading,
+  isError,
+}: {
+  user?: LoginResponseUserDto;
+  isLoading: boolean;
+  isError: boolean;
+}) {
   const pathname = usePathname();
   const activeHref = menuItems.reduce((current, item) => {
     const matches =
@@ -68,9 +75,7 @@ function SidebarMenu() {
   }, "");
 
   const permissionKeys =
-    (user as LoginResponseUserDto | undefined)?.role?.permissions?.map(
-      (permission) => permission.key,
-    ) ?? [];
+    user?.role?.permissions?.map((permission) => permission.key) ?? [];
 
   const filteredMenuItems = menuItems.filter((item) =>
     permissionKeys.includes(item.permission),
@@ -81,38 +86,45 @@ function SidebarMenu() {
       className="min-h-0 flex-1 space-y-0.5 overflow-x-hidden overflow-y-auto overscroll-contain pr-1 [--scrollbar-thumb:#c9ddd566] [--scrollbar-thumb-hover:#c9ddd599]"
       aria-label="Dashboard navigation"
     >
-      {filteredMenuItems.map((item) => (
-        <MenuItem
-          key={item.href}
-          item={item}
-          active={item.href === activeHref}
-        />
-      ))}
+      {isLoading ? (
+        <div
+          className="space-y-8 px-3 py-4"
+          role="status"
+          aria-label="Loading menu permissions"
+        >
+          <span className="sr-only">Loading menu...</span>
+          {menuItems.slice(0, 10).map((item) => (
+            <div
+              key={item.href}
+              className="flex animate-pulse items-center gap-3"
+              aria-hidden="true"
+            >
+              <span className="size-4 rounded-sm bg-white/15" />
+              <span className="h-3 w-3/5 rounded-sm bg-white/15" />
+            </div>
+          ))}
+        </div>
+      ) : isError ? (
+        <p role="alert" className="px-3 py-4 text-sm text-light">
+          Unable to load menu permissions.
+        </p>
+      ) : (
+        filteredMenuItems.map((item) => (
+          <MenuItem
+            key={item.href}
+            item={item}
+            active={item.href === activeHref}
+          />
+        ))
+      )}
     </nav>
   );
 }
 
-function SidebarProfile() {
+function SidebarProfile({ user }: { user?: LoginResponseUserDto }) {
   const router = useRouter();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
-  const { deleteValue, setValue, values } = useStorageStore();
-
-  const user = values.user as LoginResponseUserDto | undefined;
-  const userId = user?.id ?? "";
-
-  const { data: userData } = useUserControllerFindOne(userId, {
-    query: {
-      enabled: !!userId,
-    },
-  });
-
-  const userResponse: LoginResponseUserDto | undefined = userData?.data;
-
-  useEffect(() => {
-    if (userData) {
-      setValue("user", userResponse!);
-    }
-  }, [userData, setValue]);
+  const deleteValue = useStorageStore((state) => state.deleteValue);
 
   const handleLogout = () => {
     Cookies.remove("accessToken", { path: "/" });
@@ -166,11 +178,40 @@ function SidebarProfile() {
 }
 
 export default function Sidebar() {
+  const storedUser = useStorageStore((state) => state.values.user) as
+    | LoginResponseUserDto
+    | undefined;
+  const setValue = useStorageStore((state) => state.setValue);
+  const userId = storedUser?.id ?? "";
+  const {
+    data: userData,
+    isPending,
+    isFetching,
+    isError,
+  } = useUserControllerFindOne(userId, {
+    query: {
+      enabled: Boolean(userId),
+      refetchOnMount: "always",
+    },
+  });
+  const user = userData?.data ?? storedUser;
+  const isPermissionsLoading = !userId || isPending || isFetching;
+
+  useEffect(() => {
+    if (userData?.data) {
+      setValue("user", userData.data);
+    }
+  }, [setValue, userData]);
+
   return (
     <aside className="flex h-full w-full flex-col bg-primary px-3 pt-5 pb-4 text-white">
       <SidebarHeader />
-      <SidebarMenu />
-      <SidebarProfile />
+      <SidebarMenu
+        user={user}
+        isLoading={isPermissionsLoading}
+        isError={isError}
+      />
+      <SidebarProfile user={user} />
     </aside>
   );
 }

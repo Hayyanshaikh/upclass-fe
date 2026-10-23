@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Pagination, Table as AntTable } from "antd";
 import type { PaginationProps } from "antd";
 import type { Dayjs } from "dayjs";
+import Button from "@/components/ui/Button";
+import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import TableToolbar from "@/components/shared/TableToolbar";
 import type { TablePaginationFooterProps, TableProps } from "@/types/table";
 
@@ -48,8 +50,8 @@ function useTableBodyHeight(autoHeight: boolean, rowCount: number) {
       const headerHeight = header?.getBoundingClientRect().height ?? 55;
       const availableHeight = Math.max(0, area.clientHeight - headerHeight - 8);
       const contentHeight =
-        area.querySelector(".ant-table-tbody")?.getBoundingClientRect().height ??
-        0;
+        area.querySelector(".ant-table-tbody")?.getBoundingClientRect()
+          .height ?? 0;
       setBodyHeight(availableHeight);
       setNeedsVerticalScroll(contentHeight > availableHeight + 1);
     }
@@ -74,9 +76,20 @@ const renderPaginationItem: NonNullable<PaginationProps["itemRender"]> = (
 ) => {
   if (type === "prev" || type === "next") {
     return (
-      <span className="flex h-11 items-center rounded-md border border-primary px-5 font-semibold text-primary">
-        {type === "prev" ? "Previous" : "Next"}
-      </span>
+      <Button
+        variant="secondary"
+        className="h-11 gap-2 border-primary px-3! font-semibold text-primary"
+      >
+        {type === "prev" ? (
+          <>
+            <LuChevronLeft size={20} aria-hidden="true" />
+          </>
+        ) : (
+          <>
+            <LuChevronRight size={20} aria-hidden="true" />
+          </>
+        )}
+      </Button>
     );
   }
   return original;
@@ -149,7 +162,9 @@ export default function Table<
     autoHeight,
     rows.length,
   );
-  const visibleActions = actions.filter((action) => action.showButton !== false);
+  const visibleActions = actions.filter(
+    (action) => action.showButton !== false,
+  );
   const hasToolbar = Boolean(
     (showSearch && search) || filterFields.length || visibleActions.length,
   );

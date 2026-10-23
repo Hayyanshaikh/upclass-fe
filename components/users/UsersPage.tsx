@@ -8,6 +8,7 @@ import { flushSync } from "react-dom";
 import ActionButtons from "@/components/shared/ActionButtons";
 import Button from "@/components/ui/Button";
 import DeleteDialog from "@/components/shared/DeleteDialog";
+import ErrorDialog from "@/components/shared/ErrorDialog";
 import PageHeader from "@/components/shared/PageHeader";
 import UserDetailsDialog from "@/components/dialogs/UserDetailsDialog";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -38,6 +39,7 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserAccount | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleteErrorOpen, setIsDeleteErrorOpen] = useState(false);
   const { mutateAsync: removeUser, isPending: isDeleting } =
     useUserControllerRemove();
 
@@ -107,6 +109,7 @@ export default function UsersPage() {
       const message = isAxiosError(error)
         ? (error.response?.data as { message?: string } | undefined)?.message
         : undefined;
+      setUserToDelete(null);
       setDeleteError(message ?? "Unable to delete user. Please try again.");
     }
   }
@@ -152,6 +155,7 @@ export default function UsersPage() {
           onDelete={() => {
             if (user.isSystem) return;
             setDeleteError(null);
+            setIsDeleteErrorOpen(false);
             setUserToDelete(user);
           }}
           deleteDisabled={user.isSystem || isDeleting}
@@ -242,21 +246,25 @@ export default function UsersPage() {
         open={userToDelete !== null}
         title="Remove user?"
         message={`Remove ${userToDelete?.name ?? "this user"} from the user list?`}
-        description={
-          deleteError ? (
-            <span role="alert" className="text-danger">
-              {deleteError}
-            </span>
-          ) : (
-            "This permanently deletes the user account."
-          )
-        }
+        description="This permanently deletes the user account."
         okText="Remove user"
         confirmLoading={isDeleting}
         onClose={() => {
           if (!isDeleting) setUserToDelete(null);
         }}
         onConfirm={() => void confirmDelete()}
+        afterClose={() => {
+          if (deleteError) setIsDeleteErrorOpen(true);
+        }}
+      />
+      <ErrorDialog
+        open={isDeleteErrorOpen}
+        title="Unable to remove user"
+        message={deleteError ?? "Unable to delete user. Please try again."}
+        onClose={() => {
+          setIsDeleteErrorOpen(false);
+          setDeleteError(null);
+        }}
       />
     </div>
   );
