@@ -28,6 +28,7 @@ import type {
   TableAction,
   TableSearch,
 } from "@/types/table-toolbar";
+import { useRolePermission } from "@/hooks/useRolePermission";
 
 export default function UsersPage() {
   const router = useRouter();
@@ -38,6 +39,8 @@ export default function UsersPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const { mutateAsync: removeUser, isPending: isDeleting } =
     useUserControllerRemove();
+
+  const { canCreate, canDelete, canEdit, canView } = useRolePermission("users");
 
   const {
     page,
@@ -137,13 +140,16 @@ export default function UsersPage() {
       render: (_, user) => (
         <ActionButtons
           name={user.name}
-          onView={() => setSelectedUser(user)}
-          onEdit={() => editUser(user)}
-          onDelete={() => {
-            if (user.isSystem) return;
-            setDeleteError(null);
-            setUserToDelete(user);
-          }}
+          showView={canView}
+          showEdit={canEdit}
+          showDelete={canDelete}
+          // onView={() => setSelectedUser(user)}
+          // onEdit={() => editUser(user)}
+          // onDelete={() => {
+          //   if (user.isSystem) return;
+          //   setDeleteError(null);
+          //   setUserToDelete(user);
+          // }}
           deleteDisabled={user.isSystem || isDeleting}
           deleteDisabledReason={
             user.isSystem ? "System users cannot be deleted" : undefined
@@ -177,7 +183,7 @@ export default function UsersPage() {
     },
     {
       label: "Add user",
-      showButton: isSuperAdmin,
+      showButton: canCreate,
       onClick: () => router.push("/users/add"),
     },
   ];

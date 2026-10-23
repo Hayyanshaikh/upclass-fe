@@ -14,6 +14,7 @@ export * from './loginResponseDto';
 export * from './loginResponseUserDto';
 export * from './loginResponseUserDtoGender';
 export * from './permissionDataDto';
+export * from './permissionKey';
 export * from './permissionResponseDto';
 export * from './permissionsResponseDto';
 export * from './roleDetailDataDto';

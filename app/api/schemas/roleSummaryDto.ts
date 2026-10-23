@@ -5,9 +5,11 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
+import type { PermissionKey } from './permissionKey';
 
 export interface RoleSummaryDto {
   id: string;
   name: string;
   slug: string;
+  permissions?: PermissionKey[];
 }

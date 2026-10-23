@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tooltip } from "antd";
 import Cookies from "js-cookie";
 import { LuLogOut } from "react-icons/lu";
@@ -12,6 +12,8 @@ import Logo from "@/components/shared/Logo";
 import { menuItems } from "@/constants/menu";
 import type { MenuItemProps } from "@/types/sidebar";
 import { useStorageStore } from "@/stores/storage";
+import { LoginResponseUserDto } from "@/app/api/schemas";
+import { useUserControllerFindOne } from "@/app/api/endpoints";
 
 function SidebarHeader() {
   return (
@@ -56,6 +58,7 @@ function MenuItem({ item, active }: MenuItemProps) {
 }
 
 function SidebarMenu() {
+  const { user } = useStorageStore((state) => state.values);
   const pathname = usePathname();
   const activeHref = menuItems.reduce((current, item) => {
     const matches =
@@ -64,12 +67,21 @@ function SidebarMenu() {
     return matches && item.href.length > current.length ? item.href : current;
   }, "");
 
+  const permissionKeys =
+    (user as LoginResponseUserDto | undefined)?.role?.permissions?.map(
+      (permission) => permission.key,
+    ) ?? [];
+
+  const filteredMenuItems = menuItems.filter((item) =>
+    permissionKeys.includes(item.permission),
+  );
+
   return (
     <nav
       className="min-h-0 flex-1 space-y-0.5 overflow-x-hidden overflow-y-auto overscroll-contain pr-1 [--scrollbar-thumb:#c9ddd566] [--scrollbar-thumb-hover:#c9ddd599]"
       aria-label="Dashboard navigation"
     >
-      {menuItems.map((item) => (
+      {filteredMenuItems.map((item) => (
         <MenuItem
           key={item.href}
           item={item}
@@ -83,7 +95,24 @@ function SidebarMenu() {
 function SidebarProfile() {
   const router = useRouter();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
-  const deleteValue = useStorageStore((state) => state.deleteValue);
+  const { deleteValue, setValue, values } = useStorageStore();
+
+  const user = values.user as LoginResponseUserDto | undefined;
+  const userId = user?.id ?? "";
+
+  const { data: userData } = useUserControllerFindOne(userId, {
+    query: {
+      enabled: !!userId,
+    },
+  });
+
+  const userResponse: LoginResponseUserDto | undefined = userData?.data;
+
+  useEffect(() => {
+    if (userData) {
+      setValue("user", userResponse!);
+    }
+  }, [userData, setValue]);
 
   const handleLogout = () => {
     Cookies.remove("accessToken", { path: "/" });
@@ -99,11 +128,11 @@ function SidebarProfile() {
         className="flex size-8 shrink-0 items-center justify-center rounded-full bg-light text-sm font-bold text-primary"
         aria-hidden="true"
       >
-        A
+        {user?.name?.charAt(0)}
       </span>
       <div className="min-w-0 text-xs leading-4">
-        <p className="truncate font-bold">[Admin Name]</p>
-        <p className="text-[10px] text-light">Super admin</p>
+        <p className="truncate font-bold">{user?.name}</p>
+        <p className="text-[10px] text-light">{user?.role?.name}</p>
       </div>
       <Tooltip title="Log out" placement="top">
         <span className="ml-auto inline-flex shrink-0">

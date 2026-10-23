@@ -68,24 +68,26 @@ function ActionButton({ action }: ActionButtonProps) {
     </ConfigProvider>
   );
 }
-
 export default function ActionButtons({
   name = "record",
   onView,
   onEdit,
   onDelete,
+  showView = true,
+  showEdit = true,
+  showDelete = true,
   deleteDisabled = false,
   deleteDisabledReason,
   actions,
 }: ActionButtonsProps) {
   const buttons: RecordAction[] = actions ?? [
-    ...(onView
+    ...(showView
       ? [{ label: `View ${name}`, icon: LuEye, onClick: onView }]
       : []),
-    ...(onEdit
+    ...(showEdit
       ? [{ label: `Edit ${name}`, icon: LuPencil, onClick: onEdit }]
       : []),
-    ...(onDelete
+    ...(showDelete
       ? [
           {
             label: deleteDisabledReason ?? `Delete ${name}`,

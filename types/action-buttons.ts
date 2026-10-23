@@ -8,6 +8,9 @@ export type ActionButtonsProps = {
   deleteDisabled?: boolean;
   deleteDisabledReason?: string;
   actions?: RecordAction[];
+  showView?: boolean;
+  showEdit?: boolean;
+  showDelete?: boolean;
 };
 export type RecordAction = {
   label: string;
