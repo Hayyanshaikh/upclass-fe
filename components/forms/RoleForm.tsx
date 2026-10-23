@@ -2,73 +2,86 @@
 
 import { useState } from "react";
 import { Form } from "antd";
+import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { LuChevronDown, LuX } from "react-icons/lu";
 import PageHeader from "@/components/shared/PageHeader";
+import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import SectionCard from "@/components/ui/SectionCard";
-import { permissionGroups, roleActions } from "@/constants/roles";
-import { useRoleStore } from "@/stores/roles";
-import type { RoleAction, RoleFormProps, RoleFormValues } from "@/types/role";
+import {
+  useRolesControllerCreate,
+  useRolesControllerUpdate,
+} from "@/app/api/endpoints";
+import { RoleDataDtoType } from "@/app/api/schemas";
+import type { CreateRoleDto, UpdateRoleDto } from "@/app/api/schemas";
+import type { RoleFormProps, RoleFormValues } from "@/types/role";
+
+function slugFromName(name: string) {
+  return name
+    .normalize("NFKD")
+    .toLowerCase()
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 80)
+    .replace(/_+$/g, "");
+}
 
 export default function RoleForm({ role }: RoleFormProps) {
   const router = useRouter();
   const [form] = Form.useForm<RoleFormValues>();
-  const roles = useRoleStore((state) => state.records);
-  const saveRole = useRoleStore((state) => state.saveRole);
-  const [assignedUsers, setAssignedUsers] = useState(role?.assignedUsers ?? []);
-  const [userCount, setUserCount] = useState(role?.users ?? 0);
-  const [permissions, setPermissions] = useState(role?.permissions ?? {});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const { mutateAsync: createRole, isPending: isCreating } =
+    useRolesControllerCreate();
+  const { mutateAsync: updateRole, isPending: isUpdating } =
+    useRolesControllerUpdate();
+  const isPending = isCreating || isUpdating;
+  const isSystemRole = role?.type === RoleDataDtoType.SYSTEM_ROLE;
 
-  function togglePermission(module: string, action: RoleAction) {
-    setPermissions((current) => {
-      const actions = current[module] ?? [];
-      return {
-        ...current,
-        [module]: actions.includes(action)
-          ? actions.filter((item) => item !== action)
-          : [...actions, action],
-      };
-    });
-  }
+  async function handleSubmit(values: RoleFormValues) {
+    if (isPending) return;
 
-  function removeUser(name: string) {
-    setAssignedUsers((current) => current.filter((user) => user !== name));
-    setUserCount((current) => Math.max(0, current - 1));
-  }
+    const name = isSystemRole ? role.name : values.name.trim();
+    const description = values.description?.trim() ?? "";
+    setSubmitError(null);
 
-  function handleSubmit(values: RoleFormValues) {
-    const name = role?.type === "System role" ? role.name : values.name.trim();
-    if (
-      roles.some(
-        (record) =>
-          record.id !== role?.id &&
-          record.name.toLowerCase() === name.toLowerCase(),
-      )
-    ) {
-      form.setFields([
-        { name: "name", errors: ["A role with this name already exists."] },
-      ]);
-      return;
+    try {
+      if (role) {
+        const data: UpdateRoleDto = { name, description };
+        await updateRole({ id: role.id, data });
+      } else {
+        const slug = slugFromName(name);
+        if (!slug) {
+          form.setFields([
+            {
+              name: "name",
+              errors: ["Use letters or numbers in the role name."],
+            },
+          ]);
+          return;
+        }
+        const data: CreateRoleDto = { name, slug, description };
+        await createRole({ data });
+      }
+
+      router.push("/roles");
+    } catch (error) {
+      const message = isAxiosError(error)
+        ? (error.response?.data as { message?: string } | undefined)?.message
+        : undefined;
+      if (isAxiosError(error) && error.response?.status === 409) {
+        form.setFields([
+          {
+            name: "name",
+            errors: [message ?? "A role with this name already exists."],
+          },
+        ]);
+        return;
+      }
+      setSubmitError(message ?? `Unable to ${role ? "update" : "add"} role.`);
     }
-
-    saveRole(
-      {
-        id: role?.id ?? crypto.randomUUID(),
-        name,
-        description: (values.description ?? "").trim(),
-        type: role?.type ?? "Custom",
-        users: role ? userCount : 0,
-        assignedUsers: role ? assignedUsers : [],
-        permissions: role ? permissions : {},
-      },
-      role?.id,
-    );
-    router.push("/roles");
   }
-
-  const moreUsers = Math.max(0, userCount - assignedUsers.length);
 
   return (
     <div>
@@ -80,44 +93,65 @@ export default function RoleForm({ role }: RoleFormProps) {
         ]}
         actions={
           <div className="flex flex-wrap gap-3">
-            <Button variant="secondary" onClick={() => router.push("/roles")}>
+            <Button
+              variant="secondary"
+              disabled={isPending}
+              onClick={() => router.push("/roles")}
+            >
               Cancel
             </Button>
-            <Button onClick={() => form.submit()}>
-              {role ? "Save permissions" : "Add role"}
+            <Button loading={isPending} onClick={() => form.submit()}>
+              {role ? "Save role" : "Add role"}
             </Button>
           </div>
         }
       />
 
+      {submitError && <Alert type="error" role="alert" message={submitError} />}
+
       <Form
         form={form}
         layout="vertical"
-        initialValues={{ name: role?.name, description: role?.description }}
-        onFinish={handleSubmit}
+        initialValues={{
+          name: role?.name,
+          description: role?.description ?? "",
+        }}
+        onFinish={(values) => void handleSubmit(values)}
         scrollToFirstError
         requiredMark={false}
         className="flex flex-col gap-5"
       >
-        <SectionCard title="Role name" autoHeight>
+        <SectionCard title="Role details" autoHeight>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Input
               name="name"
               label="Role name"
               placeholder="Enter role name"
-              readOnly={role?.type === "System role"}
+              readOnly={isSystemRole}
               isRequird
-              rules={[{ whitespace: true, message: "Enter a role name." }]}
+              rules={[
+                { whitespace: true, message: "Enter a role name." },
+                {
+                  max: 80,
+                  message: "Role name must be 80 characters or less.",
+                },
+              ]}
             />
             <Input
               name="description"
               label="Description"
               placeholder="Describe this role"
+              rules={[
+                {
+                  max: 500,
+                  message: "Description must be 500 characters or less.",
+                },
+              ]}
             />
           </div>
         </SectionCard>
 
-        {role && (
+        {/* {role && (
           <>
             <SectionCard title="Assign users" autoHeight>
               <div className="flex flex-wrap gap-2">
@@ -205,7 +239,7 @@ export default function RoleForm({ role }: RoleFormProps) {
               means on.
             </p>
           </>
-        )}
+        )} */}
       </Form>
     </div>
   );

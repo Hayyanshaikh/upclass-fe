@@ -5,7 +5,6 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
-import type { RoleListItemDtoDescription } from './roleListItemDtoDescription';
 import type { RoleListItemDtoType } from './roleListItemDtoType';
 
 export interface RoleListItemDto {
@@ -13,7 +12,7 @@ export interface RoleListItemDto {
   name: string;
   slug: string;
   /** @nullable */
-  description: RoleListItemDtoDescription;
+  description: string | null;
   type: RoleListItemDtoType;
   createdAt: string;
   updatedAt: string;

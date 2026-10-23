@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Form } from "antd";
 import { isAxiosError } from "axios";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
@@ -13,8 +12,6 @@ import Select from "@/components/ui/Select";
 import { userStatusOptions } from "@/constants/users";
 import type { UserAccount, UserFormValues } from "@/types/user-management";
 import {
-  getUserControllerFindAllQueryKey,
-  getUserControllerFindOneQueryKey,
   useUserControllerCreate,
   useUserControllerUpdate,
 } from "@/app/api/endpoints";
@@ -28,7 +25,6 @@ type UserFormProps = {
 
 export default function UserForm({ user }: UserFormProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [form] = Form.useForm<UserFormValues>();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const { options, isLoading: rolesLoading, isError: rolesError } =
@@ -75,9 +71,6 @@ export default function UserForm({ user }: UserFormProps) {
             : {}),
         };
         await updateUser({ data: payload, id: user.id });
-        void queryClient.invalidateQueries({
-          queryKey: getUserControllerFindOneQueryKey(user.id),
-        });
       } else {
         if (!values.password) return;
         const payload: CreateUserDto = {
@@ -87,9 +80,6 @@ export default function UserForm({ user }: UserFormProps) {
         await createUser({ data: payload });
       }
 
-      void queryClient.invalidateQueries({
-        queryKey: getUserControllerFindAllQueryKey(),
-      });
       router.push("/users");
     } catch (error) {
       if (isAxiosError(error)) {

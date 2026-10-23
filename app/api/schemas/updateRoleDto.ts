@@ -5,7 +5,6 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
-import type { UpdateRoleDtoDescription } from './updateRoleDtoDescription';
 
 export interface UpdateRoleDto {
   /** @maxLength 80 */
@@ -16,5 +15,5 @@ export interface UpdateRoleDto {
      * @maxLength 500
      * @nullable
      */
-  description?: UpdateRoleDtoDescription;
+  description?: string | null;
 }

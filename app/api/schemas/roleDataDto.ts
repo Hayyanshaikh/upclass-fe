@@ -5,7 +5,6 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
-import type { RoleDataDtoDescription } from './roleDataDtoDescription';
 import type { RoleDataDtoType } from './roleDataDtoType';
 
 export interface RoleDataDto {
@@ -13,7 +12,7 @@ export interface RoleDataDto {
   name: string;
   slug: string;
   /** @nullable */
-  description: RoleDataDtoDescription;
+  description: string | null;
   type: RoleDataDtoType;
   createdAt: string;
   updatedAt: string;

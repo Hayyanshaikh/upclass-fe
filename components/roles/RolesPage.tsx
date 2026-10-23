@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { flushSync } from "react-dom";
 import { isAxiosError } from "axios";
 import type { TableColumnsType } from "antd";
 import { useRouter } from "next/navigation";
 import ActionButtons from "@/components/shared/ActionButtons";
 import DeleteDialog from "@/components/shared/DeleteDialog";
+import RoleDetailsDialog from "@/components/dialogs/RoleDetailsDialog";
 import PageHeader from "@/components/shared/PageHeader";
 import Button from "@/components/ui/Button";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -14,7 +15,6 @@ import Table from "@/components/ui/Table";
 import { roleTypeOptions } from "@/constants/roles";
 import { useTable } from "@/hooks/useTable";
 import {
-  getRolesControllerFindAllQueryKey,
   useRolesControllerFindAll,
   useRolesControllerRemove,
 } from "@/app/api/endpoints";
@@ -27,7 +27,7 @@ import type {
 
 export default function RolesPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const [selectedRole, setSelectedRole] = useState<RoleListItemDto | null>(null);
   const [roleToDelete, setRoleToDelete] = useState<RoleListItemDto | null>(
     null,
   );
@@ -60,6 +60,11 @@ export default function RolesPage() {
   const roles = response?.data ?? [];
   const total = response?.total ?? 0;
 
+  function editRole(role: RoleListItemDto) {
+    flushSync(() => setSelectedRole(null));
+    router.push(`/roles/edit/${encodeURIComponent(role.id)}`);
+  }
+
   async function confirmDelete() {
     if (!roleToDelete || isDeleting) return;
 
@@ -67,10 +72,11 @@ export default function RolesPage() {
     try {
       await removeRole({ id: roleToDelete.id });
       setRoleToDelete(null);
-      if (page > 1 && offset >= total - 1) setPage(page - 1);
-      await queryClient.invalidateQueries({
-        queryKey: getRolesControllerFindAllQueryKey(),
-      });
+      if (page > 1 && offset >= total - 1) {
+        setPage(page - 1);
+      } else {
+        void refetch();
+      }
     } catch (error) {
       const message = isAxiosError(error)
         ? (error.response?.data as { message?: string } | undefined)?.message
@@ -114,15 +120,16 @@ export default function RolesPage() {
     {
       title: "Actions",
       key: "actions",
-      width: 100,
+      width: 160,
       render: (_, role) => (
         <ActionButtons
           name={role.name}
+          onView={() => setSelectedRole(role)}
+          onEdit={() => editRole(role)}
           onDelete={() => {
             setDeleteError(null);
             setRoleToDelete(role);
           }}
-          onEdit={() => {}}
           deleteDisabled={
             role.type === RoleListItemDtoType.SYSTEM_ROLE ||
             role.users > 0 ||
@@ -190,6 +197,11 @@ export default function RolesPage() {
         filterValues={filters}
         onFilterValuesChange={setFilters}
         actions={actions}
+      />
+      <RoleDetailsDialog
+        role={selectedRole}
+        onClose={() => setSelectedRole(null)}
+        onEdit={editRole}
       />
       <DeleteDialog
         open={roleToDelete !== null}

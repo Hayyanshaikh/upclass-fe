@@ -1,3 +1,5 @@
+import type { RoleDataDto, RoleListItemDto } from "@/app/api/schemas";
+
 export type SchoolRole = {
   id: string;
   name: string;
@@ -16,7 +18,13 @@ export type RoleFormValues = {
 };
 
 export type RoleFormProps = {
-  role?: SchoolRole;
+  role?: RoleDataDto;
+};
+
+export type RoleDetailsDialogProps = {
+  role: RoleListItemDto | null;
+  onClose: () => void;
+  onEdit: (role: RoleListItemDto) => void;
 };
 
 export type RoleStore = {
