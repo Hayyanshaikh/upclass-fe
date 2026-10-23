@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { RoleDataDtoDescription } from './roleDataDtoDescription';
+import type { RoleDataDtoType } from './roleDataDtoType';
 
 export interface RoleDataDto {
   id: string;
@@ -13,6 +14,7 @@ export interface RoleDataDto {
   slug: string;
   /** @nullable */
   description: RoleDataDtoDescription;
+  type: RoleDataDtoType;
   createdAt: string;
   updatedAt: string;
 }

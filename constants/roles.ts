@@ -1,4 +1,5 @@
 import type { RoleAction, SchoolRole } from "@/types/role";
+import { RoleListItemDtoType } from "@/app/api/schemas";
 
 export const ROLE_OPTIONS = [
   { label: "Super Admin", value: "SUPERADMIN" },
@@ -35,6 +36,6 @@ export const schoolRoles: SchoolRole[] = [
 ];
 
 export const roleTypeOptions = [
-  { label: "System role", value: "System role" },
-  { label: "Custom", value: "Custom" },
+  { label: "System role", value: RoleListItemDtoType.SYSTEM_ROLE },
+  { label: "Custom", value: RoleListItemDtoType.CUSTOM },
 ];

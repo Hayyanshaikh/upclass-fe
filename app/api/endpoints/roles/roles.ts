@@ -27,6 +27,7 @@ import type {
 import type {
   CreateRoleDto,
   RoleResponseDto,
+  RolesControllerFindAllParams,
   RolesResponseDto,
   UpdateRoleDto
 } from '../../schemas';
@@ -140,20 +141,27 @@ export const useRolesControllerCreate = <TError = void,
       > => {
       return useMutation(getRolesControllerCreateMutationOptions(options), queryClient);
     }
-    export const getRolesControllerFindAllUrl = () => {
+    export const getRolesControllerFindAllUrl = (params?: RolesControllerFindAllParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/roles`
+  return stringifiedParams.length > 0 ? `/api/roles?${stringifiedParams}` : `/api/roles`
 }
 
 /**
  * @summary Get all roles
  */
-export const rolesControllerFindAll = async ( options?: Parameters<typeof customInstance>[1]): Promise<RolesResponseDto> => {
+export const rolesControllerFindAll = async (params?: RolesControllerFindAllParams, options?: Parameters<typeof customInstance>[1]): Promise<RolesResponseDto> => {
 
-  return customInstance<RolesResponseDto>(getRolesControllerFindAllUrl(),
+  return customInstance<RolesResponseDto>(getRolesControllerFindAllUrl(params),
   {
     ...options,
     method: 'GET'
@@ -166,23 +174,23 @@ export const rolesControllerFindAll = async ( options?: Parameters<typeof custom
 
 
 
-export const getRolesControllerFindAllQueryKey = () => {
+export const getRolesControllerFindAllQueryKey = (params?: RolesControllerFindAllParams,) => {
     return [
-    `/api/roles`
+    `/api/roles`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getRolesControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof rolesControllerFindAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rolesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getRolesControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof rolesControllerFindAll>>, TError = unknown>(params?: RolesControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rolesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getRolesControllerFindAllQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getRolesControllerFindAllQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof rolesControllerFindAll>>> = ({ signal }) => rolesControllerFindAll({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof rolesControllerFindAll>>> = ({ signal }) => rolesControllerFindAll(params, { signal, ...requestOptions });
 
 
 
@@ -196,7 +204,7 @@ export type RolesControllerFindAllQueryError = unknown
 
 
 export function useRolesControllerFindAll<TData = Awaited<ReturnType<typeof rolesControllerFindAll>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof rolesControllerFindAll>>, TError, TData>> & Pick<
+ params: undefined |  RolesControllerFindAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof rolesControllerFindAll>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof rolesControllerFindAll>>,
           TError,
@@ -206,7 +214,7 @@ export function useRolesControllerFindAll<TData = Awaited<ReturnType<typeof role
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useRolesControllerFindAll<TData = Awaited<ReturnType<typeof rolesControllerFindAll>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rolesControllerFindAll>>, TError, TData>> & Pick<
+ params?: RolesControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rolesControllerFindAll>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof rolesControllerFindAll>>,
           TError,
@@ -216,7 +224,7 @@ export function useRolesControllerFindAll<TData = Awaited<ReturnType<typeof role
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useRolesControllerFindAll<TData = Awaited<ReturnType<typeof rolesControllerFindAll>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rolesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ params?: RolesControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rolesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -224,11 +232,11 @@ export function useRolesControllerFindAll<TData = Awaited<ReturnType<typeof role
  */
 
 export function useRolesControllerFindAll<TData = Awaited<ReturnType<typeof rolesControllerFindAll>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rolesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ params?: RolesControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rolesControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getRolesControllerFindAllQueryOptions(options)
+  const queryOptions = getRolesControllerFindAllQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -1,35 +1,85 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 import type { TableColumnsType } from "antd";
-import { LuCopy, LuPencil, LuTrash2 } from "react-icons/lu";
+import { useRouter } from "next/navigation";
 import ActionButtons from "@/components/shared/ActionButtons";
 import DeleteDialog from "@/components/shared/DeleteDialog";
 import PageHeader from "@/components/shared/PageHeader";
+import Button from "@/components/ui/Button";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
 import { roleTypeOptions } from "@/constants/roles";
-import { useRoleStore } from "@/stores/roles";
-import type { SchoolRole } from "@/types/role";
+import { useTable } from "@/hooks/useTable";
+import {
+  getRolesControllerFindAllQueryKey,
+  useRolesControllerFindAll,
+  useRolesControllerRemove,
+} from "@/app/api/endpoints";
+import { RoleListItemDtoType, type RoleListItemDto } from "@/app/api/schemas";
+import type {
+  FilterField,
+  TableAction,
+  TableSearch,
+} from "@/types/table-toolbar";
 
 export default function RolesPage() {
   const router = useRouter();
-  const roles = useRoleStore((state) => state.records);
-  const duplicateRole = useRoleStore((state) => state.duplicateRole);
-  const deleteRole = useRoleStore((state) => state.deleteRole);
-  const [search, setSearch] = useState("");
-  const [type, setType] = useState<string>();
-  const [page, setPage] = useState(1);
-  const [roleToDelete, setRoleToDelete] = useState<SchoolRole | null>(null);
-
-  const filteredRoles = roles.filter(
-    (role) =>
-      role.name.toLowerCase().includes(search.trim().toLowerCase()) &&
-      (!type || role.type === type),
+  const queryClient = useQueryClient();
+  const [roleToDelete, setRoleToDelete] = useState<RoleListItemDto | null>(
+    null,
   );
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const { mutateAsync: removeRole, isPending: isDeleting } =
+    useRolesControllerRemove();
+  const {
+    page,
+    pageSize,
+    offset,
+    search,
+    filters,
+    setPage,
+    setSearch,
+    setFilters,
+  } = useTable<{ type?: RoleListItemDto["type"] }>({ pageSize: 7 });
 
-  const columns: TableColumnsType<SchoolRole> = [
+  const {
+    data: response,
+    isFetching,
+    error,
+    refetch,
+  } = useRolesControllerFindAll({
+    limit: pageSize,
+    offset,
+    searchKey: search,
+    type: filters.type,
+  });
+
+  const roles = response?.data ?? [];
+  const total = response?.total ?? 0;
+
+  async function confirmDelete() {
+    if (!roleToDelete || isDeleting) return;
+
+    setDeleteError(null);
+    try {
+      await removeRole({ id: roleToDelete.id });
+      setRoleToDelete(null);
+      if (page > 1 && offset >= total - 1) setPage(page - 1);
+      await queryClient.invalidateQueries({
+        queryKey: getRolesControllerFindAllQueryKey(),
+      });
+    } catch (error) {
+      const message = isAxiosError(error)
+        ? (error.response?.data as { message?: string } | undefined)?.message
+        : undefined;
+      setDeleteError(message ?? "Unable to delete role. Please try again.");
+    }
+  }
+
+  const columns: TableColumnsType<RoleListItemDto> = [
     {
       title: "Role",
       dataIndex: "name",
@@ -40,7 +90,7 @@ export default function RolesPage() {
     {
       title: "Description",
       dataIndex: "description",
-      render: (description: string) => (
+      render: (description: string | null) => (
         <span className="text-gray">{description || "—"}</span>
       ),
     },
@@ -53,41 +103,71 @@ export default function RolesPage() {
     {
       title: "Type",
       dataIndex: "type",
-      render: (value: SchoolRole["type"]) => (
-        <StatusBadge variant={value === "Custom" ? "success" : "neutral"}>
-          {value}
+      render: (type: RoleListItemDto["type"]) => (
+        <StatusBadge
+          variant={type === RoleListItemDtoType.CUSTOM ? "success" : "neutral"}
+        >
+          {type === RoleListItemDtoType.SYSTEM_ROLE ? "System role" : "Custom"}
         </StatusBadge>
       ),
     },
     {
       title: "Actions",
       key: "actions",
-      width: 160,
+      width: 100,
       render: (_, role) => (
         <ActionButtons
           name={role.name}
-          actions={[
-            {
-              label: `Duplicate ${role.name}`,
-              icon: LuCopy,
-              onClick: () => duplicateRole(role.id),
-            },
-            {
-              label: `Edit ${role.name}`,
-              icon: LuPencil,
-              onClick: () =>
-                router.push(`/roles/edit/${encodeURIComponent(role.id)}`),
-            },
-            {
-              label: `Delete ${role.name}`,
-              icon: LuTrash2,
-              onClick: () => setRoleToDelete(role),
-              danger: true,
-              disabled: role.type === "System role",
-            },
-          ]}
+          onDelete={() => {
+            setDeleteError(null);
+            setRoleToDelete(role);
+          }}
+          onEdit={() => {}}
+          deleteDisabled={
+            role.type === RoleListItemDtoType.SYSTEM_ROLE ||
+            role.users > 0 ||
+            isDeleting
+          }
+          deleteDisabledReason={
+            role.type === RoleListItemDtoType.SYSTEM_ROLE
+              ? "System roles cannot be deleted"
+              : role.users > 0
+                ? "Remove assigned users before deleting this role"
+                : undefined
+          }
         />
       ),
+    },
+  ];
+
+  const filterFields: FilterField[] = [
+    {
+      name: "type",
+      label: "Type",
+      placeholder: "Any",
+      options: roleTypeOptions,
+    },
+  ];
+  const tableSearch: TableSearch = {
+    placeholder: "Role name",
+    onChange: setSearch,
+  };
+  const beforeTable = error ? (
+    <div
+      role="alert"
+      className="flex items-center gap-3 rounded-md border border-danger bg-danger/10 px-4 py-3 text-sm text-danger"
+    >
+      <span>Unable to load roles.</span>
+      <Button variant="link" onClick={() => void refetch()}>
+        Retry
+      </Button>
+    </div>
+  ) : undefined;
+
+  const actions: TableAction[] = [
+    {
+      label: "Add role",
+      onClick: () => router.push("/roles/add"),
     },
   ];
 
@@ -98,38 +178,38 @@ export default function RolesPage() {
       </div>
       <Table
         columns={columns}
-        data={filteredRoles}
-        pageSize={7}
+        data={roles}
+        total={total}
+        loading={isFetching}
+        beforeTable={beforeTable}
+        pageSize={pageSize}
         current={page}
         onPageChange={setPage}
-        search={{
-          placeholder: "Role name",
-          onChange: setSearch,
-        }}
-        filterFields={[
-          {
-            name: "type",
-            label: "Type",
-            placeholder: "Any",
-            options: roleTypeOptions,
-            onChange: setType,
-          },
-        ]}
-        actions={[
-          { label: "Add role", onClick: () => router.push("/roles/add") },
-        ]}
+        search={tableSearch}
+        filterFields={filterFields}
+        filterValues={filters}
+        onFilterValuesChange={setFilters}
+        actions={actions}
       />
       <DeleteDialog
         open={roleToDelete !== null}
-        title="Delete custom role?"
+        title="Delete role?"
         message={`Remove ${roleToDelete?.name ?? "this role"} from the role list?`}
-        description="This changes the current preview only."
+        description={
+          deleteError ? (
+            <span role="alert" className="text-danger">
+              {deleteError}
+            </span>
+          ) : (
+            "This permanently deletes the role."
+          )
+        }
         okText="Delete role"
-        onClose={() => setRoleToDelete(null)}
-        onConfirm={() => {
-          if (roleToDelete) deleteRole(roleToDelete.id);
-          setRoleToDelete(null);
+        confirmLoading={isDeleting}
+        onClose={() => {
+          if (!isDeleting) setRoleToDelete(null);
         }}
+        onConfirm={() => void confirmDelete()}
       />
     </div>
   );

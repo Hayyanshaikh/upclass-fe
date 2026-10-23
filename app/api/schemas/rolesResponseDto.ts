@@ -5,10 +5,11 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
-import type { RoleDataDto } from './roleDataDto';
+import type { RoleListItemDto } from './roleListItemDto';
 
 export interface RolesResponseDto {
-  data: RoleDataDto[];
+  data: RoleListItemDto[];
+  total: number;
   message: string;
   statusCode: number;
   warning?: string;
