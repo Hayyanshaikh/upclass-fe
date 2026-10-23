@@ -5,15 +5,15 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
-import type { RoleDataDtoType } from './roleDataDtoType';
 
-export interface RoleDataDto {
+export interface PermissionDataDto {
   id: string;
-  name: string;
-  slug: string;
+  key: string;
   /** @nullable */
   description: string | null;
-  type: RoleDataDtoType;
+  group: string;
+  module: string;
+  action: string;
+  sortOrder: number;
   createdAt: string;
-  updatedAt: string;
 }

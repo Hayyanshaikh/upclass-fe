@@ -16,4 +16,5 @@ export interface UpdateRoleDto {
      * @nullable
      */
   description?: string | null;
+  permissionKeys?: string[];
 }

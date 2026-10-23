@@ -6,10 +6,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type RoleDataDtoType = typeof RoleDataDtoType[keyof typeof RoleDataDtoType];
+export type RoleDetailDataDtoType = typeof RoleDetailDataDtoType[keyof typeof RoleDetailDataDtoType];
 
 
-export const RoleDataDtoType = {
+export const RoleDetailDataDtoType = {
   SYSTEM_ROLE: 'SYSTEM_ROLE',
   CUSTOM: 'CUSTOM',
 } as const;
