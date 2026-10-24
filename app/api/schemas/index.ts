@@ -8,11 +8,9 @@
 
 export * from './createRoleDto';
 export * from './createUserDto';
-export * from './createUserDtoGender';
 export * from './loginDto';
 export * from './loginResponseDto';
 export * from './loginResponseUserDto';
-export * from './loginResponseUserDtoGender';
 export * from './permissionDataDto';
 export * from './permissionKey';
 export * from './permissionResponseDto';
@@ -28,7 +26,6 @@ export * from './rolesResponseDto';
 export * from './roleSummaryDto';
 export * from './updateRoleDto';
 export * from './updateUserDto';
-export * from './updateUserDtoGender';
 export * from './userControllerFindAllParams';
 export * from './userFindOneResponseDto';
 export * from './userResponseDto';
