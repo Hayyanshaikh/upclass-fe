@@ -1,34 +1,40 @@
 "use client";
 
+import { useTeachersControllerFindOne } from "@/app/api/endpoints";
+import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
 import StatusBadge from "@/components/ui/StatusBadge";
-import { teacherStatusVariants } from "@/constants/teachers";
 import type { TeacherDetailsDialogProps } from "@/types/teacher";
+
+function displayValue(value: string | null) {
+  return value || "—";
+}
+
+function displayEnum(value: string | null) {
+  if (!value) return "—";
+  const label = value.replaceAll("_", " ").toLowerCase();
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
 
 export default function TeacherDetailsDialog({
   teacher,
   onClose,
   onEdit,
 }: TeacherDetailsDialogProps) {
+  const {
+    data: response,
+    isFetching,
+    error,
+    refetch,
+  } = useTeachersControllerFindOne(teacher?.id ?? "", {
+    query: { enabled: teacher !== null },
+  });
+  const details = response?.data;
+
   return (
     <Dialog
       open={teacher !== null}
-      title={
-        teacher && (
-          <div className="mb-5 flex items-center gap-3">
-            <span
-              aria-hidden="true"
-              className="flex size-11 shrink-0 items-center justify-center rounded-full bg-success/10 text-lg font-bold text-primary"
-            >
-              {teacher.name.charAt(0)}
-            </span>
-            <div>
-              <p className="text-base font-bold text-dark">{teacher.name}</p>
-              <p className="text-sm text-gray">ID {teacher.id}</p>
-            </div>
-          </div>
-        )
-      }
+      title={teacher?.name ?? "Teacher details"}
       onClose={onClose}
       onConfirm={() => {
         if (teacher) onEdit(teacher);
@@ -36,42 +42,61 @@ export default function TeacherDetailsDialog({
       okText="Edit teacher"
       cancelText="Close"
     >
-      {teacher && (
-        <>
-          <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-gray">Subject</dt>
-              <dd className="mt-1 font-semibold text-dark">
-                {teacher.subject}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-gray">Classes</dt>
-              <dd className="mt-1 font-semibold text-dark">
-                {teacher.classes.join(", ")}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-gray">Phone</dt>
-              <dd className="mt-1 font-semibold text-dark">{teacher.phone}</dd>
-            </div>
-            <div>
-              <dt className="text-gray">Employment</dt>
-              <dd className="mt-1 font-semibold text-dark">
-                {teacher.employment}
-              </dd>
-            </div>
-            <div>
-              <dt className="mb-1 text-gray">Status</dt>
-              <dd>
-                <StatusBadge variant={teacherStatusVariants[teacher.status]}>
-                  {teacher.status}
-                </StatusBadge>
-              </dd>
-            </div>
-          </dl>
-        </>
-      )}
+      {isFetching && !details ? (
+        <p role="status" className="text-sm text-gray">
+          Loading teacher details...
+        </p>
+      ) : error ? (
+        <div role="alert" className="flex items-center gap-3 text-sm text-danger">
+          <span>Unable to load teacher details.</span>
+          <Button variant="link" onClick={() => void refetch()}>
+            Retry
+          </Button>
+        </div>
+      ) : details ? (
+        <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="text-gray">Employee ID</dt>
+            <dd className="mt-1 font-semibold text-dark">
+              {displayValue(details.employeeId)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-gray">Subject</dt>
+            <dd className="mt-1 font-semibold text-dark">—</dd>
+          </div>
+          <div>
+            <dt className="text-gray">Classes</dt>
+            <dd className="mt-1 font-semibold text-dark">—</dd>
+          </div>
+          <div>
+            <dt className="text-gray">Phone</dt>
+            <dd className="mt-1 font-semibold text-dark">
+              {displayValue(details.phone)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-gray">Employment Type</dt>
+            <dd className="mt-1 font-semibold text-dark">
+              {displayEnum(details.employmentType)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-gray">Status</dt>
+            <dd className="mt-1">
+              <StatusBadge
+                variant={details.isActive === true ? "success" : "neutral"}
+              >
+                {details.isActive === null
+                  ? "Unknown"
+                  : details.isActive
+                    ? "Active"
+                    : "Inactive"}
+              </StatusBadge>
+            </dd>
+          </div>
+        </dl>
+      ) : null}
     </Dialog>
   );
 }

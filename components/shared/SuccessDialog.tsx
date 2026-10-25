@@ -3,13 +3,14 @@
 import Dialog from "@/components/ui/Dialog";
 import Button from "@/components/ui/Button";
 import type { FeedbackDialogProps } from "@/types/feedback-dialog";
-import { LuCheck, LuCircleCheck } from "react-icons/lu";
+import { LuCheck } from "react-icons/lu";
 
 export default function SuccessDialog({
   open,
   title = "Success",
   message,
   onClose,
+  afterClose,
   okText = "Okay",
 }: FeedbackDialogProps) {
   return (
@@ -25,6 +26,7 @@ export default function SuccessDialog({
       }
       onClose={onClose}
       onConfirm={onClose}
+      afterClose={afterClose}
       closable={false}
       width={400}
       footer={

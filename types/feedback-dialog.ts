@@ -5,5 +5,6 @@ export type FeedbackDialogProps = {
   title?: ReactNode;
   message: ReactNode;
   onClose: () => void;
+  afterClose?: () => void;
   okText?: string;
 };

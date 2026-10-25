@@ -1,4 +1,12 @@
 import type { Dayjs } from "dayjs";
+import type {
+  CreateTeacherDtoEmploymentType,
+  CreateTeacherDtoGender,
+  CreateTeacherDtoMaritalStatus,
+  TeacherDto,
+  TeachersControllerFindAllStatus,
+} from "@/app/api/schemas";
+import type { TeacherAccount } from "@/types/teacher-management";
 
 export type Teacher = {
   id: string;
@@ -23,26 +31,25 @@ export type Teacher = {
 
 export type TeacherFormValues = {
   firstName: string;
-  lastName: string;
-  dateOfBirth?: Dayjs;
-  gender?: string;
-  identityNumber?: string;
-  maritalStatus?: string;
-  employeeId: string;
-  subject: string;
-  assignedClasses?: Record<string, boolean>;
+  lastName?: string;
+  image?: string;
+  dateOfBirth?: Dayjs | null;
+  gender?: CreateTeacherDtoGender;
+  cnicNo?: string;
+  maritalStatus?: CreateTeacherDtoMaritalStatus;
+  employeeId?: string;
   qualification?: string;
-  joiningDate?: Dayjs;
-  phone: string;
-  employment: Teacher["employment"];
-  status: Teacher["status"];
-  email?: string;
+  joiningDate?: Dayjs | null;
+  employmentType?: CreateTeacherDtoEmploymentType;
+  status?: TeachersControllerFindAllStatus;
+  phone?: string;
+  email: string;
   address?: string;
-  photo?: string;
 };
 
 export type TeacherFormProps = {
-  teacher?: Teacher;
+  teacher?: TeacherDto;
+  onSaved?: () => Promise<unknown>;
 };
 
 export type TeacherStore = {
@@ -56,7 +63,7 @@ export type TeacherRouteParams = {
 };
 
 export type TeacherDetailsDialogProps = {
-  teacher: Teacher | null;
+  teacher: TeacherAccount | null;
   onClose: () => void;
-  onEdit: (teacher: Teacher) => void;
+  onEdit: (teacher: TeacherAccount) => void;
 };
