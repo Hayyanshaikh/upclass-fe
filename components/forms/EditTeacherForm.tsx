@@ -12,10 +12,14 @@ import type { TeacherRouteParams } from "@/types/teacher";
 
 export default function EditTeacherForm() {
   const { id } = useParams<TeacherRouteParams>();
-  const { data: response, isLoading, error, refetch } =
-    useTeachersControllerFindOne(id, {
-      query: { refetchOnMount: "always" },
-    });
+  const {
+    data: response,
+    isLoading,
+    error,
+    refetch,
+  } = useTeachersControllerFindOne(id, {
+    query: { refetchOnMount: "always" },
+  });
 
   if (isLoading) return <Loader />;
 
