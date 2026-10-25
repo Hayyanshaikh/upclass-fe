@@ -7,6 +7,10 @@
  */
 
 export * from './createRoleDto';
+export * from './createTeacherDto';
+export * from './createTeacherDtoEmploymentType';
+export * from './createTeacherDtoGender';
+export * from './createTeacherDtoMaritalStatus';
 export * from './createUserDto';
 export * from './loginDto';
 export * from './loginResponseDto';
@@ -24,7 +28,20 @@ export * from './rolesControllerFindAllParams';
 export * from './rolesControllerFindAllType';
 export * from './rolesResponseDto';
 export * from './roleSummaryDto';
+export * from './teacherDto';
+export * from './teacherDtoEmploymentType';
+export * from './teacherDtoGender';
+export * from './teacherDtoMaritalStatus';
+export * from './teacherFindOneResponseDto';
+export * from './teacherResponseDto';
+export * from './teachersControllerFindAllEmploymentType';
+export * from './teachersControllerFindAllParams';
+export * from './teachersControllerFindAllStatus';
 export * from './updateRoleDto';
+export * from './updateTeacherDto';
+export * from './updateTeacherDtoEmploymentType';
+export * from './updateTeacherDtoGender';
+export * from './updateTeacherDtoMaritalStatus';
 export * from './updateUserDto';
 export * from './userControllerFindAllParams';
 export * from './userFindOneResponseDto';
