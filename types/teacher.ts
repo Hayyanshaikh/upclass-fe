@@ -32,7 +32,7 @@ export type Teacher = {
 export type TeacherFormValues = {
   firstName: string;
   lastName?: string;
-  image?: string;
+  image?: File | string | null;
   dateOfBirth?: Dayjs | null;
   gender?: CreateTeacherDtoGender;
   cnicNo?: string;

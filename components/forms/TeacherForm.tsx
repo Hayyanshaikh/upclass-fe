@@ -31,6 +31,7 @@ import Select from "@/components/ui/Select";
 import TextArea from "@/components/ui/TextArea";
 import type { TeacherFormProps, TeacherFormValues } from "@/types/teacher";
 import { toOptions } from "@/utils/enum-options";
+import { handleImageUpload } from "@/utils/handle-image-upload";
 
 const genderOptions = toOptions(CreateTeacherDtoGender);
 const maritalStatusOptions = toOptions(CreateTeacherDtoMaritalStatus);
@@ -44,6 +45,7 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
   const router = useRouter();
   const [form] = Form.useForm<TeacherFormValues>();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [successRedirect, setSuccessRedirect] = useState<string | null>(null);
   const [temporaryPassword, setTemporaryPassword] = useState<string | null>(
@@ -59,7 +61,7 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
     useTeachersControllerCreate();
   const { mutateAsync: updateTeacher, isPending: isUpdating } =
     useTeachersControllerUpdate();
-  const isPending = isCreating || isUpdating;
+  const isPending = isCreating || isUpdating || isUploading;
 
   useEffect(() => {
     if (!teacher) return;
@@ -67,7 +69,7 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
       firstName: teacher.firstName,
       lastName: teacher.lastName ?? "",
       employeeId: teacher.employeeId ?? "",
-      image: teacher.image ?? undefined,
+      image: teacher.image ?? "",
       dateOfBirth: teacher.dateOfBirth ? dayjs(teacher.dateOfBirth) : null,
       gender: teacher.gender,
       cnicNo: teacher.cnicNo ?? "",
@@ -95,92 +97,80 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
   async function handleSubmit(values: TeacherFormValues) {
     if (isPending) return;
 
-    const firstName = values.firstName.trim();
-    const lastName = values.lastName?.trim() || null;
-    const employeeId = values.employeeId?.trim() || null;
-    const image = values.image || null;
-    const dateOfBirth = values.dateOfBirth?.format("YYYY-MM-DD") ?? null;
-    const gender = values.gender ?? null;
-    const cnicNo = values.cnicNo?.trim() || null;
-    const maritalStatus = values.maritalStatus ?? null;
-    const qualification = values.qualification?.trim() || null;
-    const joiningDate = values.joiningDate?.format("YYYY-MM-DD") ?? null;
-    const employmentType = values.employmentType ?? null;
-    const isActive =
-      values.status === undefined
-        ? null
-        : values.status === TeachersControllerFindAllStatus.ACTIVE;
-    const phone = values.phone?.trim() || null;
-    const email = values.email.trim();
-    const address = values.address?.trim() || null;
-
     setSubmitError(null);
     setSubmitSuccess(null);
+    setIsUploading(values.image instanceof File);
 
     try {
+      const imageUrl = await handleImageUpload(values.image);
+
+      const commonData = {
+        firstName: values.firstName.trim(),
+        lastName: values.lastName?.trim() || null,
+        image: imageUrl || "",
+        dateOfBirth: values.dateOfBirth?.format("YYYY-MM-DD") ?? null,
+        gender: values.gender ?? null,
+        employeeId: values.employeeId?.trim() || null,
+        cnicNo: values.cnicNo?.trim() || null,
+        maritalStatus: values.maritalStatus ?? null,
+        qualification: values.qualification?.trim() || null,
+        joiningDate: values.joiningDate?.format("YYYY-MM-DD") ?? null,
+        employmentType: values.employmentType ?? null,
+        isActive:
+          values.status === undefined
+            ? null
+            : values.status === TeachersControllerFindAllStatus.ACTIVE,
+        phone: values.phone?.trim() || null,
+        email: values.email.trim(),
+        address: values.address?.trim() || null,
+      };
+
       if (teacher) {
         const data: UpdateTeacherDto = {
-          firstName,
-          lastName,
-          employeeId,
-          image,
-          dateOfBirth,
-          gender,
-          cnicNo,
-          maritalStatus,
-          qualification,
-          joiningDate,
-          employmentType,
-          isActive,
-          phone,
-          email,
-          address,
+          ...commonData,
         };
+
         await updateTeacher({ id: teacher.id, data });
         await onSaved?.();
+
         setSubmitSuccess("Teacher updated successfully.");
-      } else {
-        const data: CreateTeacherDto = {
-          firstName,
-          lastName,
-          image,
-          dateOfBirth,
-          gender,
-          cnicNo,
-          maritalStatus,
-          qualification,
-          joiningDate,
-          employmentType,
-          isActive,
-          phone,
-          email,
-          address,
-        };
-        const response = await createTeacher({ data });
-        setTemporaryPassword(response.temporaryPassword ?? null);
-        setCopyStatus("idle");
-        setSuccessRedirect(
-          `/teachers/edit/${encodeURIComponent(response.data.id)}`,
-        );
-        setSubmitSuccess("Teacher added successfully.");
+        return;
       }
+
+      const data: CreateTeacherDto = commonData;
+      const response = await createTeacher({ data });
+
+      setTemporaryPassword(response.temporaryPassword ?? null);
+      setCopyStatus("idle");
+      setSuccessRedirect(
+        `/teachers/edit/${encodeURIComponent(response.data.id)}`,
+      );
+      setSubmitSuccess("Teacher added successfully.");
     } catch (error) {
       const body = isAxiosError(error)
         ? (error.response?.data as
             | { message?: string; data?: { errors?: string[] } }
             | undefined)
         : undefined;
-      const message = body?.data?.errors?.[0] ?? body?.message;
+
+      const message =
+        body?.data?.errors?.[0] ??
+        body?.message ??
+        (error instanceof Error ? error.message : undefined);
+
       if (isAxiosError(error) && error.response?.status === 409) {
-        const field = message?.toLowerCase().includes("email")
+        const lowerMessage = message?.toLowerCase();
+
+        const field = lowerMessage?.includes("email")
           ? "email"
-          : message?.toLowerCase().includes("username")
+          : lowerMessage?.includes("username")
             ? "firstName"
-            : message?.toLowerCase().includes("employee")
+            : lowerMessage?.includes("employee")
               ? "employeeId"
-              : message?.toLowerCase().includes("cnic")
+              : lowerMessage?.includes("cnic")
                 ? "cnicNo"
                 : undefined;
+
         if (field) {
           form.setFields([
             { name: field, errors: [message ?? "Already exists."] },
@@ -188,9 +178,12 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
           form.scrollToField(field, { focus: true });
         }
       }
+
       setSubmitError(
         message ?? `Unable to ${teacher ? "update" : "add"} teacher.`,
       );
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -314,7 +307,10 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
           }
         >
           <div className="space-y-4 text-sm text-dark">
-            <p>Copy this password to sign in as the teacher. It is shown only once.</p>
+            <p>
+              Copy this password to sign in as the teacher. It is shown only
+              once.
+            </p>
             <div className="flex items-center gap-2 rounded-md border border-border bg-foreground px-3 py-1">
               <input
                 ref={passwordInputRef}
@@ -350,7 +346,7 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
         <SectionCard title="Personal details" autoHeight>
           <div className="flex flex-col gap-5 sm:flex-row">
             <Form.Item name="image">
-              <PhotoUpload alt="Teacher photo preview" />
+              <PhotoUpload maxSizeMB={0.05} alt="Teacher photo preview" />
             </Form.Item>
             <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               <Input
