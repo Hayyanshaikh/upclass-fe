@@ -18,6 +18,8 @@ export interface CreateTeacherDto {
   /** @nullable */
   image?: string | null;
   /** @nullable */
+  imagePublicId?: string | null;
+  /** @nullable */
   dateOfBirth?: string | null;
   /** @nullable */
   gender?: CreateTeacherDtoGender;
