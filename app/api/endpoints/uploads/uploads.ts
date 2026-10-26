@@ -16,7 +16,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  CloudinaryControllerUploadBody
+  CloudinaryControllerUploadBody,
+  CloudinaryUploadResponseDto
 } from '../../schemas';
 
 import { customInstance } from '../../axios-instance';
@@ -37,11 +38,11 @@ export const getCloudinaryControllerUploadUrl = () => {
 /**
  * @summary Upload an image to Cloudinary
  */
-export const cloudinaryControllerUpload = async (cloudinaryControllerUploadBody: CloudinaryControllerUploadBody, options?: Parameters<typeof customInstance>[1]): Promise<void> => {
+export const cloudinaryControllerUpload = async (cloudinaryControllerUploadBody: CloudinaryControllerUploadBody, options?: Parameters<typeof customInstance>[1]): Promise<CloudinaryUploadResponseDto> => {
     const formData = new FormData();
 formData.append(`file`, cloudinaryControllerUploadBody.file);
 
-  return customInstance<void>(getCloudinaryControllerUploadUrl(),
+  return customInstance<CloudinaryUploadResponseDto>(getCloudinaryControllerUploadUrl(),
   {
     ...options,
     method: 'POST'

@@ -7,6 +7,8 @@
  */
 
 export * from './cloudinaryControllerUploadBody';
+export * from './cloudinaryUploadDataDto';
+export * from './cloudinaryUploadResponseDto';
 export * from './createRoleDto';
 export * from './createTeacherDto';
 export * from './createTeacherDtoEmploymentType';

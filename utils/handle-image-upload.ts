@@ -1,27 +1,28 @@
 import { cloudinaryControllerUpload } from "@/app/api/endpoints/uploads/uploads";
 
-type CloudinaryUploadResponse = {
-  data?: {
-    url?: string;
-  };
-};
-
 export async function handleImageUpload(
   image?: File | string | null,
-): Promise<string | null> {
+  currentPublicId?: string | null,
+): Promise<{ url: string | null; publicId: string | null }> {
   if (!(image instanceof File)) {
-    return image || null;
+    return {
+      url: image || null,
+      publicId: image ? currentPublicId ?? null : null,
+    };
   }
 
   const response = await cloudinaryControllerUpload(
     { file: image },
     { headers: { "Content-Type": "multipart/form-data" } },
   );
-  const upload = response as unknown as CloudinaryUploadResponse;
+  const upload = response.data;
 
-  if (!upload?.data?.url) {
-    throw new Error("Image upload did not return a URL.");
+  if (!upload?.url || !upload.publicId) {
+    throw new Error("Image upload did not return its URL and public ID.");
   }
 
-  return upload.data.url;
+  return {
+    url: upload.url,
+    publicId: upload.publicId,
+  };
 }

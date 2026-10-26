@@ -102,12 +102,16 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
     setIsUploading(values.image instanceof File);
 
     try {
-      const imageUrl = await handleImageUpload(values.image);
+      const image = await handleImageUpload(
+        values.image,
+        teacher?.imagePublicId,
+      );
 
       const commonData = {
         firstName: values.firstName.trim(),
         lastName: values.lastName?.trim() || null,
-        image: imageUrl || "",
+        image: image.url,
+        imagePublicId: image.publicId,
         dateOfBirth: values.dateOfBirth?.format("YYYY-MM-DD") ?? null,
         gender: values.gender ?? null,
         employeeId: values.employeeId?.trim() || null,
