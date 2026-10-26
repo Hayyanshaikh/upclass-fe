@@ -66,7 +66,7 @@ export const menuItems: NavItem[] = [
     label: "Mark Attendance",
     href: "/mark-attendance",
     icon: LuClock,
-    permission: "attendance.create",
+    permission: "mark_attendance.create",
   },
   {
     group: "Academics",
@@ -79,7 +79,7 @@ export const menuItems: NavItem[] = [
     label: "Exams & Results",
     href: "/exams",
     icon: LuFileText,
-    permission: "exams.view",
+    permission: "exams_results.view",
   },
   {
     group: "Finance",
