@@ -1,4 +1,4 @@
-import axios, { type AxiosRequestConfig } from "axios";
+import axios from "axios";
 import Cookies from "js-cookie";
 
 export const axiosInstance = axios.create({
@@ -8,39 +8,72 @@ export const axiosInstance = axios.create({
   },
 });
 
+// Attach access token to every request
 axiosInstance.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = Cookies.get("accessToken");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+  const token = Cookies.get("accessToken");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
 });
 
-export const customInstance = <T>(
+// Handle unauthorized responses
+axiosInstance.interceptors.response.use(
+  (response) => response,
+
+  (error) => {
+    const status = error.response?.status;
+    const requestUrl = error.config?.url ?? "";
+
+    const isLoginRequest = requestUrl.includes("/auth/login");
+
+    if (status === 401 && !isLoginRequest && typeof window !== "undefined") {
+      Cookies.remove("accessToken");
+      localStorage.clear();
+      window.location.replace("/login");
+    }
+
+    // Redirect to access‑denied page on 403 responses
+    if (status === 403 && typeof window !== "undefined") {
+      window.location.replace("/access-denied");
+    }
+
+    return Promise.reject(error);
+  },
+);
+
+type ApiOptions = {
+  method?: string;
+  headers?: Record<string, string>;
+  body?: BodyInit | null;
+  unwrapResponse?: boolean;
+};
+
+export const customInstance = async <T>(
   url: string,
-  options?: RequestInit & { unwrapResponse?: boolean },
+  options?: ApiOptions,
 ): Promise<T> => {
   const { body, unwrapResponse = false, ...requestOptions } = options ?? {};
 
-  return axiosInstance
-    .request<T>({
-      ...requestOptions,
-      url,
-      data: body,
-    } as AxiosRequestConfig)
-    .then(({ data }) => {
-      // Generated response DTOs include the API envelope by default.
-      if (
-        unwrapResponse &&
-        data &&
-        typeof data === "object" &&
-        "statusCode" in data &&
-        "data" in data
-      ) {
-        return data.data as T;
-      }
+  const response = await axiosInstance.request({
+    ...requestOptions,
+    url,
+    data: body,
+  });
 
-      return data as T;
-    });
+  const data = response.data;
+
+  if (
+    unwrapResponse &&
+    data &&
+    typeof data === "object" &&
+    "statusCode" in data &&
+    "data" in data
+  ) {
+    return data.data as T;
+  }
+
+  return data as T;
 };
