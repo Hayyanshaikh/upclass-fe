@@ -45,6 +45,8 @@ axiosInstance.interceptors.response.use(
 );
 
 type ApiOptions = {
+  /** Optional AbortSignal to allow request cancellation */
+  signal?: AbortSignal;
   method?: string;
   headers?: Record<string, string>;
   body?: BodyInit | null;
