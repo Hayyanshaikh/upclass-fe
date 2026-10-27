@@ -246,7 +246,11 @@ export default function Sidebar() {
           <LuMenu size={22} aria-hidden="true" />
           <span className="sr-only">Open navigation menu</span>
         </Button>
-        <Link href="/" aria-label="UPCLASS dashboard" className="min-w-0 text-dark! hover:text-dark!">
+        <Link
+          href="/"
+          aria-label="UPCLASS dashboard"
+          className="min-w-0 text-dark! hover:text-dark!"
+        >
           <Logo size="sm" />
         </Link>
         <Button
@@ -272,7 +276,7 @@ export default function Sidebar() {
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         placement="left"
-        width="min(18rem, 85vw)"
+        size="min(18rem, 85vw)"
         title={<Logo size="sm" className="text-white" />}
         closable={false}
         extra={
