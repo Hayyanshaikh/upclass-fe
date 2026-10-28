@@ -1,4 +1,4 @@
 export type FileUploadProps = {
-  name: string;
+  name: string | (string | number)[];
   maxSizeMB?: number;
 };
