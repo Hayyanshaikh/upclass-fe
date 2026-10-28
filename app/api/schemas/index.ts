@@ -15,6 +15,7 @@ export * from './createTeacherDtoEmploymentType';
 export * from './createTeacherDtoGender';
 export * from './createTeacherDtoMaritalStatus';
 export * from './createUserDto';
+export * from './documents';
 export * from './loginDto';
 export * from './loginResponseDto';
 export * from './loginResponseUserDto';

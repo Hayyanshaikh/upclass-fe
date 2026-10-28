@@ -8,6 +8,7 @@
 import type { CreateTeacherDtoEmploymentType } from './createTeacherDtoEmploymentType';
 import type { CreateTeacherDtoGender } from './createTeacherDtoGender';
 import type { CreateTeacherDtoMaritalStatus } from './createTeacherDtoMaritalStatus';
+import type { Documents } from './documents';
 
 export interface CreateTeacherDto {
   firstName: string;
@@ -41,4 +42,9 @@ export interface CreateTeacherDto {
   email?: string | null;
   /** @nullable */
   address?: string | null;
+  /** @nullable */
+  bankName?: string | null;
+  /** @nullable */
+  accountNumber?: string | null;
+  documents?: Documents[];
 }

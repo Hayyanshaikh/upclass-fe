@@ -7,6 +7,7 @@ import type {
   TeachersControllerFindAllStatus,
 } from "@/app/api/schemas";
 import type { TeacherAccount } from "@/types/teacher-management";
+import { UploadFile } from "antd";
 
 export type Teacher = {
   id: string;
@@ -29,6 +30,13 @@ export type Teacher = {
   photo?: string;
 };
 
+export type TeacherDocumentFormValue = {
+  documentName: string;
+
+  documentUrl?: string;
+  file?: UploadFile[];
+};
+
 export type TeacherFormValues = {
   firstName: string;
   lastName?: string;
@@ -45,6 +53,9 @@ export type TeacherFormValues = {
   phone?: string;
   email: string;
   address?: string;
+  bankName?: string;
+  accountNumber?: string;
+  documents: TeacherDocumentFormValue[];
 };
 
 export type TeacherFormProps = {

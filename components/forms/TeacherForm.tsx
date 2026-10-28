@@ -5,7 +5,7 @@ import { Form } from "antd";
 import { isAxiosError } from "axios";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import { LuCheck, LuCopy, LuSave, LuX } from "react-icons/lu";
+import { LuCheck, LuCopy, LuSave, LuTrash2, LuX } from "react-icons/lu";
 import {
   useTeachersControllerCreate,
   useTeachersControllerUpdate,
@@ -32,6 +32,7 @@ import TextArea from "@/components/ui/TextArea";
 import type { TeacherFormProps, TeacherFormValues } from "@/types/teacher";
 import { toOptions } from "@/utils/enum-options";
 import { handleImageUpload } from "@/utils/handle-image-upload";
+import FileUpload from "../ui/FileUpload";
 
 const genderOptions = toOptions(CreateTeacherDtoGender);
 const maritalStatusOptions = toOptions(CreateTeacherDtoMaritalStatus);
@@ -86,6 +87,24 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
       phone: teacher.phone ?? "",
       email: teacher.email ?? "",
       address: teacher.address ?? "",
+      bankName: teacher.bankName ?? "",
+      accountNumber: teacher.accountNumber ?? "",
+      documents: (teacher.documents ?? []).map((document, index) => ({
+        documentName: document.documentName ?? "",
+        documentUrl: document.documentUrl ?? "",
+        file: document.documentUrl
+          ? [
+              {
+                uid: `-${index + 1}`,
+                name:
+                  document.documentUrl.split("/").pop()?.split("?")[0] ||
+                  "Uploaded file",
+                status: "done",
+                url: document.documentUrl,
+              },
+            ]
+          : [],
+      })),
     });
   }, [form, teacher]);
 
@@ -100,6 +119,28 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
     setSubmitError(null);
     setSubmitSuccess(null);
     setIsUploading(values.image instanceof File);
+
+    const documents = await Promise.all(
+      (values.documents ?? []).map(async (document) => {
+        const file = document.file?.[0]?.originFileObj;
+
+        // Existing document: reuse URL, upload dobara nahi karna
+        if (!(file instanceof File)) {
+          return {
+            documentName: document.documentName.trim(),
+            documentUrl: document.documentUrl,
+          };
+        }
+
+        // Sirf new file upload hogi
+        const uploaded = await handleImageUpload(file);
+
+        return {
+          documentName: document.documentName.trim(),
+          documentUrl: uploaded.url,
+        };
+      }),
+    );
 
     try {
       const image = await handleImageUpload(
@@ -127,6 +168,9 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
         phone: values.phone?.trim() || null,
         email: values.email.trim(),
         address: values.address?.trim() || null,
+        bankName: values.bankName,
+        accountNumber: values.accountNumber,
+        documents: documents || [],
       };
 
       if (teacher) {
@@ -399,10 +443,8 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
             <Input
               name="employeeId"
               label="Employee ID"
-              placeholder={
-                teacher ? "Enter employee ID" : "Assigned automatically"
-              }
-              disabled={!teacher}
+              placeholder="Assigned automatically"
+              disabled={!!teacher}
               rules={[
                 {
                   pattern: /^[A-Za-z0-9-]+$/,
@@ -432,6 +474,28 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
             />
           </div>
         </SectionCard>
+        <SectionCard title="Bank Details" autoHeight>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Input
+              name="bankName"
+              label="Bank Name"
+              placeholder="Enter bank name"
+            />
+
+            <Input
+              name="accountNumber"
+              label="Account Number"
+              placeholder="Enter account number"
+              rules={[
+                {
+                  pattern: /^\d{10,20}$/,
+                  message: "Account number must contain 10–20 digits.",
+                },
+              ]}
+            />
+          </div>
+        </SectionCard>
+
         <SectionCard title="Contact details" autoHeight>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Input
@@ -450,6 +514,7 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
             <Input
               name="email"
               label="Email"
+              disabled={!!teacher}
               type="email"
               placeholder="name@school.edu"
               autoComplete="email"
@@ -470,6 +535,55 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
               />
             </div>
           </div>
+        </SectionCard>
+
+        <SectionCard title="Documents" autoHeight>
+          <Form.List name="documents">
+            {(fields, { add, remove }) => (
+              <div className="space-y-4">
+                {fields.map((field) => (
+                  <div key={field.key} className="flex items-start gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start flex-1">
+                      <Input
+                        name={[field.name, "documentName"]}
+                        label="Document Name"
+                        placeholder="e.g. CNIC, Degree"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Document name is required.",
+                          },
+                        ]}
+                      />
+
+                      <div>
+                        <label className="mb-2 block text-sm">
+                          Document File
+                        </label>
+                        <FileUpload name={[field.name, "file"]} maxSizeMB={5} />
+                      </div>
+                    </div>
+
+                    <div className="mt-7">
+                      <Button
+                        className="bg-transparent! transition! hover:bg-danger/10!"
+                        onClick={() => remove(field.name)}
+                      >
+                        <LuTrash2 className="text-danger" size={18} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+
+                <Button
+                  variant="secondary"
+                  onClick={() => add({ documentName: "" })}
+                >
+                  + Add Document
+                </Button>
+              </div>
+            )}
+          </Form.List>
         </SectionCard>
       </Form>
     </div>

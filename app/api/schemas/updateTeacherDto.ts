@@ -5,6 +5,7 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
+import type { Documents } from './documents';
 import type { UpdateTeacherDtoEmploymentType } from './updateTeacherDtoEmploymentType';
 import type { UpdateTeacherDtoGender } from './updateTeacherDtoGender';
 import type { UpdateTeacherDtoMaritalStatus } from './updateTeacherDtoMaritalStatus';
@@ -41,4 +42,9 @@ export interface UpdateTeacherDto {
   email?: string | null;
   /** @nullable */
   address?: string | null;
+  /** @nullable */
+  bankName?: string | null;
+  /** @nullable */
+  accountNumber?: string | null;
+  documents?: Documents[];
 }
