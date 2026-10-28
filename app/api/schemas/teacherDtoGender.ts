@@ -6,10 +6,14 @@
  * OpenAPI spec version: 1.0
  */
 
-export type UpdateUserDtoGender = typeof UpdateUserDtoGender[keyof typeof UpdateUserDtoGender];
+/**
+ * @nullable
+ */
+export type TeacherDtoGender = typeof TeacherDtoGender[keyof typeof TeacherDtoGender] | null;
 
 
-export const UpdateUserDtoGender = {
+export const TeacherDtoGender = {
   MALE: 'MALE',
   FEMALE: 'FEMALE',
+  OTHER: 'OTHER',
 } as const;

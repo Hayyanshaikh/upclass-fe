@@ -1,5 +1,6 @@
 import type { SelectOption } from "@/types/select";
 import type { Dayjs } from "dayjs";
+import type { ReactNode } from "react";
 
 export type TableSearch = {
   label?: string;
@@ -31,6 +32,7 @@ export type FilterField = SelectFilterField | DateFilterField;
 
 export type TableAction = {
   label: string;
+  icon?: ReactNode;
   variant?: "primary" | "secondary" | "link";
   onClick?: () => void;
   disabled?: boolean;

@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useMemo, useState } from "react";
 import { Form } from "antd";
-import { LuListFilter } from "react-icons/lu";
+import { LuListFilter, LuSearch } from "react-icons/lu";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
@@ -41,6 +41,9 @@ export default function TableToolbar({
   const hasTopRow = Boolean(
     (showSearch && (search || filterFields.length > 0)) || actions.length > 0,
   );
+  const compactMobile = Boolean(
+    showSearch && search && actions.length > 0 && actions.every((action) => action.icon),
+  );
 
   return (
     <Form
@@ -51,13 +54,15 @@ export default function TableToolbar({
       onFinish={() => {}}
     >
       {hasTopRow && (
-        <div className="flex flex-wrap items-end gap-3">
+        <div className={`flex items-end gap-3 ${compactMobile ? "flex-nowrap gap-2 sm:flex-wrap sm:gap-3" : "flex-wrap"}`}>
           {showSearch && search && (
-            <div className="min-w-0 grow basis-full sm:basis-0">
+            <div className={compactMobile ? "min-w-0 flex-1 sm:grow sm:basis-0" : "min-w-0 grow basis-full sm:basis-0"}>
               <Input
                 name="search"
                 label={search.label}
                 placeholder={search.placeholder || "Search records"}
+                ariaLabel={search.placeholder || "Search records"}
+                prefix={<LuSearch size={16} aria-hidden="true" />}
                 allowClear
               />
             </div>
@@ -65,6 +70,7 @@ export default function TableToolbar({
           {showSearch && filterFields.length > 0 && (
             <Button
               variant={showFilters ? "primary" : "secondary"}
+              className={compactMobile ? "size-11! shrink-0 p-0! sm:h-11! sm:w-auto! sm:px-4!" : ""}
               onClick={() => setShowFilters(!showFilters)}
             >
               <LuListFilter size={18} aria-hidden="true" />
@@ -79,9 +85,13 @@ export default function TableToolbar({
               variant={action.variant}
               disabled={action.disabled}
               loading={action.loading}
+              className={action.icon ? "size-11! shrink-0 p-0! sm:h-11! sm:w-auto! sm:px-4!" : ""}
               onClick={action.onClick}
             >
-              {action.label}
+              {action.icon}
+              <span className={action.icon ? "sr-only sm:not-sr-only" : ""}>
+                {action.label}
+              </span>
             </Button>
           ))}
         </div>

@@ -8,6 +8,7 @@ import RoleForm from "@/components/forms/RoleForm";
 import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
 import Loader from "@/components/ui/Loader";
+import { ROUTE_NAMES } from "@/constants/routes";
 
 export default function EditRoleForm() {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +29,10 @@ export default function EditRoleForm() {
       <div>
         <PageHeader
           title="Edit role"
-          breadcrumbs={[{ title: "Roles", href: "/roles" }, { title: "Edit role" }]}
+          breadcrumbs={[
+            { title: "Roles", href: ROUTE_NAMES.roleListing },
+            { title: "Edit role" },
+          ]}
         />
         <Alert type="error" role="alert" message={message} />
         {message !== "Role not found." && (
@@ -42,8 +46,9 @@ export default function EditRoleForm() {
 
   return (
     <RoleForm
-      key={`${id}:${response.data.permissionKeys.join(",")}`}
+      key={id}
       role={response.data}
+      onSaved={refetch}
     />
   );
 }

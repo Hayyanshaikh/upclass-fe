@@ -5,14 +5,11 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
-import type { UpdateUserDtoGender } from './updateUserDtoGender';
 
 export interface UpdateUserDto {
   name?: string;
   email?: string;
   password?: string;
-  age?: number;
-  gender?: UpdateUserDtoGender;
   roleId?: string;
   isActive?: boolean;
 }

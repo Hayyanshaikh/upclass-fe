@@ -5,14 +5,17 @@ import { flushSync } from "react-dom";
 import { isAxiosError } from "axios";
 import type { TableColumnsType } from "antd";
 import { useRouter } from "next/navigation";
+import { LuPlus } from "react-icons/lu";
 import ActionButtons from "@/components/shared/ActionButtons";
 import DeleteDialog from "@/components/shared/DeleteDialog";
+import ErrorDialog from "@/components/shared/ErrorDialog";
 import RoleDetailsDialog from "@/components/dialogs/RoleDetailsDialog";
 import PageHeader from "@/components/shared/PageHeader";
 import Button from "@/components/ui/Button";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
 import { roleTypeOptions } from "@/constants/roles";
+import { ROUTE_NAMES } from "@/constants/routes";
 import { useTable } from "@/hooks/useTable";
 import {
   useRolesControllerFindAll,
@@ -32,6 +35,7 @@ export default function RolesPage() {
     null,
   );
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleteErrorOpen, setIsDeleteErrorOpen] = useState(false);
   const { mutateAsync: removeRole, isPending: isDeleting } =
     useRolesControllerRemove();
   const {
@@ -62,7 +66,9 @@ export default function RolesPage() {
 
   function editRole(role: RoleListItemDto) {
     flushSync(() => setSelectedRole(null));
-    router.push(`/roles/edit/${encodeURIComponent(role.id)}`);
+    router.push(
+      ROUTE_NAMES.editRole.replace(":id", encodeURIComponent(role.id)),
+    );
   }
 
   async function confirmDelete() {
@@ -81,6 +87,7 @@ export default function RolesPage() {
       const message = isAxiosError(error)
         ? (error.response?.data as { message?: string } | undefined)?.message
         : undefined;
+      setRoleToDelete(null);
       setDeleteError(message ?? "Unable to delete role. Please try again.");
     }
   }
@@ -128,6 +135,7 @@ export default function RolesPage() {
           onEdit={() => editRole(role)}
           onDelete={() => {
             setDeleteError(null);
+            setIsDeleteErrorOpen(false);
             setRoleToDelete(role);
           }}
           deleteDisabled={
@@ -174,7 +182,8 @@ export default function RolesPage() {
   const actions: TableAction[] = [
     {
       label: "Add role",
-      onClick: () => router.push("/roles/add"),
+      icon: <LuPlus size={18} aria-hidden="true" />,
+      onClick: () => router.push(ROUTE_NAMES.createRole),
     },
   ];
 
@@ -207,21 +216,25 @@ export default function RolesPage() {
         open={roleToDelete !== null}
         title="Delete role?"
         message={`Remove ${roleToDelete?.name ?? "this role"} from the role list?`}
-        description={
-          deleteError ? (
-            <span role="alert" className="text-danger">
-              {deleteError}
-            </span>
-          ) : (
-            "This permanently deletes the role."
-          )
-        }
+        description="This permanently deletes the role."
         okText="Delete role"
         confirmLoading={isDeleting}
         onClose={() => {
           if (!isDeleting) setRoleToDelete(null);
         }}
         onConfirm={() => void confirmDelete()}
+        afterClose={() => {
+          if (deleteError) setIsDeleteErrorOpen(true);
+        }}
+      />
+      <ErrorDialog
+        open={isDeleteErrorOpen}
+        title="Unable to delete role"
+        message={deleteError ?? "Unable to delete role. Please try again."}
+        onClose={() => {
+          setIsDeleteErrorOpen(false);
+          setDeleteError(null);
+        }}
       />
     </div>
   );

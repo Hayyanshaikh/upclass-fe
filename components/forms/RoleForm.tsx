@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Form } from "antd";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import { LuSave, LuX } from "react-icons/lu";
 import PageHeader from "@/components/shared/PageHeader";
-import Alert from "@/components/ui/Alert";
+import ErrorDialog from "@/components/shared/ErrorDialog";
+import SuccessDialog from "@/components/shared/SuccessDialog";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import SectionCard from "@/components/ui/SectionCard";
@@ -18,6 +20,7 @@ import {
   useUserControllerUpdate,
 } from "@/app/api/endpoints";
 import { RoleDetailDataDtoType } from "@/app/api/schemas";
+import { ROUTE_NAMES } from "@/constants/routes";
 import type { CreateRoleDto, UpdateRoleDto } from "@/app/api/schemas";
 import type { RoleFormProps, RoleFormValues } from "@/types/role";
 
@@ -32,13 +35,20 @@ function slugFromName(name: string) {
     .replace(/_+$/g, "");
 }
 
-export default function RoleForm({ role }: RoleFormProps) {
+export default function RoleForm({ role, onSaved }: RoleFormProps) {
   const router = useRouter();
   const [form] = Form.useForm<RoleFormValues>();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const [successRedirect, setSuccessRedirect] = useState<string | null>(null);
   const [permissionKeys, setPermissionKeys] = useState<string[]>(
     role?.permissionKeys ?? [],
   );
+
+  useEffect(() => {
+    if (role) return;
+    return () => form.resetFields();
+  }, [form, role]);
 
   const {
     data: permissionResponse,
@@ -67,11 +77,14 @@ export default function RoleForm({ role }: RoleFormProps) {
     const name = isSystemRole ? role.name : values.name.trim();
     const description = values.description?.trim() ?? "";
     setSubmitError(null);
+    setSubmitSuccess(null);
 
     try {
       if (role) {
         const data: UpdateRoleDto = { name, description, permissionKeys };
         await updateRole({ id: role.id, data });
+        await onSaved?.();
+        setSubmitSuccess("Role updated successfully.");
       } else {
         const slug = slugFromName(name);
         if (!slug) {
@@ -84,15 +97,18 @@ export default function RoleForm({ role }: RoleFormProps) {
           return;
         }
         const data: CreateRoleDto = { name, slug, description };
-        await createRole({ data });
+        const res = await createRole({ data });
+        setSuccessRedirect(
+          ROUTE_NAMES.editRole.replace(":id", encodeURIComponent(res.data.id)),
+        );
+        setSubmitSuccess("Role added successfully.");
       }
-
-      // router.push("/roles");
     } catch (error) {
       const message = isAxiosError(error)
         ? (error.response?.data as { message?: string } | undefined)?.message
         : undefined;
       if (isAxiosError(error) && error.response?.status === 409) {
+        setSubmitError(message ?? "A role with this name already exists.");
         form.setFields([
           {
             name: "name",
@@ -109,31 +125,54 @@ export default function RoleForm({ role }: RoleFormProps) {
     <div>
       <PageHeader
         title={role?.name ?? "Add role"}
+        compactMobile
         breadcrumbs={[
-          { title: "Roles", href: "/roles" },
+          { title: "Roles", href: ROUTE_NAMES.roleListing },
           { title: role ? "Edit role" : "Add role" },
         ]}
         actions={
-          <div className="flex flex-wrap gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <Button
               variant="secondary"
+              className="size-11! p-0! sm:h-11! sm:w-auto! sm:px-4!"
               disabled={isPending || isReassigning}
-              onClick={() => router.push("/roles")}
+              onClick={() => {
+                if (!role) form.resetFields();
+                router.push(ROUTE_NAMES.roleListing);
+              }}
             >
-              Cancel
+              <LuX size={18} aria-hidden="true" />
+              <span className="sr-only sm:not-sr-only">Cancel</span>
             </Button>
             <Button
+              className="size-11! p-0! sm:h-11! sm:w-auto! sm:px-4!"
               loading={isPending}
               disabled={permissionsUnavailable || isReassigning}
               onClick={() => form.submit()}
             >
-              {role ? "Save role" : "Add role"}
+              <LuSave size={18} aria-hidden="true" />
+              <span className="sr-only sm:not-sr-only">{role ? "Save role" : "Add role"}</span>
             </Button>
           </div>
         }
       />
 
-      {submitError && <Alert type="error" role="alert" message={submitError} />}
+      <ErrorDialog
+        open={submitError !== null}
+        message={submitError ?? ""}
+        onClose={() => setSubmitError(null)}
+      />
+      <SuccessDialog
+        open={submitSuccess !== null}
+        message={submitSuccess ?? ""}
+        onClose={() => {
+          setSubmitSuccess(null);
+          if (successRedirect) {
+            router.push(successRedirect);
+            setSuccessRedirect(null);
+          }
+        }}
+      />
 
       <Form
         form={form}
@@ -199,7 +238,6 @@ export default function RoleForm({ role }: RoleFormProps) {
           />
         )}
       </Form>
-
     </div>
   );
 }

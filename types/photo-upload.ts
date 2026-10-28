@@ -1,5 +1,6 @@
 export type PhotoUploadProps = {
-  value?: string;
+  value?: File | string | null;
   alt?: string;
-  onChange?: (value: string) => void;
+  onChange?: (value: File | string | null) => void;
+  maxSizeMB?: number;
 };

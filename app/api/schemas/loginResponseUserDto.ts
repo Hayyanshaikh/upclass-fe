@@ -5,7 +5,6 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
-import type { LoginResponseUserDtoGender } from './loginResponseUserDtoGender';
 import type { RoleSummaryDto } from './roleSummaryDto';
 
 export interface LoginResponseUserDto {
@@ -16,5 +15,4 @@ export interface LoginResponseUserDto {
   role?: RoleSummaryDto;
   isActive: boolean;
   isSystem: boolean;
-  gender: LoginResponseUserDtoGender;
 }

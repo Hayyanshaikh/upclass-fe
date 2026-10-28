@@ -5,14 +5,17 @@ import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { flushSync } from "react-dom";
+import { LuDownload, LuPlus } from "react-icons/lu";
 import ActionButtons from "@/components/shared/ActionButtons";
 import Button from "@/components/ui/Button";
 import DeleteDialog from "@/components/shared/DeleteDialog";
+import ErrorDialog from "@/components/shared/ErrorDialog";
 import PageHeader from "@/components/shared/PageHeader";
 import UserDetailsDialog from "@/components/dialogs/UserDetailsDialog";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
 import { userStatusVariants } from "@/constants/users";
+import { ROUTE_NAMES } from "@/constants/routes";
 import { exportCsv } from "@/utils/export-csv";
 import type { UserAccount, UserStatus } from "@/types/user-management";
 import {
@@ -20,7 +23,6 @@ import {
   useUserControllerRemove,
 } from "@/app/api/endpoints";
 import { userManipulator } from "@/lib/api/users";
-import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
 import { useRoleDropdown } from "@/hooks/useRoleDropdown";
 import { useTable } from "@/hooks/useTable";
 import type {
@@ -33,10 +35,10 @@ import { useRolePermission } from "@/hooks/useRolePermission";
 export default function UsersPage() {
   const router = useRouter();
   const { options: roleOptions, isError: rolesError } = useRoleDropdown();
-  const { isSuperAdmin } = useIsSuperAdmin();
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserAccount | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleteErrorOpen, setIsDeleteErrorOpen] = useState(false);
   const { mutateAsync: removeUser, isPending: isDeleting } =
     useUserControllerRemove();
 
@@ -83,7 +85,9 @@ export default function UsersPage() {
 
   function editUser(user: UserAccount) {
     flushSync(() => setSelectedUser(null));
-    router.push(`/users/edit/${encodeURIComponent(user.id)}`);
+    router.push(
+      ROUTE_NAMES.editUser.replace(":id", encodeURIComponent(user.id)),
+    );
   }
 
   async function confirmDelete() {
@@ -104,6 +108,7 @@ export default function UsersPage() {
       const message = isAxiosError(error)
         ? (error.response?.data as { message?: string } | undefined)?.message
         : undefined;
+      setUserToDelete(null);
       setDeleteError(message ?? "Unable to delete user. Please try again.");
     }
   }
@@ -149,6 +154,7 @@ export default function UsersPage() {
           onDelete={() => {
             if (user.isSystem) return;
             setDeleteError(null);
+            setIsDeleteErrorOpen(false);
             setUserToDelete(user);
           }}
           deleteDisabled={user.isSystem || isDeleting}
@@ -181,6 +187,7 @@ export default function UsersPage() {
   const actions: TableAction[] = [
     {
       label: "Export page CSV",
+      icon: <LuDownload size={18} aria-hidden="true" />,
       variant: "secondary",
       onClick: downloadCsv,
       showButton: true,
@@ -188,8 +195,9 @@ export default function UsersPage() {
     },
     {
       label: "Add user",
+      icon: <LuPlus size={18} aria-hidden="true" />,
       showButton: canCreate,
-      onClick: () => router.push("/users/add"),
+      onClick: () => router.push(ROUTE_NAMES.createUser),
     },
   ];
 
@@ -239,21 +247,25 @@ export default function UsersPage() {
         open={userToDelete !== null}
         title="Remove user?"
         message={`Remove ${userToDelete?.name ?? "this user"} from the user list?`}
-        description={
-          deleteError ? (
-            <span role="alert" className="text-danger">
-              {deleteError}
-            </span>
-          ) : (
-            "This permanently deletes the user account."
-          )
-        }
+        description="This permanently deletes the user account."
         okText="Remove user"
         confirmLoading={isDeleting}
         onClose={() => {
           if (!isDeleting) setUserToDelete(null);
         }}
         onConfirm={() => void confirmDelete()}
+        afterClose={() => {
+          if (deleteError) setIsDeleteErrorOpen(true);
+        }}
+      />
+      <ErrorDialog
+        open={isDeleteErrorOpen}
+        title="Unable to remove user"
+        message={deleteError ?? "Unable to delete user. Please try again."}
+        onClose={() => {
+          setIsDeleteErrorOpen(false);
+          setDeleteError(null);
+        }}
       />
     </div>
   );

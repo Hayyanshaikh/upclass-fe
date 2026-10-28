@@ -10,4 +10,5 @@ export type PageHeaderProps = {
   breadcrumbs?: BreadcrumbItem[];
   subtitle?: string;
   actions?: ReactNode;
+  compactMobile?: boolean;
 };
