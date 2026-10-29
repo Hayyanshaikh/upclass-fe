@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Button from "@/components/ui/Button";
 import PageHeader from "@/components/shared/PageHeader";
 import SectionCard from "@/components/ui/SectionCard";
+import Button from "@/components/ui/Button";
 import SubjectForm from "@/components/forms/SubjectForm";
 import { useSubjectStore } from "@/stores/subjects";
 import type { Subject, SubjectFormValues } from "@/types/subject";
@@ -14,15 +14,18 @@ type SubjectFormPageProps = {
 
 export default function SubjectFormPage({ subjectId }: SubjectFormPageProps) {
   const router = useRouter();
-  const subject = useSubjectStore((state) => subjectId
-    ? state.records.find((record) => record.id === subjectId)
-    : undefined,
+  const subject = useSubjectStore((state) =>
+    subjectId
+      ? state.records.find((record) => record.id === subjectId)
+      : undefined,
   );
   const saveSubject = useSubjectStore((state) => state.saveSubject);
 
-  function handleSave(values: SubjectFormValues) {
+  // Store-only persistence. The API create call happens in the form;
+  // this is used by the edit path and to refresh the list preview.
+  function handleSave(values: SubjectFormValues, id?: string) {
     const record: Subject = {
-      id: subject?.id ?? `SUB-${Date.now()}`,
+      id: id ?? subject?.id ?? `SUB-${Date.now()}`,
       name: values.name,
       code: values.code,
       type: values.type,
@@ -43,7 +46,6 @@ export default function SubjectFormPage({ subjectId }: SubjectFormPageProps) {
     <div>
       <PageHeader
         title={title}
-        subtitle={subjectId ? "Update subject details." : "Update uses the same form with fields prefilled and the title ‘Edit subject’."}
         breadcrumbs={[
           { title: "Subjects", href: "/subjects" },
           { title: subjectId ? "Edit subject" : "Add" },
@@ -51,13 +53,24 @@ export default function SubjectFormPage({ subjectId }: SubjectFormPageProps) {
       />
       {subjectId && !subject ? (
         <SectionCard className="h-auto!">
-          <p className="text-sm text-gray">This subject could not be found in the current preview.</p>
-          <Button variant="secondary" className="mt-4" onClick={() => router.push("/subjects")}>
+          <p className="text-sm text-gray">
+            This subject could not be found in the current preview.
+          </p>
+          <Button
+            variant="secondary"
+            className="mt-4"
+            onClick={() => router.push("/subjects")}
+          >
             Back to subjects
           </Button>
         </SectionCard>
       ) : (
-        <SubjectForm subject={subject} onCancel={() => router.push("/subjects")} onSave={handleSave} />
+        <SubjectForm
+          subject={subject}
+          onCancel={() => router.push("/subjects")}
+          onCreated={(values, id) => handleSave(values, id)}
+          onEditSave={(values) => handleSave(values, subject?.id)}
+        />
       )}
     </div>
   );
