@@ -1,32 +1,22 @@
-export type SubjectType = "Core" | "Elective";
-export type SubjectStatus = "Active" | "Inactive";
-export type PracticalComponent = "Yes" | "No";
+import type { SubjectDto } from "@/app/api/schemas";
 
-export type Subject = {
-  id: string;
-  name: string;
-  code: string;
-  type: SubjectType;
-  classes: number;
-  teachers: number;
-  status: SubjectStatus;
-  hasPractical?: PracticalComponent;
-  totalMarks?: number;
-  passingMarks?: number;
-};
+// Adapter: map API SubjectDto to the local Subject shape expected by forms/dialogs.
+export interface Subject extends SubjectDto {
+  classes?: number;
+  teachers?: number;
+}
 
 export type SubjectFormValues = {
   name: string;
   code: string;
-  type: SubjectType;
-  status: SubjectStatus;
-  hasPractical: PracticalComponent;
+  type: string;
+  status: string;
+  hasPractical: "Yes" | "No";
   totalMarks: number;
   passingMarks: number;
 };
 
-export type SubjectStore = {
-  records: Subject[];
-  saveSubject: (subject: Subject) => void;
-  deleteSubject: (id: string) => void;
+export type SubjectFormProps = {
+  subject?: SubjectDto;
+  onSaved?: () => Promise<unknown>;
 };

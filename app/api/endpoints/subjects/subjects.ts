@@ -6,18 +6,30 @@
  * OpenAPI spec version: 1.0
  */
 import {
-  useMutation
+  useMutation,
+  useQuery
 } from '@tanstack/react-query';
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   MutationFunction,
   QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
   UseMutationOptions,
-  UseMutationResult
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
   CreateSubjectDto,
-  SubjectFindOneResponseDto
+  SubjectFindOneResponseDto,
+  SubjectsControllerFindAllParams,
+  SubjectsResponseDto,
+  UpdateSubjectDto,
 } from '../../schemas';
 
 import { customInstance } from '../../axios-instance';
@@ -26,6 +38,21 @@ import { customInstance } from '../../axios-instance';
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
+
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
+};
 
 export const getSubjectsControllerCreateUrl = () => {
 
@@ -66,7 +93,6 @@ return customInstance<SubjectFindOneResponseDto>(getSubjectsControllerCreateUrl(
 
 
 
-
 export const getSubjectsControllerCreateMutationKey = () => ['subjectsControllerCreate'] as const;
 
 export const getSubjectsControllerCreateMutationOptions = <TError = void,
@@ -92,8 +118,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-
-
   return  { mutationFn, ...mutationOptions }}
 
     export type SubjectsControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof subjectsControllerCreate>>>
@@ -113,4 +137,358 @@ export const useSubjectsControllerCreate = <TError = void,
         TContext
       > => {
       return useMutation(getSubjectsControllerCreateMutationOptions(options), queryClient);
+    }
+    export const getSubjectsControllerFindAllUrl = (params?: SubjectsControllerFindAllParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/subjects?${stringifiedParams}` : `/api/subjects`
+}
+
+/**
+ * @summary List all subjects
+ */
+export const subjectsControllerFindAll = async (params?: SubjectsControllerFindAllParams, options?: Parameters<typeof customInstance>[1]): Promise<SubjectsResponseDto> => {
+
+  return customInstance<SubjectsResponseDto>(getSubjectsControllerFindAllUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+export const getSubjectsControllerFindAllQueryKey = (params?: SubjectsControllerFindAllParams,) => {
+    return [
+    `/api/subjects`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSubjectsControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof subjectsControllerFindAll>>, TError = unknown>(params?: SubjectsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSubjectsControllerFindAllQueryKey(params);
+
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof subjectsControllerFindAll>>> = ({ signal }) => subjectsControllerFindAll(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SubjectsControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof subjectsControllerFindAll>>>
+export type SubjectsControllerFindAllQueryError = unknown
+
+
+export function useSubjectsControllerFindAll<TData = Awaited<ReturnType<typeof subjectsControllerFindAll>>, TError = unknown>(
+ params: undefined |  SubjectsControllerFindAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof subjectsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof subjectsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSubjectsControllerFindAll<TData = Awaited<ReturnType<typeof subjectsControllerFindAll>>, TError = unknown>(
+ params?: SubjectsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof subjectsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof subjectsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSubjectsControllerFindAll<TData = Awaited<ReturnType<typeof subjectsControllerFindAll>>, TError = unknown>(
+ params?: SubjectsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List all subjects
+ */
+
+export function useSubjectsControllerFindAll<TData = Awaited<ReturnType<typeof subjectsControllerFindAll>>, TError = unknown>(
+ params?: SubjectsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSubjectsControllerFindAllQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+export const getSubjectsControllerFindOneUrl = (id: string,) => {
+
+
+
+
+  return `/api/subjects/${id}`
+}
+
+/**
+ * @summary Get a subject by ID
+ */
+export const subjectsControllerFindOne = async (id: string, options?: Parameters<typeof customInstance>[1]): Promise<SubjectFindOneResponseDto> => {
+
+  return customInstance<SubjectFindOneResponseDto>(getSubjectsControllerFindOneUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+export const getSubjectsControllerFindOneQueryKey = (id: string,) => {
+    return [
+    `/api/subjects/${id}`
+    ] as const;
+    }
+
+
+export const getSubjectsControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof subjectsControllerFindOne>>, TError = void>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSubjectsControllerFindOneQueryKey(id);
+
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof subjectsControllerFindOne>>> = ({ signal }) => subjectsControllerFindOne(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindOne>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SubjectsControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof subjectsControllerFindOne>>>
+export type SubjectsControllerFindOneQueryError = void
+
+
+export function useSubjectsControllerFindOne<TData = Awaited<ReturnType<typeof subjectsControllerFindOne>>, TError = void>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindOne>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof subjectsControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof subjectsControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSubjectsControllerFindOne<TData = Awaited<ReturnType<typeof subjectsControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindOne>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof subjectsControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof subjectsControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSubjectsControllerFindOne<TData = Awaited<ReturnType<typeof subjectsControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get a subject by ID
+ */
+
+export function useSubjectsControllerFindOne<TData = Awaited<ReturnType<typeof subjectsControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subjectsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSubjectsControllerFindOneQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+export const getSubjectsControllerRemoveUrl = (id: string,) => {
+
+
+
+
+  return `/api/subjects/${id}`
+}
+
+/**
+ * @summary Delete a subject
+ */
+export const subjectsControllerRemove = async (id: string, options?: Parameters<typeof customInstance>[1]): Promise<void> => {
+
+  return customInstance<void>(getSubjectsControllerRemoveUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getSubjectsControllerRemoveMutationKey = () => ['subjectsControllerRemove'] as const;
+
+export const getSubjectsControllerRemoveMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subjectsControllerRemove>>, TError,SubjectsControllerRemoveMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof subjectsControllerRemove>>, TError,SubjectsControllerRemoveMutationVariables, TContext> => {
+
+const mutationKey = getSubjectsControllerRemoveMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof subjectsControllerRemove>>, SubjectsControllerRemoveMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  subjectsControllerRemove(id,requestOptions)
+        }
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubjectsControllerRemoveMutationResult = NonNullable<Awaited<ReturnType<typeof subjectsControllerRemove>>>
+    export type SubjectsControllerRemoveMutationBody = void
+    export type SubjectsControllerRemoveMutationError = void
+    export type SubjectsControllerRemoveMutationVariables = {id: string}
+
+    /**
+ * @summary Delete a subject
+ */
+export const useSubjectsControllerRemove = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subjectsControllerRemove>>, TError,SubjectsControllerRemoveMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof subjectsControllerRemove>>,
+        TError,
+        SubjectsControllerRemoveMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSubjectsControllerRemoveMutationOptions(options), queryClient);
+    }
+
+export const getSubjectsControllerUpdateUrl = (id: string,) => {
+
+  return `/api/subjects/${id}`
+}
+
+/**
+ * @summary Update a subject
+ */
+export const subjectsControllerUpdate = async (id: string, updateSubjectDto: UpdateSubjectDto, options?: Parameters<typeof customInstance>[1]): Promise<SubjectFindOneResponseDto> => {
+
+  const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return customInstance<SubjectFindOneResponseDto>(getSubjectsControllerUpdateUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateSubjectDto)
+  }
+);}
+
+
+
+export const getSubjectsControllerUpdateMutationKey = () => ['subjectsControllerUpdate'] as const;
+
+export const getSubjectsControllerUpdateMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subjectsControllerUpdate>>, TError,SubjectsControllerUpdateMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof subjectsControllerUpdate>>, TError,SubjectsControllerUpdateMutationVariables, TContext> => {
+
+const mutationKey = getSubjectsControllerUpdateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof subjectsControllerUpdate>>, SubjectsControllerUpdateMutationVariables> = (props) => {
+          const {id, data} = props ?? {};
+
+          return  subjectsControllerUpdate(id,data,requestOptions)
+        }
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubjectsControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof subjectsControllerUpdate>>>
+    export type SubjectsControllerUpdateMutationBody = UpdateSubjectDto
+    export type SubjectsControllerUpdateMutationError = void
+    export type SubjectsControllerUpdateMutationVariables = {id: string, data: UpdateSubjectDto}
+
+    /**
+     * @summary Update a subject
+     */
+export const useSubjectsControllerUpdate = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subjectsControllerUpdate>>, TError,SubjectsControllerUpdateMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof subjectsControllerUpdate>>,
+        TError,
+        SubjectsControllerUpdateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSubjectsControllerUpdateMutationOptions(options), queryClient);
     }

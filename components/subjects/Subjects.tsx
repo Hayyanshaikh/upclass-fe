@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { TableColumnsType } from "antd";
 import ActionButtons from "@/components/shared/ActionButtons";
@@ -10,45 +10,75 @@ import SubjectDetailsDialog from "@/components/dialogs/SubjectDetailsDialog";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
 import { subjectStatusOptions, subjectTypeOptions } from "@/constants/subjects";
-import { useSubjectStore } from "@/stores/subjects";
+import { useTable } from "@/hooks/useTable";
+import {
+  useSubjectsControllerFindAll,
+  useSubjectsControllerRemove,
+} from "@/app/api/endpoints";
 import { exportCsv } from "@/utils/export-csv";
-import type { Subject } from "@/types/subject";
+import type { SubjectDto } from "@/app/api/schemas";
+import type { FilterField, TableSearch } from "@/types/table-toolbar";
 
 export default function Subjects() {
   const router = useRouter();
-  const subjects = useSubjectStore((state) => state.records);
-  const deleteSubject = useSubjectStore((state) => state.deleteSubject);
-  const [search, setSearch] = useState("");
-  const [type, setType] = useState<string>();
-  const [status, setStatus] = useState<string>();
-  const [page, setPage] = useState(1);
-  const [viewingSubject, setViewingSubject] = useState<Subject | null>(null);
-  const [deletingSubject, setDeletingSubject] = useState<Subject | null>(null);
-
-  const filteredSubjects = subjects.filter(
-    (subject) =>
-      `${subject.name} ${subject.code}`
-        .toLowerCase()
-        .includes(search.trim().toLowerCase()) &&
-      (!type || subject.type === type) &&
-      (!status || subject.status === status),
+  const [viewingSubject, setViewingSubject] = useState<SubjectDto | null>(null);
+  const [deletingSubject, setDeletingSubject] = useState<SubjectDto | null>(
+    null,
   );
+  const {
+    page,
+    pageSize,
+    offset,
+    search,
+    filters,
+    setPage,
+    setSearch,
+    setFilters,
+  } = useTable<{ type?: string; status?: string }>({ pageSize: 8 });
+
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [search]);
+
+  const { mutateAsync: removeSubject, isPending: isDeleting } =
+    useSubjectsControllerRemove();
+  const {
+    data: response,
+    isFetching,
+    refetch,
+  } = useSubjectsControllerFindAll({
+    searchKey: debouncedSearch || undefined,
+    type: filters.type,
+    status: filters.status,
+    limit: pageSize,
+    offset,
+  });
+
+  const subjects = response?.data ?? [];
+  const total = response?.total ?? 0;
 
   function downloadCsv() {
     exportCsv("subjects.csv", [
-      ["Subject", "Code", "Type", "Classes", "Teachers", "Status"],
-      ...filteredSubjects.map((subject) => [
+      ["Subject", "Code", "Type", "Status"],
+      ...subjects.map((subject) => [
         subject.name,
         subject.code,
         subject.type,
-        String(subject.classes),
-        subject.teachers ? String(subject.teachers) : "Unassigned",
         subject.status,
       ]),
     ]);
   }
 
-  const columns: TableColumnsType<Subject> = [
+  const columns: TableColumnsType<SubjectDto> = [
     {
       title: "Subject",
       dataIndex: "name",
@@ -64,40 +94,26 @@ export default function Subjects() {
       dataIndex: "type",
       key: "type",
       width: 130,
-      render: (subjectType: Subject["type"]) => (
-        <StatusBadge variant={subjectType === "Core" ? "success" : "warning"}>
+      render: (subjectType: SubjectDto["type"]) => (
+        <StatusBadge
+          variant={
+            subjectType === "THEORY" || subjectType === "MIXED"
+              ? "success"
+              : "warning"
+          }
+        >
           {subjectType}
         </StatusBadge>
       ),
-    },
-    {
-      title: "Classes",
-      dataIndex: "classes",
-      key: "classes",
-      width: 140,
-      render: (count: number) =>
-        `${count} ${count === 1 ? "class" : "classes"}`,
-    },
-    {
-      title: "Teachers",
-      dataIndex: "teachers",
-      key: "teachers",
-      width: 150,
-      render: (count: number) =>
-        count ? (
-          `${count} ${count === 1 ? "teacher" : "teachers"}`
-        ) : (
-          <span className="text-danger">Unassigned</span>
-        ),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
       width: 130,
-      render: (subjectStatus: Subject["status"]) => (
+      render: (subjectStatus: SubjectDto["status"]) => (
         <StatusBadge
-          variant={subjectStatus === "Active" ? "success" : "neutral"}
+          variant={subjectStatus === "ACTIVE" ? "success" : "neutral"}
         >
           {subjectStatus}
         </StatusBadge>
@@ -120,6 +136,26 @@ export default function Subjects() {
     },
   ];
 
+  const filterFields: FilterField[] = [
+    {
+      name: "type",
+      label: "Type",
+      placeholder: "Any",
+      options: subjectTypeOptions,
+    },
+    {
+      name: "status",
+      label: "Status",
+      placeholder: "Any",
+      options: subjectStatusOptions,
+    },
+  ];
+
+  const tableSearch: TableSearch = {
+    placeholder: "Subject name or code",
+    onChange: setSearch,
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="shrink-0">
@@ -127,40 +163,17 @@ export default function Subjects() {
       </div>
       <Table
         columns={columns}
-        data={filteredSubjects}
+        data={subjects}
+        total={total}
         rowKey="id"
-        pageSize={8}
+        pageSize={pageSize}
         current={page}
         onPageChange={setPage}
-        search={{
-          placeholder: "Subject name or code",
-          onChange: (value) => {
-            setSearch(value);
-            setPage(1);
-          },
-        }}
-        filterFields={[
-          {
-            name: "type",
-            label: "Type",
-            placeholder: "Any",
-            options: subjectTypeOptions,
-            onChange: (value) => {
-              setType(value);
-              setPage(1);
-            },
-          },
-          {
-            name: "status",
-            label: "Status",
-            placeholder: "Any",
-            options: subjectStatusOptions,
-            onChange: (value) => {
-              setStatus(value);
-              setPage(1);
-            },
-          },
-        ]}
+        loading={isFetching}
+        search={tableSearch}
+        filterFields={filterFields}
+        filterValues={filters}
+        onFilterValuesChange={setFilters}
         actions={[
           { label: "Export CSV", variant: "secondary", onClick: downloadCsv },
           { label: "Add subject", onClick: () => router.push("/subjects/add") },
@@ -186,10 +199,16 @@ export default function Subjects() {
             : "Remove this subject?"
         }
         onClose={() => setDeletingSubject(null)}
-        onConfirm={() => {
-          if (deletingSubject) deleteSubject(deletingSubject.id);
-          setDeletingSubject(null);
-          setPage(1);
+        confirmLoading={isDeleting}
+        onConfirm={async () => {
+          if (!deletingSubject) return;
+          try {
+            await removeSubject({ id: deletingSubject.id });
+            setDeletingSubject(null);
+            refetch();
+          } catch {
+            // Error handled by antd dialog or global error boundary
+          }
         }}
       />
     </div>
