@@ -21,6 +21,7 @@ export default function Dialog({
   confirmDanger = false,
   className = "",
   footer,
+  showPrimaryBtn = true,
 }: DialogProps) {
   return (
     <Modal
@@ -35,19 +36,26 @@ export default function Dialog({
       className={className}
       closeIcon={<LuX size={20} aria-hidden="true" />}
       footer={
-        footer !== undefined ? footer : (
+        footer !== undefined ? (
+          footer
+        ) : (
           <div className="flex flex-wrap justify-end gap-3">
-            <Button variant="secondary" onClick={onClose}>
+            <Button
+              variant={!showPrimaryBtn ? "primary" : "secondary"}
+              onClick={onClose}
+            >
               {cancelText}
             </Button>
-            <Button
-              onClick={onConfirm}
-              loading={confirmLoading}
-              disabled={confirmDisabled}
-              danger={confirmDanger}
-            >
-              {okText}
-            </Button>
+            {showPrimaryBtn && (
+              <Button
+                onClick={onConfirm}
+                loading={confirmLoading}
+                disabled={confirmDisabled}
+                danger={confirmDanger}
+              >
+                {okText}
+              </Button>
+            )}
           </div>
         )
       }

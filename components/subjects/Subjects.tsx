@@ -17,7 +17,13 @@ import {
 } from "@/app/api/endpoints";
 import { exportCsv } from "@/utils/export-csv";
 import type { SubjectDto } from "@/app/api/schemas";
-import type { FilterField, TableSearch } from "@/types/table-toolbar";
+import type {
+  FilterField,
+  TableAction,
+  TableSearch,
+} from "@/types/table-toolbar";
+import { useRolePermission } from "@/hooks/useRolePermission";
+import { LuDownload, LuPlus } from "react-icons/lu";
 
 export default function Subjects() {
   const router = useRouter();
@@ -25,6 +31,10 @@ export default function Subjects() {
   const [deletingSubject, setDeletingSubject] = useState<SubjectDto | null>(
     null,
   );
+
+  const { canCreate, canDelete, canEdit, canView, showActions } =
+    useRolePermission("subjects");
+
   const {
     page,
     pageSize,
@@ -109,7 +119,7 @@ export default function Subjects() {
     {
       title: "Actions",
       key: "actions",
-
+      hidden: !showActions,
       width: 160,
       render: (_, subject) => (
         <ActionButtons
@@ -119,6 +129,9 @@ export default function Subjects() {
             router.push(`/subjects/edit/${encodeURIComponent(subject.id)}`)
           }
           onDelete={() => setDeletingSubject(subject)}
+          showEdit={canEdit}
+          showDelete={canDelete}
+          showView={canView}
         />
       ),
     },
@@ -144,6 +157,23 @@ export default function Subjects() {
     onChange: setSearch,
   };
 
+  const actions: TableAction[] = [
+    {
+      label: "Export page CSV",
+      icon: <LuDownload size={18} aria-hidden="true" />,
+      variant: "secondary",
+      onClick: downloadCsv,
+      showButton: true,
+      disabled: subjects.length === 0,
+    },
+    {
+      label: "Add Subject",
+      icon: <LuPlus size={18} aria-hidden="true" />,
+      showButton: canCreate,
+      onClick: () => router.push("/subjects/add"),
+    },
+  ];
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="shrink-0">
@@ -162,10 +192,7 @@ export default function Subjects() {
         filterFields={filterFields}
         filterValues={filters}
         onFilterValuesChange={setFilters}
-        actions={[
-          { label: "Export CSV", variant: "secondary", onClick: downloadCsv },
-          { label: "Add subject", onClick: () => router.push("/subjects/add") },
-        ]}
+        actions={actions}
         scrollX={1000}
         className="min-h-0"
       />

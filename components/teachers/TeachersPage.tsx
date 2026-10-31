@@ -84,14 +84,7 @@ export default function TeachersPage() {
 
   function downloadCsv() {
     exportCsv("teachers-page.csv", [
-      [
-        "Teacher",
-        "Employee ID",
-        "Email",
-        "Phone",
-        "Employment Type",
-        "Status",
-      ],
+      ["Teacher", "Employee ID", "Email", "Phone", "Employment Type", "Status"],
       ...teacherData.map((teacher) => [
         teacher.name,
         teacher.employeeId,
@@ -245,20 +238,17 @@ export default function TeachersPage() {
     },
   ];
 
-  const beforeTable =
-    error ? (
-      <div
-        role="alert"
-        className="flex items-center gap-3 rounded-md border border-danger bg-danger/10 px-4 py-3 text-sm text-danger"
-      >
-        <span>
-          Unable to load teachers.
-        </span>
-        <Button variant="link" onClick={() => void refetch()}>
-          Retry
-        </Button>
-      </div>
-    ) : undefined;
+  const beforeTable = error ? (
+    <div
+      role="alert"
+      className="flex items-center gap-3 rounded-md border border-danger bg-danger/10 px-4 py-3 text-sm text-danger"
+    >
+      <span>Unable to load teachers.</span>
+      <Button variant="link" onClick={() => void refetch()}>
+        Retry
+      </Button>
+    </div>
+  ) : undefined;
 
   return (
     <div className="flex h-full min-h-0 flex-col">
