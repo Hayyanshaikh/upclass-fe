@@ -2,10 +2,15 @@
 
 import { useState } from "react";
 import type { TableQueryState, UseTableOptions } from "@/types/table";
+import { useDebounce } from "./useDebounce";
 
 export function useTable<
   TFilters extends object = Record<string, string | undefined>,
->({ pageSize = 10, initialFilters }: UseTableOptions<TFilters> = {}) {
+>({
+  pageSize = 10,
+  initialFilters,
+  debounceMs = 300,
+}: UseTableOptions<TFilters> = {}) {
   const [state, setState] = useState<TableQueryState<TFilters>>(() => ({
     page: 1,
     search: "",
@@ -43,11 +48,13 @@ export function useTable<
     });
   }
 
+  const debouncedSearch = useDebounce(state.search, debounceMs);
+
   return {
     page: state.page,
     pageSize,
     offset: (state.page - 1) * pageSize,
-    search: state.search,
+    search: debouncedSearch,
     filters: state.filters,
     setPage,
     setSearch,

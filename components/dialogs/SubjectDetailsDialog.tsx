@@ -39,7 +39,7 @@ export default function SubjectDetailsDialog({ subject, onClose, onEdit }: Subje
           <div>
             <dt className="text-xs text-gray">Type</dt>
             <dd className="mt-1">
-              <StatusBadge variant={subject.type === "Core" ? "success" : "warning"}>
+              <StatusBadge variant={subject.type === "THEORY" || subject.type === "MIXED" ? "success" : "warning"}>
                 {subject.type}
               </StatusBadge>
             </dd>
@@ -47,7 +47,7 @@ export default function SubjectDetailsDialog({ subject, onClose, onEdit }: Subje
           <div>
             <dt className="text-xs text-gray">Status</dt>
             <dd className="mt-1">
-              <StatusBadge variant={subject.status === "Active" ? "success" : "neutral"}>
+              <StatusBadge variant={subject.status === "ACTIVE" ? "success" : "neutral"}>
                 {subject.status}
               </StatusBadge>
             </dd>
@@ -55,7 +55,7 @@ export default function SubjectDetailsDialog({ subject, onClose, onEdit }: Subje
           <div>
             <dt className="text-xs text-gray">Classes</dt>
             <dd className="mt-1 font-semibold text-dark">
-              {subject.classes} {subject.classes === 1 ? "class" : "classes"}
+              {subject.classes ?? 0} {subject.classes === 1 ? "class" : "classes"}
             </dd>
           </div>
           <div>
@@ -66,24 +66,18 @@ export default function SubjectDetailsDialog({ subject, onClose, onEdit }: Subje
                 : "Unassigned"}
             </dd>
           </div>
-          {subject.hasPractical && (
-            <div>
-              <dt className="text-xs text-gray">Practical / lab component</dt>
-              <dd className="mt-1 font-semibold text-dark">{subject.hasPractical}</dd>
-            </div>
-          )}
-          {subject.totalMarks !== undefined && (
-            <div>
-              <dt className="text-xs text-gray">Default total marks</dt>
-              <dd className="mt-1 font-semibold text-dark">{subject.totalMarks}</dd>
-            </div>
-          )}
-          {subject.passingMarks !== undefined && (
-            <div>
-              <dt className="text-xs text-gray">Default passing marks</dt>
-              <dd className="mt-1 font-semibold text-dark">{subject.passingMarks}</dd>
-            </div>
-          )}
+          <div>
+            <dt className="text-xs text-gray">Has practical / lab</dt>
+            <dd className="mt-1 font-semibold text-dark">{subject.hasPractical ? "Yes" : "No"}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-gray">Default total marks</dt>
+            <dd className="mt-1 font-semibold text-dark">{subject.defaultTotalMarks}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-gray">Default passing marks</dt>
+            <dd className="mt-1 font-semibold text-dark">{subject.defaultPassingMarks}</dd>
+          </div>
         </dl>
       )}
     </Dialog>
