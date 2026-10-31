@@ -43,6 +43,7 @@ export type TablePaginationFooterProps = {
 export type UseTableOptions<TFilters extends object> = {
   pageSize?: number;
   initialFilters?: Partial<TFilters>;
+  debounceMs?: number;
 };
 
 export type TableQueryState<TFilters extends object> = {

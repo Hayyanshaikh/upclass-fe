@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { TableColumnsType } from "antd";
 import ActionButtons from "@/components/shared/ActionButtons";
@@ -34,20 +34,10 @@ export default function Subjects() {
     setPage,
     setSearch,
     setFilters,
-  } = useTable<{ type?: string; status?: string }>({ pageSize: 8 });
-
-  const [debouncedSearch, setDebouncedSearch] = useState(search);
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => {
-      setDebouncedSearch(search);
-    }, 400);
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
-  }, [search]);
+  } = useTable<{ type?: string; status?: string }>({
+    pageSize: 10,
+    debounceMs: 400,
+  });
 
   const { mutateAsync: removeSubject, isPending: isDeleting } =
     useSubjectsControllerRemove();
@@ -56,7 +46,7 @@ export default function Subjects() {
     isFetching,
     refetch,
   } = useSubjectsControllerFindAll({
-    searchKey: debouncedSearch || undefined,
+    searchKey: search,
     type: filters.type,
     status: filters.status,
     limit: pageSize,
@@ -83,17 +73,15 @@ export default function Subjects() {
       title: "Subject",
       dataIndex: "name",
       key: "name",
-      width: 190,
       render: (name: string) => (
         <span className="font-bold text-dark">{name}</span>
       ),
     },
-    { title: "Code", dataIndex: "code", key: "code", width: 110 },
+    { title: "Code", dataIndex: "code", key: "code" },
     {
       title: "Type",
       dataIndex: "type",
       key: "type",
-      width: 130,
       render: (subjectType: SubjectDto["type"]) => (
         <StatusBadge
           variant={
@@ -110,7 +98,6 @@ export default function Subjects() {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 130,
       render: (subjectStatus: SubjectDto["status"]) => (
         <StatusBadge
           variant={subjectStatus === "ACTIVE" ? "success" : "neutral"}
@@ -122,7 +109,8 @@ export default function Subjects() {
     {
       title: "Actions",
       key: "actions",
-      width: 150,
+
+      width: 160,
       render: (_, subject) => (
         <ActionButtons
           name={subject.name}
