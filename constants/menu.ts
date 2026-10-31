@@ -15,6 +15,7 @@ import {
   LuClock,
   LuUserCog,
   LuStar,
+  LuSchool,
 } from "react-icons/lu";
 
 export const menuItems: NavItem[] = [
@@ -24,6 +25,17 @@ export const menuItems: NavItem[] = [
     icon: LuLayoutDashboard,
     permission: "dashboard.view",
   },
+
+  // Platform Management
+  {
+    group: "Platform",
+    label: "Schools",
+    href: "/schools",
+    icon: LuSchool,
+    permission: "schools.view",
+  },
+
+  // People
   {
     group: "People",
     label: "Students",
@@ -49,6 +61,8 @@ export const menuItems: NavItem[] = [
     icon: LuBookOpen,
     permission: "classes.view",
   },
+
+  // Attendance
   {
     group: "Attendance",
     label: "Student Attendance",
@@ -68,6 +82,8 @@ export const menuItems: NavItem[] = [
     icon: LuClock,
     permission: "mark_attendance.create",
   },
+
+  // Academics
   {
     group: "Academics",
     label: "Timetable",
@@ -81,6 +97,8 @@ export const menuItems: NavItem[] = [
     icon: LuFileText,
     permission: "exams_results.view",
   },
+
+  // Finance
   {
     group: "Finance",
     label: "Fees",
@@ -94,6 +112,8 @@ export const menuItems: NavItem[] = [
     icon: LuReceiptText,
     permission: "fee_structure.view",
   },
+
+  // Communication
   {
     group: "Communication",
     label: "Notices",
@@ -101,6 +121,8 @@ export const menuItems: NavItem[] = [
     icon: LuBell,
     permission: "notices.view",
   },
+
+  // System
   {
     group: "System",
     label: "Leave Requests",

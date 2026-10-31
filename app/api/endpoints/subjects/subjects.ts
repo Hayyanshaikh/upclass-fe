@@ -29,7 +29,7 @@ import type {
   SubjectFindOneResponseDto,
   SubjectsControllerFindAllParams,
   SubjectsResponseDto,
-  UpdateSubjectDto,
+  UpdateSubjectDto
 } from '../../schemas';
 
 import { customInstance } from '../../axios-instance';
@@ -93,6 +93,7 @@ return customInstance<SubjectFindOneResponseDto>(getSubjectsControllerCreateUrl(
 
 
 
+
 export const getSubjectsControllerCreateMutationKey = () => ['subjectsControllerCreate'] as const;
 
 export const getSubjectsControllerCreateMutationOptions = <TError = void,
@@ -114,6 +115,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
           return  subjectsControllerCreate(data,requestOptions)
         }
+
+
 
 
 
@@ -170,6 +173,7 @@ export const subjectsControllerFindAll = async (params?: SubjectsControllerFindA
 
 
 
+
 export const getSubjectsControllerFindAllQueryKey = (params?: SubjectsControllerFindAllParams,) => {
     return [
     `/api/subjects`, ...(params ? [params] : [])
@@ -183,7 +187,6 @@ export const getSubjectsControllerFindAllQueryOptions = <TData = Awaited<ReturnT
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getSubjectsControllerFindAllQueryKey(params);
-
 
 
 
@@ -243,6 +246,8 @@ export function useSubjectsControllerFindAll<TData = Awaited<ReturnType<typeof s
 
 
 
+
+
 export const getSubjectsControllerFindOneUrl = (id: string,) => {
 
 
@@ -268,6 +273,7 @@ export const subjectsControllerFindOne = async (id: string, options?: Parameters
 
 
 
+
 export const getSubjectsControllerFindOneQueryKey = (id: string,) => {
     return [
     `/api/subjects/${id}`
@@ -281,7 +287,6 @@ export const getSubjectsControllerFindOneQueryOptions = <TData = Awaited<ReturnT
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getSubjectsControllerFindOneQueryKey(id);
-
 
 
 
@@ -341,6 +346,8 @@ export function useSubjectsControllerFindOne<TData = Awaited<ReturnType<typeof s
 
 
 
+
+
 export const getSubjectsControllerRemoveUrl = (id: string,) => {
 
 
@@ -362,6 +369,7 @@ export const subjectsControllerRemove = async (id: string, options?: Parameters<
 
   }
 );}
+
 
 
 
@@ -391,10 +399,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
+
+
   return  { mutationFn, ...mutationOptions }}
 
     export type SubjectsControllerRemoveMutationResult = NonNullable<Awaited<ReturnType<typeof subjectsControllerRemove>>>
-    export type SubjectsControllerRemoveMutationBody = void
+
     export type SubjectsControllerRemoveMutationError = void
     export type SubjectsControllerRemoveMutationVariables = {id: string}
 
@@ -411,8 +421,10 @@ export const useSubjectsControllerRemove = <TError = void,
       > => {
       return useMutation(getSubjectsControllerRemoveMutationOptions(options), queryClient);
     }
+    export const getSubjectsControllerUpdateUrl = (id: string,) => {
 
-export const getSubjectsControllerUpdateUrl = (id: string,) => {
+
+
 
   return `/api/subjects/${id}`
 }
@@ -420,9 +432,10 @@ export const getSubjectsControllerUpdateUrl = (id: string,) => {
 /**
  * @summary Update a subject
  */
-export const subjectsControllerUpdate = async (id: string, updateSubjectDto: UpdateSubjectDto, options?: Parameters<typeof customInstance>[1]): Promise<SubjectFindOneResponseDto> => {
+export const subjectsControllerUpdate = async (id: string,
+    updateSubjectDto: UpdateSubjectDto, options?: Parameters<typeof customInstance>[1]): Promise<SubjectFindOneResponseDto> => {
 
-  const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
     if (Symbol.iterator in h) {
@@ -436,7 +449,7 @@ export const subjectsControllerUpdate = async (id: string, updateSubjectDto: Upd
     }
     return headers;
   };
-  return customInstance<SubjectFindOneResponseDto>(getSubjectsControllerUpdateUrl(id),
+return customInstance<SubjectFindOneResponseDto>(getSubjectsControllerUpdateUrl(id),
   {
     ...options,
     method: 'PATCH',
@@ -444,6 +457,8 @@ export const subjectsControllerUpdate = async (id: string, updateSubjectDto: Upd
     body: JSON.stringify(updateSubjectDto)
   }
 );}
+
+
 
 
 
@@ -464,10 +479,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof subjectsControllerUpdate>>, SubjectsControllerUpdateMutationVariables> = (props) => {
-          const {id, data} = props ?? {};
+          const {id,data} = props ?? {};
 
           return  subjectsControllerUpdate(id,data,requestOptions)
         }
+
+
 
 
 
@@ -477,11 +494,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type SubjectsControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof subjectsControllerUpdate>>>
     export type SubjectsControllerUpdateMutationBody = UpdateSubjectDto
     export type SubjectsControllerUpdateMutationError = void
-    export type SubjectsControllerUpdateMutationVariables = {id: string, data: UpdateSubjectDto}
+    export type SubjectsControllerUpdateMutationVariables = {id: string;data: UpdateSubjectDto}
 
     /**
-     * @summary Update a subject
-     */
+ * @summary Update a subject
+ */
 export const useSubjectsControllerUpdate = <TError = void,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subjectsControllerUpdate>>, TError,SubjectsControllerUpdateMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<

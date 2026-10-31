@@ -5,17 +5,15 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
-import type { CreateSubjectDtoStatus } from './createSubjectDtoStatus';
-import type { CreateSubjectDtoType } from './createSubjectDtoType';
+import type { UpdateSubjectDtoStatus } from './updateSubjectDtoStatus';
+import type { UpdateSubjectDtoType } from './updateSubjectDtoType';
 
 export interface UpdateSubjectDto {
   name?: string;
   code?: string;
-  type?: CreateSubjectDtoType;
-  status?: CreateSubjectDtoStatus;
+  type?: UpdateSubjectDtoType;
+  status?: UpdateSubjectDtoStatus;
   hasPractical?: boolean;
-  /** Default total marks for the subject */
   defaultTotalMarks?: number;
-  /** Default passing marks for the subject */
   defaultPassingMarks?: number;
 }
