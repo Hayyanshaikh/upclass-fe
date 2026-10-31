@@ -17,4 +17,5 @@ export type DialogProps = {
   confirmDanger?: boolean;
   className?: string;
   footer?: ReactNode;
+  showPrimaryBtn?: boolean;
 };
