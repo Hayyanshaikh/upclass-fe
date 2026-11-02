@@ -23,6 +23,8 @@ import type {
 import { useRolePermission } from "@/hooks/useRolePermission";
 import { LuDownload, LuPlus } from "react-icons/lu";
 import Button from "../ui/Button";
+import dayjs from "dayjs";
+import { DISPLAY_DATE } from "@/constants/date-formats";
 
 export default function SchoolsPage() {
   const router = useRouter();
@@ -124,7 +126,7 @@ export default function SchoolsPage() {
       dataIndex: "createdAt",
       key: "createdAt",
       render: (createdAt: string) =>
-        createdAt ? new Date(createdAt).toLocaleDateString() : "—",
+        createdAt ? dayjs(createdAt).format(DISPLAY_DATE) : "—",
     },
     {
       title: "Actions",
@@ -138,7 +140,7 @@ export default function SchoolsPage() {
           showEdit={canEdit}
           showDelete={canDelete}
           onView={() => {}}
-          onEdit={() => {}}
+          onEdit={() => router.push(`/schools/edit/${school.id}`)}
           onDelete={() => setDeletingSchool(school)}
           deleteDisabled={isDeleting}
         />
