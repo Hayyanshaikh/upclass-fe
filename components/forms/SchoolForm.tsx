@@ -226,63 +226,65 @@ export default function SchoolForm({ school }: SchoolFormProps) {
           </div>
         </SectionCard>
 
-        <SectionCard title="Admin account" autoHeight>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Input
-              name="adminName"
-              label="Admin name"
-              placeholder="Enter admin name"
-              isRequird
-              rules={[{ whitespace: true, message: "Enter an admin name." }]}
-            />
-            <Input
-              name="adminEmail"
-              label="Admin email"
-              placeholder="admin@example.com"
-              isRequird
-              type="email"
-              rules={[
-                {
-                  pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Enter a valid email address.",
-                },
-              ]}
-            />
-            {school && (
+        {!school && (
+          <SectionCard title="Admin account" autoHeight>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Input
-                name="adminPassword"
-                label="Admin password"
-                placeholder="Leave blank to keep current password"
-                type="password"
+                name="adminName"
+                label="Admin name"
+                placeholder="Enter admin name"
+                isRequird
+                rules={[{ whitespace: true, message: "Enter an admin name." }]}
+              />
+              <Input
+                name="adminEmail"
+                label="Admin email"
+                placeholder="admin@example.com"
+                isRequird
+                type="email"
                 rules={[
                   {
-                    pattern: /^(.{6,}|)$/,
-                    message: "Enter at least 6 characters or leave blank.",
+                    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Enter a valid email address.",
                   },
                 ]}
               />
-            )}
-
-            {!school && (
-              <div className="col-span-2">
+              {school && (
                 <Input
                   name="adminPassword"
                   label="Admin password"
-                  placeholder="Enter admin password"
+                  placeholder="Leave blank to keep current password"
                   type="password"
-                  isRequird
                   rules={[
-                    { required: true, message: "Enter an admin password." },
                     {
-                      min: 6,
-                      message: "Password must be at least 6 characters.",
+                      pattern: /^(.{6,}|)$/,
+                      message: "Enter at least 6 characters or leave blank.",
                     },
                   ]}
                 />
-              </div>
-            )}
-          </div>
-        </SectionCard>
+              )}
+
+              {!school && (
+                <div className="col-span-2">
+                  <Input
+                    name="adminPassword"
+                    label="Admin password"
+                    placeholder="Enter admin password"
+                    type="password"
+                    isRequird
+                    rules={[
+                      { required: true, message: "Enter an admin password." },
+                      {
+                        min: 6,
+                        message: "Password must be at least 6 characters.",
+                      },
+                    ]}
+                  />
+                </div>
+              )}
+            </div>
+          </SectionCard>
+        )}
       </Form>
     </div>
   );
