@@ -17,21 +17,13 @@ import {
   useSchoolsControllerUpdate,
 } from "@/app/api/endpoints";
 import type { CreateSchoolDto, UpdateSchoolDto } from "@/app/api/schemas";
-import type { SchoolDto } from "@/app/api/schemas";
+import type { SchoolFormProps, SchoolFormValues } from "@/types/school";
+import Select from "../ui/Select";
 
-type SchoolFormValues = {
-  name: string;
-  email?: string | null;
-  phone?: string | null;
-  address?: string | null;
-  adminName: string;
-  adminEmail: string;
-  adminPassword?: string;
-};
-
-type SchoolFormProps = {
-  school?: SchoolDto;
-};
+const statusOptions = ["Active", "Inactive"].map((value) => ({
+  label: value,
+  value,
+}));
 
 export default function SchoolForm({ school }: SchoolFormProps) {
   const router = useRouter();
@@ -54,6 +46,7 @@ export default function SchoolForm({ school }: SchoolFormProps) {
       email: school.email ?? undefined,
       phone: school.phone ?? undefined,
       address: school.address ?? undefined,
+      status: school.isActive ? "Active" : "Inactive",
       adminPassword: "",
     });
   }, [form, school]);
@@ -70,12 +63,13 @@ export default function SchoolForm({ school }: SchoolFormProps) {
     setSubmitSuccess(null);
 
     const baseData = {
-      name: values.name.trim(),
+      name: values.name?.trim(),
       email: values.email?.trim() || null,
       phone: values.phone?.trim() || null,
       address: values.address?.trim() || null,
-      adminName: values.adminName.trim(),
-      adminEmail: values.adminEmail.trim(),
+      isActive: values.status === "Active",
+      adminName: values.adminName?.trim(),
+      adminEmail: values.adminEmail?.trim(),
     };
 
     setIsSaving(true);
@@ -179,9 +173,10 @@ export default function SchoolForm({ school }: SchoolFormProps) {
                 email: school.email ?? undefined,
                 phone: school.phone ?? undefined,
                 address: school.address ?? undefined,
+                status: school.isActive ? "Active" : "Inactive",
                 adminPassword: "",
               }
-            : undefined
+            : { status: "Active" }
         }
         onFinish={(values) => void handleSubmit(values)}
         onValuesChange={() => {
@@ -218,11 +213,21 @@ export default function SchoolForm({ school }: SchoolFormProps) {
               label="Phone"
               placeholder="Enter phone number"
             />
-            <Input
-              name="address"
-              label="Address"
-              placeholder="Enter school address"
+
+            <Select
+              name="status"
+              label="Status"
+              options={statusOptions}
+              placeholder="Select status"
+              isRequird
             />
+            <div className="col-span-1 md:col-span-2">
+              <Input
+                name="address"
+                label="Address"
+                placeholder="Enter school address"
+              />
+            </div>
           </div>
         </SectionCard>
 

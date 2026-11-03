@@ -14,6 +14,8 @@ export interface CreateSchoolDto {
   phone?: string | null;
   /** @nullable */
   address?: string | null;
+  /** @nullable */
+  isActive?: boolean | null;
   adminName: string;
   adminEmail: string;
   adminPassword: string;
