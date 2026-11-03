@@ -82,7 +82,7 @@ export default function ExamForm({ exam }: ExamFormProps) {
         <fieldset>
           <legend className="sr-only">Classes included in this exam</legend>
           <div className="flex flex-wrap gap-3">
-            {examClassOptions.map((option) => (
+            {examClassOptions.map((option: any) => (
               <div
                 key={option.value}
                 className="rounded-sm border border-border px-4 py-3"

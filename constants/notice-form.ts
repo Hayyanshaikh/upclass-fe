@@ -7,7 +7,7 @@ export const noticeAudienceOptions = [
   "Staff",
 ];
 export const noticeClassOptions = [].filter(
-  (option) => Number(option.value) >= 6,
+  (option: any) => Number(option.value) >= 6,
 );
 export const noticeChannelOptions = ["Portal", "Email", "SMS"];
 export const noticePublishOptions = [

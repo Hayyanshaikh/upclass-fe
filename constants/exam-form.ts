@@ -1,7 +1,7 @@
 import { teacherSubjects } from "@/constants/teachers";
 
 export const examClassOptions = [].filter(
-  (option) => Number(option.value) >= 6,
+  (option: any) => Number(option.value) >= 6,
 );
 export const examSubjectOptions = teacherSubjects.map((value) => ({
   label: value,

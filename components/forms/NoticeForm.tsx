@@ -118,7 +118,7 @@ export default function NoticeForm({ notice }: NoticeFormProps) {
                   Classes (leave empty for all)
                 </span>
                 <div className="flex flex-wrap gap-3">
-                  {noticeClassOptions.map((option) => (
+                  {noticeClassOptions.map((option: any) => (
                     <div
                       key={option.value}
                       className="rounded-sm border border-border px-4 py-3"
