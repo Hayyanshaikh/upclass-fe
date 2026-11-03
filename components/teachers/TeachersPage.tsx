@@ -18,7 +18,6 @@ import {
   TeachersControllerFindAllEmploymentType,
   TeachersControllerFindAllStatus,
 } from "@/app/api/schemas";
-import { teacherSubjects } from "@/constants/teachers";
 import { exportCsv } from "@/utils/export-csv";
 import type { TeacherAccount, TeacherStatus } from "@/types/teacher-management";
 import {
@@ -26,6 +25,7 @@ import {
   useTeachersControllerRemove,
 } from "@/app/api/endpoints";
 import { teacherManipulator } from "@/lib/api/teachers";
+import { useSubjectDropdown } from "@/hooks/useSubjectDropdown";
 import { useTable } from "@/hooks/useTable";
 import type {
   FilterField,
@@ -65,6 +65,7 @@ export default function TeachersPage() {
     status?: TeachersControllerFindAllStatus;
   }>();
 
+  const { options: subjectOptions } = useSubjectDropdown();
   const {
     data: teachers,
     isFetching,
@@ -74,9 +75,9 @@ export default function TeachersPage() {
     limit: pageSize,
     offset,
     searchKey: search,
+    subject: filters.subject,
     employmentType: filters.employmentType,
     status: filters.status,
-    // subject: filters.subject, // Enable when the Subject API and Teacher query support it.
   });
 
   const total = teachers?.total ?? 0;
@@ -189,7 +190,7 @@ export default function TeachersPage() {
       name: "subject",
       label: "Subject",
       placeholder: "All subjects",
-      options: teacherSubjects.map((value) => ({ label: value, value })),
+      options: subjectOptions,
     },
     {
       name: "employmentType",

@@ -23,6 +23,10 @@ offset?: number;
 employmentType?: TeachersControllerFindAllEmploymentType;
 status?: TeachersControllerFindAllStatus;
 /**
+ * Filter teachers by subject ID
+ */
+subject?: string;
+/**
  * Filter teachers by role ID or slug
  */
 role?: string;
