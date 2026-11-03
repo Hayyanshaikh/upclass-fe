@@ -1,8 +1,12 @@
-import { classGradeOptions } from "@/constants/classes";
 import { teacherSubjects } from "@/constants/teachers";
 
-export const examClassOptions = classGradeOptions.filter((option) => Number(option.value) >= 6);
-export const examSubjectOptions = teacherSubjects.map((value) => ({ label: value, value }));
+export const examClassOptions = [].filter(
+  (option) => Number(option.value) >= 6,
+);
+export const examSubjectOptions = teacherSubjects.map((value) => ({
+  label: value,
+  value,
+}));
 
 export const examTermOptions = [
   { label: "Term 1 [2026–27]", value: "term-1" },
@@ -26,7 +30,11 @@ export const examFormDefaults = {
   term: "term-1",
   academicYear: "2026-27",
   classes: {},
-  dateSheet: [{ ...examDateSheetDefaults }, { ...examDateSheetDefaults }, { ...examDateSheetDefaults }],
+  dateSheet: [
+    { ...examDateSheetDefaults },
+    { ...examDateSheetDefaults },
+    { ...examDateSheetDefaults },
+  ],
   passingPercentage: 40,
   gradingScale: "letter",
   showRank: "yes",

@@ -1,4 +1,3 @@
-import { classGradeOptions } from "@/constants/classes";
 import type { FilterField } from "@/types/table-toolbar";
 import type {
   TimetableDay,
@@ -66,7 +65,7 @@ export const timetableFilterFields: FilterField[] = [
   {
     name: "grade",
     label: "Class",
-    options: classGradeOptions,
+    options: [],
     value: "8",
     allowClear: false,
   },
