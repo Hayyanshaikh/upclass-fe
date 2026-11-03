@@ -1,321 +1,372 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Form } from "antd";
-import { LuTrash2 } from "react-icons/lu";
-import Input from "@/components/ui/Input";
-import Select from "@/components/ui/Select";
-import Button from "@/components/ui/Button";
-import SectionCard from "@/components/ui/SectionCard";
+import { isAxiosError } from "axios";
+import { useRouter } from "next/navigation";
+import { LuSave, LuTrash2, LuX } from "react-icons/lu";
 import {
-  classGradeOptions,
-  academicYearOptions,
-  classStatusOptions,
-  classFormDefaults,
-} from "@/constants/classes";
-import { teacherSubjects } from "@/constants/teachers";
-import { useTeacherStore } from "@/stores/teachers";
-import { useClassStore } from "@/stores/classes";
-import type {
-  ClassFormError,
-  ClassFormProps,
-  ClassFormValues,
-  ClassSubject,
-} from "@/types/classes";
+  useClassesControllerCreate,
+  useClassesControllerUpdate,
+} from "@/app/api/endpoints";
+import {
+  CreateClassDtoStatus,
+  type CreateClassDto,
+  type CreateClassSubjectDto,
+  type UpdateClassDto,
+} from "@/app/api/schemas";
+import ErrorDialog from "@/components/shared/ErrorDialog";
+import PageHeader from "@/components/shared/PageHeader";
+import SuccessDialog from "@/components/shared/SuccessDialog";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import SectionCard from "@/components/ui/SectionCard";
+import Select from "@/components/ui/Select";
+import { academicYearOptions } from "@/constants/classes";
+import { ROUTE_NAMES } from "@/constants/routes";
+import { useSubjectDropdown } from "@/hooks/useSubjectDropdown";
+import { useTeacherDropdown } from "@/hooks/useTeacherDropdown";
+import type { ClassFormProps, ClassFormValues } from "@/types/classes";
+import { toOptions } from "@/utils/enum-options";
 
-export default function ClassForm({ schoolClass }: ClassFormProps) {
+const statusOptions = toOptions(CreateClassDtoStatus);
+
+export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
   const router = useRouter();
   const [form] = Form.useForm<ClassFormValues>();
-  const teachers = useTeacherStore((state) => state.records);
-  const saveClass = useClassStore((state) => state.saveClass);
-  const teacherOptions = teachers.map((teacher) => ({
-    label: teacher.name,
-    value: teacher.id,
-  }));
-  const subjectOptions = [
-    ...new Set([
-      ...teacherSubjects,
-      ...(schoolClass?.subjects.map((item) => item.subject) ?? []),
-    ]),
-  ].map((value) => ({ label: value, value }));
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const [successRedirect, setSuccessRedirect] = useState<string | null>(null);
+  const { options: teacherOptions } = useTeacherDropdown();
+  const { options: subjectOptions } = useSubjectDropdown();
+  const { mutateAsync: createClass, isPending: isCreating } =
+    useClassesControllerCreate();
+  const { mutateAsync: updateClass, isPending: isUpdating } =
+    useClassesControllerUpdate();
+  const isPending = isCreating || isUpdating;
 
   useEffect(() => {
     if (!schoolClass) return;
     form.setFieldsValue({
-      ...schoolClass,
-      assistantTeacherId: schoolClass.assistantTeacherId || "",
-      subjects: schoolClass.subjects.length
-        ? schoolClass.subjects
-        : [{}, {}, {}],
+      name: schoolClass.name,
+      section: schoolClass.section,
+      room: schoolClass.room,
+      capacity: schoolClass.capacity,
+      academicYear: schoolClass.academicYear,
+      status: schoolClass.status,
+      teacherId: schoolClass.teacherId,
+      assistantTeacherId: schoolClass.assistantTeacherId ?? "",
+      subjects: schoolClass.subjects.map((subject) => ({
+        subjectId: subject.subjectId,
+        teacherId: subject.teacherId,
+        periodsPerWeek: subject.periodsPerWeek,
+      })),
     });
   }, [form, schoolClass]);
 
-  function handleSubmit(values: ClassFormValues) {
-    const section = values.section.trim().toUpperCase();
-    const errors: ClassFormError[] = [];
-    const capacity = Number(values.capacity);
-    if (
-      useClassStore
-        .getState()
-        .records.some(
-          (record) =>
-            record.id !== schoolClass?.id &&
-            record.grade === values.grade &&
-            record.section === section &&
-            record.academicYear === values.academicYear,
-        )
-    ) {
-      errors.push({
-        name: ["section"],
-        errors: [
-          "This grade and section already exist for the selected academic year",
-        ],
-      });
-    }
-    if (capacity < (schoolClass?.students ?? 0)) {
-      errors.push({
-        name: ["capacity"],
-        errors: ["Capacity cannot be lower than the current student count"],
-      });
-    }
-    if (!teachers.some((teacher) => teacher.id === values.teacherId)) {
-      errors.push({
-        name: ["teacherId"],
-        errors: ["Select an available class teacher"],
-      });
-    }
-    if (
-      values.assistantTeacherId &&
-      values.assistantTeacherId === values.teacherId
-    ) {
-      errors.push({
-        name: ["assistantTeacherId"],
-        errors: ["Choose a different assistant teacher"],
-      });
-    }
-    if (
-      values.assistantTeacherId &&
-      !teachers.some((teacher) => teacher.id === values.assistantTeacherId)
-    ) {
-      errors.push({
-        name: ["assistantTeacherId"],
-        errors: ["Select an available assistant teacher"],
-      });
-    }
-    const subjects: ClassSubject[] = [];
-    const selectedSubjects = new Set<string>();
-    (values.subjects ?? []).forEach((row, index) => {
-      if (!row.subject && !row.teacherId && !row.periodsPerWeek) return;
-      if (!row.subject)
-        errors.push({
-          name: ["subjects", index, "subject"],
-          errors: ["Select a subject"],
-        });
-      if (
-        !row.teacherId ||
-        !teachers.some((teacher) => teacher.id === row.teacherId)
-      )
-        errors.push({
-          name: ["subjects", index, "teacherId"],
-          errors: ["Select an available teacher"],
-        });
-      if (!row.periodsPerWeek)
-        errors.push({
-          name: ["subjects", index, "periodsPerWeek"],
-          errors: ["Enter periods per week"],
-        });
-      if (row.subject && selectedSubjects.has(row.subject))
-        errors.push({
-          name: ["subjects", index, "subject"],
-          errors: ["This subject is already assigned"],
-        });
-      if (row.subject) selectedSubjects.add(row.subject);
-      if (row.subject && row.teacherId && row.periodsPerWeek)
-        subjects.push({
-          subject: row.subject,
-          teacherId: row.teacherId,
-          periodsPerWeek: Number(row.periodsPerWeek),
-        });
-    });
-    if (errors.length) {
-      form.setFields(errors);
-      form.scrollToField(errors[0].name, { focus: true });
-      return;
-    }
-    saveClass({
-      id: schoolClass?.id ?? crypto.randomUUID(),
-      grade: values.grade,
-      section,
+  useEffect(() => {
+    if (schoolClass) return;
+    return () => form.resetFields();
+  }, [form, schoolClass]);
+
+  async function handleSubmit(values: ClassFormValues) {
+    if (isPending) return;
+
+    setSubmitError(null);
+    setSubmitSuccess(null);
+
+    const subjects: CreateClassSubjectDto[] = (values.subjects ?? []).map(
+      (row) => ({
+        subjectId: row.subjectId?.trim() ?? "",
+        teacherId: row.teacherId ?? "",
+        periodsPerWeek: Number(row.periodsPerWeek),
+      }),
+    );
+
+    const commonData = {
+      name: values.name.trim(),
+      section: values.section.trim().toUpperCase(),
       room: values.room.trim(),
-      capacity,
+      capacity: Number(values.capacity),
       academicYear: values.academicYear,
       status: values.status,
       teacherId: values.teacherId,
-      assistantTeacherId: values.assistantTeacherId || undefined,
-      students: schoolClass?.students ?? 0,
+      assistantTeacherId: values.assistantTeacherId || null,
       subjects,
-    });
-    if (!schoolClass) {
-      form.resetFields();
+    };
+
+    try {
+      if (schoolClass) {
+        const data: UpdateClassDto = commonData;
+
+        await updateClass({ id: schoolClass.id, data });
+        await onSaved?.();
+
+        setSubmitSuccess("Class updated successfully.");
+        return;
+      }
+
+      const data: CreateClassDto = commonData;
+      const response = await createClass({ data });
+
+      setSuccessRedirect(
+        ROUTE_NAMES.editClass.replace(
+          ":id",
+          encodeURIComponent(response.data.id),
+        ),
+      );
+      setSubmitSuccess("Class added successfully.");
+    } catch (error) {
+      const body = isAxiosError(error)
+        ? (error.response?.data as
+            | { message?: string; data?: { errors?: string[] } }
+            | undefined)
+        : undefined;
+
+      const message =
+        body?.data?.errors?.[0] ??
+        body?.message ??
+        (error instanceof Error ? error.message : undefined);
+
+      if (isAxiosError(error) && error.response?.status === 409) {
+        const lowerMessage = message?.toLowerCase();
+
+        const field = lowerMessage?.includes("section")
+          ? "section"
+          : lowerMessage?.includes("name")
+            ? "name"
+            : lowerMessage?.includes("academic")
+              ? "academicYear"
+              : undefined;
+
+        if (field) {
+          form.setFields([
+            { name: field, errors: [message ?? "Already exists."] },
+          ]);
+          form.scrollToField(field, { focus: true });
+        }
+      }
+
+      setSubmitError(
+        message ?? `Unable to ${schoolClass ? "update" : "add"} class.`,
+      );
     }
-    router.push("/classes");
+  }
+
+  function closeSuccessDialog() {
+    setSubmitSuccess(null);
+    if (successRedirect) {
+      router.push(successRedirect);
+      setSuccessRedirect(null);
+    }
   }
 
   return (
-    <Form
-      form={form}
-      initialValues={classFormDefaults}
-      layout="vertical"
-      onFinish={handleSubmit}
-      scrollToFirstError
-      className="flex flex-col gap-4"
-    >
-      <SectionCard title="Class details" className="h-auto!">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Select
-            name="grade"
-            label="Grade"
-            placeholder="Select grade"
-            options={classGradeOptions}
-            isRequird
-          />
-          <Input
-            name="section"
-            label="Section"
-            placeholder="A"
-            isRequird
-            rules={[
-              {
-                required: true,
-                pattern: /^\s*[A-Za-z]+\s*$/,
-                message: "Enter a section, e.g. A",
-              },
-            ]}
-          />
-          <Input
-            name="room"
-            label="Room"
-            placeholder="Enter room, e.g. Room 12"
-            isRequird
-            rules={[
-              { required: true, whitespace: true, message: "Enter room" },
-            ]}
-          />
-          <Input
-            name="capacity"
-            label="Capacity"
-            type="number"
-            placeholder="Enter student capacity"
-            isRequird
-            rules={[
-              {
-                required: true,
-                pattern: /^[1-9]\d*$/,
-                message: "Enter a positive whole number",
-              },
-            ]}
-          />
-          <Select
-            name="academicYear"
-            label="Academic year"
-            placeholder="Select academic year"
-            options={academicYearOptions}
-            isRequird
-          />
-          <Select
-            name="status"
-            label="Status"
-            placeholder="Select status"
-            options={classStatusOptions}
-            showSearch={false}
-            isRequird
-          />
-        </div>
-      </SectionCard>
-      <SectionCard title="Class teacher" className="h-auto!">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Select
-            name="teacherId"
-            label="Class teacher"
-            placeholder="Select class teacher"
-            options={teacherOptions}
-            isRequird
-          />
-          <Select
-            name="assistantTeacherId"
-            label="Assistant teacher"
-            placeholder="None"
-            options={[{ label: "None", value: "" }, ...teacherOptions]}
-          />
-        </div>
-      </SectionCard>
-      <SectionCard title="Subjects and teachers" className="h-auto!">
-        <Form.List name="subjects">
-          {(fields, { add, remove }) => (
-            <div className="flex flex-col gap-4">
-              {fields.map((field) => (
-                <div
-                  key={field.key}
-                  className="flex flex-col gap-3 sm:flex-row sm:items-end"
-                >
-                  <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 md:grid-cols-3">
-                    <Select
-                      name={[field.name, "subject"]}
-                      label="Subject"
-                      placeholder="Select subject"
-                      options={subjectOptions}
-                      allowClear
-                    />
-                    <Select
-                      name={[field.name, "teacherId"]}
-                      label="Teacher"
-                      placeholder="Select teacher"
-                      options={teacherOptions}
-                      allowClear
-                    />
-                    <Input
-                      name={[field.name, "periodsPerWeek"]}
-                      label="Periods per week"
-                      type="number"
-                      placeholder="Enter periods per week"
-                      rules={[
-                        {
-                          pattern: /^[1-9]\d*$/,
-                          message: "Enter a positive whole number",
-                        },
-                      ]}
-                    />
-                  </div>
-                  <Button
-                    variant="text"
-                    danger
-                    onClick={() => remove(field.name)}
+    <div>
+      <PageHeader
+        title={
+          schoolClass
+            ? `${schoolClass.name}-${schoolClass.section}`
+            : "Add class"
+        }
+        compactMobile
+        breadcrumbs={[
+          { title: "Classes", href: ROUTE_NAMES.classListing },
+          { title: schoolClass ? "Edit class" : "Add class" },
+        ]}
+        actions={
+          <div className="flex gap-2 sm:gap-3">
+            <Button
+              variant="secondary"
+              className="size-11! p-0! sm:h-11! sm:w-auto! sm:px-4!"
+              disabled={isPending}
+              onClick={() => {
+                if (!schoolClass) form.resetFields();
+                router.push(ROUTE_NAMES.classListing);
+              }}
+            >
+              <LuX size={18} aria-hidden="true" />
+              <span className="sr-only sm:not-sr-only">Cancel</span>
+            </Button>
+            <Button
+              className="size-11! p-0! sm:h-11! sm:w-auto! sm:px-4!"
+              loading={isPending}
+              onClick={() => form.submit()}
+            >
+              <LuSave size={18} aria-hidden="true" />
+              <span className="sr-only sm:not-sr-only">
+                {schoolClass ? "Update class" : "Add class"}
+              </span>
+            </Button>
+          </div>
+        }
+      />
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{
+          academicYear: academicYearOptions[0]?.value,
+          status: CreateClassDtoStatus.ACTIVE,
+        }}
+        onFinish={(values) => void handleSubmit(values)}
+        onValuesChange={() => setSubmitError(null)}
+        scrollToFirstError
+        requiredMark={false}
+        className="flex flex-col gap-6"
+      >
+        <ErrorDialog
+          open={submitError !== null}
+          message={submitError ?? ""}
+          onClose={() => setSubmitError(null)}
+        />
+        <SuccessDialog
+          open={submitSuccess !== null}
+          message={submitSuccess ?? ""}
+          onClose={closeSuccessDialog}
+        />
+        <SectionCard title="Class details" autoHeight>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <Input
+              name="name"
+              label="Class name"
+              placeholder="Enter class name"
+              isRequird
+              rules={[{ whitespace: true, message: "Enter class name." }]}
+            />
+            <Input
+              name="section"
+              label="Section"
+              placeholder="A"
+              isRequird
+              rules={[
+                {
+                  required: true,
+                  pattern: /^\s*[A-Za-z]+\s*$/,
+                  message: "Enter a section, e.g. A.",
+                },
+              ]}
+            />
+            <Input
+              name="room"
+              label="Room"
+              placeholder="Enter room, e.g. Room 12"
+              isRequird
+              rules={[
+                { required: true, whitespace: true, message: "Enter room." },
+              ]}
+            />
+            <Input
+              name="capacity"
+              label="Capacity"
+              type="number"
+              placeholder="Enter student capacity"
+              isRequird
+              rules={[
+                {
+                  required: true,
+                  pattern: /^[1-9]\d*$/,
+                  message: "Enter a positive whole number.",
+                },
+              ]}
+            />
+            <Select
+              name="academicYear"
+              label="Academic year"
+              placeholder="Select academic year"
+              options={academicYearOptions}
+              isRequird
+            />
+            <Select
+              name="status"
+              label="Status"
+              placeholder="Select status"
+              options={statusOptions}
+              showSearch={false}
+              isRequird
+            />
+          </div>
+        </SectionCard>
+        <SectionCard title="Class teacher" autoHeight>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Select
+              name="teacherId"
+              label="Class teacher"
+              placeholder="Select class teacher"
+              options={teacherOptions}
+              isRequird
+            />
+            <Select
+              name="assistantTeacherId"
+              label="Assistant teacher"
+              placeholder="None"
+              options={[{ label: "None", value: "" }, ...teacherOptions]}
+            />
+          </div>
+        </SectionCard>
+        <SectionCard title="Subjects and teachers" autoHeight>
+          <Form.List name="subjects">
+            {(fields, { add, remove }) => (
+              <div className="flex flex-col gap-4">
+                {fields.map((field) => (
+                  <div
+                    key={field.key}
+                    className="flex flex-col gap-3 sm:flex-row sm:items-end"
                   >
-                    <LuTrash2 aria-hidden="true" />
-                    <span className="sr-only">
-                      Remove subject row {field.name + 1}
-                    </span>
+                    <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 md:grid-cols-3">
+                      <Select
+                        name={[field.name, "subjectId"]}
+                        label="Subject"
+                        placeholder="Select subject"
+                        options={subjectOptions}
+                        rules={[
+                          { required: true, message: "Select a subject." },
+                        ]}
+                      />
+                      <Select
+                        name={[field.name, "teacherId"]}
+                        label="Teacher"
+                        placeholder="Select teacher"
+                        options={teacherOptions}
+                        rules={[
+                          { required: true, message: "Select a teacher." },
+                        ]}
+                      />
+                      <Input
+                        name={[field.name, "periodsPerWeek"]}
+                        label="Periods per week"
+                        type="number"
+                        placeholder="Enter periods per week"
+                        rules={[
+                          {
+                            required: true,
+                            pattern: /^[1-9]\d*$/,
+                            message: "Enter a positive whole number.",
+                          },
+                        ]}
+                      />
+                    </div>
+                    <Button
+                      variant="text"
+                      danger
+                      onClick={() => remove(field.name)}
+                    >
+                      <LuTrash2 aria-hidden="true" />
+                      <span className="sr-only">
+                        Remove subject row {field.name + 1}
+                      </span>
+                    </Button>
+                  </div>
+                ))}
+                <div>
+                  <Button variant="secondary" onClick={() => add({})}>
+                    + Add subject
                   </Button>
                 </div>
-              ))}
-              <div>
-                <Button variant="secondary" onClick={() => add({})}>
-                  Add subject
-                </Button>
               </div>
-            </div>
-          )}
-        </Form.List>
-      </SectionCard>
-      <div className="flex flex-wrap items-center justify-end gap-3 pb-4">
-        <Button variant="secondary" onClick={() => router.push("/classes")}>
-          Cancel
-        </Button>
-        <Button type="submit">
-          {schoolClass ? "Update class" : "Save class"}
-        </Button>
-      </div>
-    </Form>
+            )}
+          </Form.List>
+        </SectionCard>
+      </Form>
+    </div>
   );
 }

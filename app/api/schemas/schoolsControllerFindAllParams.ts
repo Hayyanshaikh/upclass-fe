@@ -17,4 +17,5 @@ limit?: number;
 offset?: number;
 searchKey?: string;
 status?: string;
+type?: string;
 };

@@ -1,3 +1,5 @@
+import type { ClassDto, CreateClassDtoStatus } from "@/app/api/schemas";
+
 export type ClassSubject = {
   subject: string;
   teacherId: string;
@@ -19,27 +21,28 @@ export type SchoolClass = {
 };
 
 export type ClassFormValues = {
-  grade: string;
+  name: string;
   section: string;
   room: string;
   capacity: string | number;
   academicYear: string;
-  status: SchoolClass["status"];
+  status: CreateClassDtoStatus;
   teacherId: string;
   assistantTeacherId?: string;
   subjects?: {
-    subject?: string;
+    subjectId?: string;
     teacherId?: string;
     periodsPerWeek?: string | number;
   }[];
 };
 
 export type ClassFormProps = {
-  schoolClass?: SchoolClass;
+  schoolClass?: ClassDto;
+  onSaved?: () => void;
 };
 
 export type ClassFormError = {
-  name: [keyof ClassFormValues] | ["subjects", number, "subject" | "teacherId" | "periodsPerWeek"];
+  name: [keyof ClassFormValues] | ["subjects", number, "subjectId" | "teacherId" | "periodsPerWeek"];
   errors: string[];
 };
 
@@ -50,9 +53,3 @@ export type ClassStore = {
 };
 
 export type ClassRouteParams = { id: string };
-
-export type ClassDetailsDialogProps = {
-  schoolClass: SchoolClass | null;
-  onClose: () => void;
-  onEdit: (schoolClass: SchoolClass) => void;
-};
