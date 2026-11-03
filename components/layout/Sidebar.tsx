@@ -14,6 +14,7 @@ import type { MenuItemProps } from "@/types/sidebar";
 import { useStorageStore } from "@/stores/storage";
 import type { LoginResponseUserDto } from "@/app/api/schemas";
 import { useUserControllerFindOne } from "@/app/api/endpoints";
+import { NavItem } from "@/types/menu";
 
 function SidebarHeader({ onNavigate }: { onNavigate?: () => void }) {
   return (
@@ -32,30 +33,24 @@ function MenuItem({ item, active, onNavigate }: MenuItemProps) {
   const Icon = item.icon;
 
   return (
-    <div>
-      {item.group && (
-        <p className="mt-4 mb-2 px-3 text-[11px] font-extrabold tracking-wide text-light uppercase">
-          {item.group}
-        </p>
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      className={`flex min-h-11 items-center mb-0.5 gap-3 rounded-sm px-3.5 py-0 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary ${active ? "bg-white! text-primary! hover:bg-white! hover:text-primary!" : "text-light! hover:bg-white/10! hover:text-white!"}`}
+    >
+      <Icon size={18} className="shrink-0" aria-hidden="true" />
+      <span>{item.label}</span>
+
+      {item.badge !== undefined && (
+        <span
+          className="ml-auto flex size-4.5 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-bold text-dark"
+          aria-label={`${item.badge} pending requests`}
+        >
+          {item.badge}
+        </span>
       )}
-      <Link
-        href={item.href}
-        onClick={onNavigate}
-        aria-current={active ? "page" : undefined}
-        className={`flex min-h-11 items-center gap-3 rounded-sm px-3.5 py-0 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary ${active ? "bg-white! text-primary! hover:bg-white! hover:text-primary!" : "text-light! hover:bg-white/10! hover:text-white!"}`}
-      >
-        <Icon size={18} className="shrink-0" aria-hidden="true" />
-        <span>{item.label}</span>
-        {item.badge !== undefined && (
-          <span
-            className="ml-auto flex size-4.5 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-bold text-dark"
-            aria-label={`${item.badge} pending requests`}
-          >
-            {item.badge}
-          </span>
-        )}
-      </Link>
-    </div>
+    </Link>
   );
 }
 
@@ -71,10 +66,12 @@ function SidebarMenu({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+
   const activeHref = menuItems.reduce((current, item) => {
     const matches =
       pathname === item.href ||
       (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+
     return matches && item.href.length > current.length ? item.href : current;
   }, "");
 
@@ -83,6 +80,20 @@ function SidebarMenu({
 
   const filteredMenuItems = menuItems.filter((item) =>
     permissionKeys.includes(item.permission),
+  );
+
+  const groupedMenuItems = filteredMenuItems.reduce(
+    (groups, item) => {
+      const groupName = item.group || "Other";
+
+      if (!groups[groupName]) {
+        groups[groupName] = [];
+      }
+
+      groups[groupName].push(item);
+      return groups;
+    },
+    {} as Record<string, NavItem[]>,
   );
 
   return (
@@ -97,6 +108,7 @@ function SidebarMenu({
           aria-label="Loading menu permissions"
         >
           <span className="sr-only">Loading menu...</span>
+
           {menuItems.slice(0, 10).map((item) => (
             <div
               key={item.href}
@@ -113,13 +125,21 @@ function SidebarMenu({
           Unable to load menu permissions.
         </p>
       ) : (
-        filteredMenuItems.map((item) => (
-          <MenuItem
-            key={item.href}
-            item={item}
-            active={item.href === activeHref}
-            onNavigate={onNavigate}
-          />
+        Object.entries(groupedMenuItems).map(([groupName, items]) => (
+          <div key={groupName}>
+            <p className="mt-4 mb-2 px-3 text-[11px] font-extrabold tracking-wide text-light uppercase">
+              {groupName}
+            </p>
+
+            {items.map((item) => (
+              <MenuItem
+                key={item.href}
+                item={item}
+                active={item.href === activeHref}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </div>
         ))
       )}
     </nav>
