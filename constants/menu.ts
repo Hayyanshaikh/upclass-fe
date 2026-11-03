@@ -19,7 +19,9 @@ import {
 } from "react-icons/lu";
 
 export const menuItems: NavItem[] = [
+  // Overview
   {
+    group: "Overview",
     label: "Dashboard",
     href: "/",
     icon: LuLayoutDashboard,
@@ -44,18 +46,21 @@ export const menuItems: NavItem[] = [
     permission: "students.view",
   },
   {
+    group: "People",
     label: "Teachers",
     href: "/teachers",
     icon: LuUserRound,
     permission: "teachers.view",
   },
   {
+    group: "People",
     label: "Subjects",
     href: "/subjects",
     icon: LuBookOpen,
     permission: "subjects.view",
   },
   {
+    group: "People",
     label: "Classes",
     href: "/classes",
     icon: LuBookOpen,
@@ -71,12 +76,14 @@ export const menuItems: NavItem[] = [
     permission: "student_attendance.view",
   },
   {
+    group: "Attendance",
     label: "Teacher Attendance",
     href: "/attendance/teachers",
     icon: LuUsersRound,
     permission: "teacher_attendance.view",
   },
   {
+    group: "Attendance",
     label: "Mark Attendance",
     href: "/mark-attendance",
     icon: LuClock,
@@ -92,6 +99,7 @@ export const menuItems: NavItem[] = [
     permission: "timetable.view",
   },
   {
+    group: "Academics",
     label: "Exams & Results",
     href: "/exams",
     icon: LuFileText,
@@ -107,6 +115,7 @@ export const menuItems: NavItem[] = [
     permission: "fees.view",
   },
   {
+    group: "Finance",
     label: "Fee Structure",
     href: "/fee-structure",
     icon: LuReceiptText,
@@ -132,24 +141,28 @@ export const menuItems: NavItem[] = [
     permission: "leave_requests.view",
   },
   {
+    group: "System",
     label: "Teacher Leaves",
     href: "/teacher-leaves",
     icon: LuCalendarDays,
     permission: "teacher_leaves.view",
   },
   {
+    group: "System",
     label: "Users",
     href: "/users",
     icon: LuUserCog,
     permission: "users.view",
   },
   {
+    group: "System",
     label: "Roles",
     href: "/roles",
     icon: LuStar,
     permission: "roles.view",
   },
   {
+    group: "System",
     label: "Settings",
     href: "/settings",
     icon: LuSettings,
