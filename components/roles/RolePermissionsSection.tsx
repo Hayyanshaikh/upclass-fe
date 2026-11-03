@@ -6,10 +6,16 @@ import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Loader from "@/components/ui/Loader";
+import Switch from "@/components/ui/Switch";
 import type { PermissionDataDto } from "@/app/api/schemas";
-import type { RolePermissionsSectionProps } from "@/types/role";
+import type {
+  RolePermissionGroup,
+  RolePermissionsSectionProps,
+} from "@/types/role";
 
-function groupPermissions(permissions: PermissionDataDto[]) {
+function groupPermissions(
+  permissions: PermissionDataDto[],
+): RolePermissionGroup[] {
   const groups = new Map<string, Map<string, PermissionDataDto[]>>();
 
   for (const permission of permissions) {
@@ -33,6 +39,14 @@ function groupPermissions(permissions: PermissionDataDto[]) {
   }));
 }
 
+function collectPermissionKeys(groups: RolePermissionGroup[]) {
+  return groups.flatMap((group) =>
+    group.modules.flatMap((module) =>
+      module.permissions.map((permission) => permission.key),
+    ),
+  );
+}
+
 export default function RolePermissionsSection({
   permissions,
   permissionKeys,
@@ -46,15 +60,38 @@ export default function RolePermissionsSection({
 
   const groups = groupPermissions(permissions);
   // Filter modules based on search term (module name only)
+  const term = search.trim().toLowerCase();
   const filteredGroups = groups
     .map((group) => ({
       ...group,
-      modules: group.modules.filter((module) => {
-        const term = search.toLowerCase();
-        return module.name.toLowerCase().includes(term);
-      }),
+      modules: group.modules.filter((module) =>
+        module.name.toLowerCase().includes(term),
+      ),
     }))
     .filter((group) => group.modules.length > 0);
+
+  const visibleKeys = collectPermissionKeys(filteredGroups);
+  const selectedVisibleCount = visibleKeys.filter((key) =>
+    permissionKeys.includes(key),
+  ).length;
+  const allVisibleSelected =
+    visibleKeys.length > 0 && selectedVisibleCount === visibleKeys.length;
+
+  function setKeysSelection(keys: string[], selected: boolean) {
+    if (selected) {
+      const missingKeys = keys.filter((key) => !permissionKeys.includes(key));
+      if (missingKeys.length > 0) {
+        onPermissionKeysChange([...permissionKeys, ...missingKeys]);
+      }
+      return;
+    }
+
+    const keysToRemove = new Set(keys);
+    onPermissionKeysChange(
+      permissionKeys.filter((key) => !keysToRemove.has(key)),
+    );
+  }
+
   function togglePermission(key: string) {
     onPermissionKeysChange(
       permissionKeys.includes(key)
@@ -68,21 +105,29 @@ export default function RolePermissionsSection({
       className="flex flex-col gap-4"
       aria-labelledby="role-permissions-title"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2
           id="role-permissions-title"
           className="text-lg font-extrabold text-dark"
         >
           Permissions
         </h2>
-        <div className="relative flex items-center">
-          <LuSearch className="absolute z-30 left-3 top-1/2 -translate-y-1/2 text-gray" />
-          <Input
-            name="permission-search"
-            placeholder="Search modules…"
-            className="w-48 pl-9!"
-            onChange={(e) => setSearch(e.target.value)}
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <Switch
+            checked={allVisibleSelected}
+            label="Select all permissions"
+            disabled={disabled || visibleKeys.length === 0}
+            onChange={(checked) => setKeysSelection(visibleKeys, checked)}
           />
+          <div className="relative flex items-center">
+            <LuSearch className="absolute z-30 left-3 top-1/2 -translate-y-1/2 text-gray" />
+            <Input
+              name="permission-search"
+              placeholder="Search modules…"
+              className="w-48 pl-9!"
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
       </div>
       {Boolean(error) && (
@@ -100,54 +145,78 @@ export default function RolePermissionsSection({
       {isLoading ? (
         <Loader tip="Loading permissions..." fullscreen={false} size="small" />
       ) : (
-        filteredGroups.map((group) => (
-          <details
-            key={group.name}
-            open={search.length > 0}
-            // open={group.name === "People"}
-            className="group overflow-hidden rounded-lg border border-border bg-background"
-          >
-            <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 text-base font-extrabold text-dark focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
-              {group.name}
-              <LuChevronDown
-                className="transition-transform group-open:rotate-180"
-                size={18}
-                aria-hidden="true"
-              />
-            </summary>
-            <div className="border-t border-border px-5">
-              {group.modules.map((module) => (
-                <div
-                  key={module.name}
-                  className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3 last:border-b-0"
-                >
-                  <span className="font-semibold text-dark">{module.name}</span>
-                  <div
-                    className="flex flex-wrap gap-2"
-                    role="group"
-                    aria-label={`${module.name} permissions`}
-                  >
-                    {module.permissions.map((permission) => {
-                      const enabled = permissionKeys.includes(permission.key);
-                      return (
-                        <Button
-                          key={permission.key}
-                          variant={enabled ? "primary" : "secondary"}
-                          className="h-8! rounded-full! px-3! text-xs!"
-                          ariaPressed={enabled}
-                          disabled={disabled}
-                          onClick={() => togglePermission(permission.key)}
-                        >
-                          {permission.action}
-                        </Button>
-                      );
-                    })}
-                  </div>
+        filteredGroups.map((group) => {
+          const groupKeys = collectPermissionKeys([group]);
+          const selectedGroupCount = groupKeys.filter((key) =>
+            permissionKeys.includes(key),
+          ).length;
+          const allGroupSelected =
+            groupKeys.length > 0 && selectedGroupCount === groupKeys.length;
+
+          return (
+            <details
+              key={group.name}
+              open={search.length > 0}
+              // open={group.name === "People"}
+              className="group overflow-hidden rounded-lg border border-border bg-background"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 text-base font-extrabold text-dark focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
+                {group.name}
+                <LuChevronDown
+                  className="transition-transform group-open:rotate-180"
+                  size={18}
+                  aria-hidden="true"
+                />
+              </summary>
+              <div className="border-t border-border px-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3">
+                  <span className="text-sm font-semibold text-gray">
+                    All {group.name.toLowerCase()} permissions
+                  </span>
+                  <Switch
+                    checked={allGroupSelected}
+                    label="Select all"
+                    disabled={disabled || groupKeys.length === 0}
+                    onChange={(checked) =>
+                      setKeysSelection(groupKeys, checked)
+                    }
+                  />
                 </div>
-              ))}
-            </div>
-          </details>
-        ))
+                {group.modules.map((module) => (
+                  <div
+                    key={module.name}
+                    className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3 last:border-b-0"
+                  >
+                    <span className="font-semibold text-dark">
+                      {module.name}
+                    </span>
+                    <div
+                      className="flex flex-wrap gap-2"
+                      role="group"
+                      aria-label={`${module.name} permissions`}
+                    >
+                      {module.permissions.map((permission) => {
+                        const enabled = permissionKeys.includes(permission.key);
+                        return (
+                          <Button
+                            key={permission.key}
+                            variant={enabled ? "primary" : "secondary"}
+                            className="h-8! rounded-full! px-3! text-xs!"
+                            ariaPressed={enabled}
+                            disabled={disabled}
+                            onClick={() => togglePermission(permission.key)}
+                          >
+                            {permission.action}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </details>
+          );
+        })
       )}
     </section>
   );

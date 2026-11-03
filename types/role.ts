@@ -16,6 +16,14 @@ export type SchoolRole = {
 
 export type RoleAction = "View" | "Create" | "Edit" | "Delete";
 
+export type RolePermissionGroup = {
+  name: string;
+  modules: {
+    name: string;
+    permissions: PermissionDataDto[];
+  }[];
+};
+
 export type RoleFormValues = {
   name: string;
   description?: string;

@@ -8,12 +8,25 @@ export const axiosInstance = axios.create({
   },
 });
 
-// Attach access token to every request
+// Attach access token and schoolId to every request
 axiosInstance.interceptors.request.use((config) => {
   const token = Cookies.get("accessToken");
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (typeof window !== "undefined") {
+    const storage = localStorage.getItem("app-storage");
+
+    if (storage) {
+      const parsedStorage = JSON.parse(storage);
+      const schoolId = parsedStorage?.state?.values?.user?.school?.id;
+
+      if (schoolId) {
+        config.headers["schoolId"] = schoolId;
+      }
+    }
   }
 
   return config;

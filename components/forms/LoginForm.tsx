@@ -43,9 +43,11 @@ export default function LoginForm() {
 
       form.resetFields();
       setMessage("");
-    } catch (error) {
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.message || "Invalid email or password.";
       console.error("Login failed:", error);
-      setMessage("Invalid email or password.");
+      setMessage(msg);
     }
   };
 

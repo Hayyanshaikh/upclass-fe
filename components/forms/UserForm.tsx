@@ -40,7 +40,7 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
     isLoading: rolesLoading,
     isError: rolesError,
   } = useRoleDropdown();
-  const { isSuperAdmin } = useIsSuperAdmin();
+  const { isAdmin } = useIsSuperAdmin();
 
   const { mutateAsync: createUser, isPending: isCreating } =
     useUserControllerCreate();
@@ -154,7 +154,9 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
               onClick={() => form.submit()}
             >
               <LuSave size={18} aria-hidden="true" />
-              <span className="sr-only sm:not-sr-only">{user ? "Update user" : "Add user"}</span>
+              <span className="sr-only sm:not-sr-only">
+                {user ? "Update user" : "Add user"}
+              </span>
             </Button>
           </div>
         }
@@ -210,7 +212,7 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
                 },
               ]}
             />
-            {isSuperAdmin && (
+            {isAdmin && (
               <Input
                 name="password"
                 label="Password"

@@ -15,6 +15,10 @@ import {
   useSubjectsControllerFindAll,
   useSubjectsControllerRemove,
 } from "@/app/api/endpoints";
+import type {
+  SubjectsControllerFindAllStatus,
+  SubjectsControllerFindAllType,
+} from "@/app/api/schemas";
 import { exportCsv } from "@/utils/export-csv";
 import type { SubjectDto } from "@/app/api/schemas";
 import type {
@@ -44,7 +48,7 @@ export default function Subjects() {
     setPage,
     setSearch,
     setFilters,
-  } = useTable<{ type?: string; status?: string }>({
+  } = useTable<{ type?: SubjectsControllerFindAllType; status?: SubjectsControllerFindAllStatus }>({
     pageSize: 10,
     debounceMs: 400,
   });
