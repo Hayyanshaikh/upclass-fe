@@ -6,9 +6,18 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from './classDto';
+export * from './classDtoStatus';
+export * from './classesControllerFindAllParams';
+export * from './classesControllerFindAllStatus';
+export * from './classFindOneResponseDto';
+export * from './classSubjectDto';
 export * from './cloudinaryControllerUploadBody';
 export * from './cloudinaryUploadDataDto';
 export * from './cloudinaryUploadResponseDto';
+export * from './createClassDto';
+export * from './createClassDtoStatus';
+export * from './createClassSubjectDto';
 export * from './createRoleDto';
 export * from './createSchoolDto';
 export * from './createSubjectDto';
@@ -57,6 +66,8 @@ export * from './teacherResponseDto';
 export * from './teachersControllerFindAllEmploymentType';
 export * from './teachersControllerFindAllParams';
 export * from './teachersControllerFindAllStatus';
+export * from './updateClassDto';
+export * from './updateClassDtoStatus';
 export * from './updateRoleDto';
 export * from './updateSchoolDto';
 export * from './updateSubjectDto';

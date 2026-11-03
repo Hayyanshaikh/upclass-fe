@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { RoleSummaryDto } from './roleSummaryDto';
+import type { SchoolDto } from './schoolDto';
 
 export interface LoginResponseUserDto {
   id: string;
@@ -15,4 +16,5 @@ export interface LoginResponseUserDto {
   role?: RoleSummaryDto;
   isActive: boolean;
   isSystem: boolean;
+  school?: SchoolDto;
 }

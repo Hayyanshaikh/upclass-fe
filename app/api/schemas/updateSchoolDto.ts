@@ -14,8 +14,7 @@ export interface UpdateSchoolDto {
   phone?: string | null;
   /** @nullable */
   address?: string | null;
-  /** @nullable */
-  isActive?: boolean | null;
+  isActive?: boolean;
   adminName?: string;
   adminEmail?: string;
   adminPassword?: string;

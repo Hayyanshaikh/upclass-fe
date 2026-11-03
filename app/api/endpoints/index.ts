@@ -1,5 +1,6 @@
 export * from './app/app';
 export * from './auth/auth';
+export * from './classes/classes';
 export * from './permissions/permissions';
 export * from './roles/roles';
 export * from './schools/schools';
