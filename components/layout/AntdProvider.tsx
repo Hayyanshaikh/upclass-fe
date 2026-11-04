@@ -114,7 +114,7 @@ export default function AntdProvider({ children }: LayoutProps) {
       }}
       tabs={{
         className:
-          "[&_.ant-tabs-nav]:mb-4! [&_.ant-tabs-nav-list]:gap-1! [&_.ant-tabs-tab]:m-0! [&_.ant-tabs-tab]:px-3! [&_.ant-tabs-tab]:py-2! [&_.ant-tabs-tab]:font-semibold! [&_.ant-tabs-tab-active]:rounded-t-sm! [&_.ant-tabs-tab-active]:bg-primary! [&_.ant-tabs-tab-active_.ant-tabs-tab-btn]:text-background! [&_.ant-tabs-ink-bar]:hidden!",
+          "[&_.ant-tabs-nav]:mb-0! [&_.ant-tabs-nav-list]:gap-1! [&_.ant-tabs-tab]:m-0! [&_.ant-tabs-tab]:px-5! [&_.ant-tabs-tab]:py-3! [&_.ant-tabs-tab]:font-semibold! [&_.ant-tabs-tab-active]:rounded-t-sm! [&_.ant-tabs-tab-active]:bg-primary! [&_.ant-tabs-tab-active_.ant-tabs-tab-btn]:text-background! [&_.ant-tabs-ink-bar]:hidden!",
       }}
     >
       {children}
