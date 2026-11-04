@@ -1,10 +1,10 @@
 "use client";
 
-import { useSubjectsControllerFindAll } from "@/app/api/endpoints";
+import { useSubjectsControllerLookup } from "@/app/api/endpoints";
 import { useMemo } from "react";
 
 export const useSubjectDropdown = () => {
-  const { data, isLoading, isError } = useSubjectsControllerFindAll({ limit: 9999 });
+  const { data, isLoading, isError } = useSubjectsControllerLookup();
 
   const options = useMemo(() => {
     return (data?.data ?? []).map((item) => ({

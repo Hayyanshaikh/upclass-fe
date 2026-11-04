@@ -16,7 +16,12 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Tabs from "@/components/ui/Tabs";
 import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
-import { academicYears, feeHeads, leaveTypes, settingsUsers } from "@/constants/settings";
+import {
+  academicYears,
+  feeHeads,
+  leaveTypes,
+  settingsUsers,
+} from "@/constants/settings";
 import type { AcademicYear, FeeHead, SettingsUser } from "@/types/settings";
 
 type DialogKind = "year" | "fee" | "user" | null;
@@ -77,14 +82,25 @@ export default function Settings() {
   }, [form]);
 
   function saveSettings() {
-    form.validateFields().then(() => {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify({ values: form.getFieldsValue(true), years, fees, users } satisfies SavedSettings));
-        message.success("Settings saved in this browser.");
-      } catch {
-        message.error("Settings could not be saved in this browser.");
-      }
-    }).catch(() => message.error("Please complete the required fields."));
+    form
+      .validateFields()
+      .then(() => {
+        try {
+          localStorage.setItem(
+            storageKey,
+            JSON.stringify({
+              values: form.getFieldsValue(true),
+              years,
+              fees,
+              users,
+            } satisfies SavedSettings),
+          );
+          message.success("Settings saved in this browser.");
+        } catch {
+          message.error("Settings could not be saved in this browser.");
+        }
+      })
+      .catch(() => message.error("Please complete the required fields."));
   }
 
   function cancelChanges() {
@@ -113,50 +129,187 @@ export default function Settings() {
   }
 
   function submitDialog() {
-    dialogForm.validateFields().then((values) => {
-      const id = editingUser ?? crypto.randomUUID();
-      if (dialog === "year") {
-        const year = String(values.year).trim();
-        setYears((current) => [...current, { id, year, duration: String(values.duration).trim(), status: "Closed" }]);
-      }
-      if (dialog === "fee") {
-        setFees((current) => [...current, { id, name: String(values.name).trim(), required: values.required === "Yes", amount: Number(values.amount) }]);
-      }
-      if (dialog === "user") {
-        const record: SettingsUser = { id, name: String(values.name).trim(), role: String(values.role), email: String(values.email).trim(), status: "Active" };
-        setUsers((current) => editingUser ? current.map((user) => user.id === editingUser ? record : user) : [...current, record]);
-      }
-      setDialog(null);
-      message.info("Change added locally. Use Save settings to keep it in this browser.");
-    }).catch(() => undefined);
+    dialogForm
+      .validateFields()
+      .then((values) => {
+        const id = editingUser ?? crypto.randomUUID();
+        if (dialog === "year") {
+          const year = String(values.year).trim();
+          setYears((current) => [
+            ...current,
+            {
+              id,
+              year,
+              duration: String(values.duration).trim(),
+              status: "Closed",
+            },
+          ]);
+        }
+        if (dialog === "fee") {
+          setFees((current) => [
+            ...current,
+            {
+              id,
+              name: String(values.name).trim(),
+              required: values.required === "Yes",
+              amount: Number(values.amount),
+            },
+          ]);
+        }
+        if (dialog === "user") {
+          const record: SettingsUser = {
+            id,
+            name: String(values.name).trim(),
+            role: String(values.role),
+            email: String(values.email).trim(),
+            status: "Active",
+          };
+          setUsers((current) =>
+            editingUser
+              ? current.map((user) => (user.id === editingUser ? record : user))
+              : [...current, record],
+          );
+        }
+        setDialog(null);
+        message.info(
+          "Change added locally. Use Save settings to keep it in this browser.",
+        );
+      })
+      .catch(() => undefined);
   }
 
   const tabs = [
     { key: "profile", label: "School profile", children: <SchoolProfileTab /> },
-    { key: "academic", label: "Academic year", children: <AcademicYearTab years={years} onAdd={() => openDialog("year")} /> },
+    {
+      key: "academic",
+      label: "Academic year",
+      children: (
+        <AcademicYearTab years={years} onAdd={() => openDialog("year")} />
+      ),
+    },
     { key: "leave", label: "Leave policy", children: <LeavePolicyTab /> },
-    { key: "fees", label: "Fee heads", children: <FeeHeadsTab fees={fees} onAdd={() => openDialog("fee")} /> },
-    { key: "users", label: "Roles & users", children: <RolesUsersTab users={users} onAdd={() => router.push("/users/add")} canAdd={isSuperAdmin} onEdit={(user) => openDialog("user", user)} onRemove={(id) => setUsers((current) => current.filter((user) => user.id !== id))} /> },
-    { key: "notifications", label: "Notifications", children: <NotificationsTab /> },
+    {
+      key: "fees",
+      label: "Fee heads",
+      children: <FeeHeadsTab fees={fees} onAdd={() => openDialog("fee")} />,
+    },
+    {
+      key: "users",
+      label: "Roles & users",
+      children: (
+        <RolesUsersTab
+          users={users}
+          onAdd={() => router.push("/users/add")}
+          canAdd={isSuperAdmin}
+          onEdit={(user) => openDialog("user", user)}
+          onRemove={(id) =>
+            setUsers((current) => current.filter((user) => user.id !== id))
+          }
+        />
+      ),
+    },
+    {
+      key: "notifications",
+      label: "Notifications",
+      children: <NotificationsTab />,
+    },
   ];
 
-  return <div className="mx-auto flex h-full min-h-0 max-w-6xl flex-col overflow-hidden pb-4">
-    <PageHeader
-      title="Settings"
-      actions={<div className="flex flex-wrap gap-3">
-        <Button variant="secondary" onClick={cancelChanges}>Cancel</Button>
-        <Button onClick={() => form.submit()}>Save settings</Button>
-      </div>}
-    />
-    <Form form={form} layout="vertical" initialValues={initialValues} onFinish={saveSettings} className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <Tabs items={tabs} activeKey={activeTab} onChange={setActiveTab} scrollable />
-    </Form>
-    <Dialog open={dialog !== null} title={dialog === "year" ? "Add academic year" : dialog === "fee" ? "Add fee head" : editingUser ? "Edit user" : "Add user"} okText={dialog === "user" && !editingUser ? "Add user" : "Add"} onClose={() => setDialog(null)} onConfirm={submitDialog}>
-      <Form form={dialogForm} layout="vertical" className="space-y-4">
-        {dialog === "year" && <><Input name="year" label="Academic year" isRequird placeholder="2027-28" /><Input name="duration" label="Duration" isRequird placeholder="Aug 2027 - Jun 2028" /></>}
-        {dialog === "fee" && <><Input name="name" label="Fee head" isRequird /><Input name="amount" label="Default amount (Rs.)" type="number" isRequird /><Select name="required" label="Required" isRequird options={[{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }]} /></>}
-        {dialog === "user" && <><Input name="name" label="Name" isRequird /><Input name="email" label="Email" type="email" isRequird /><Select name="role" label="Role" isRequird options={["Super admin", "Teacher", "Staff", "Viewer"].map((role) => ({ label: role, value: role }))} /></>}
+  return (
+    <div>
+      <PageHeader
+        title="Settings"
+        actions={
+          <div className="flex flex-wrap gap-3">
+            <Button variant="secondary" onClick={cancelChanges}>
+              Cancel
+            </Button>
+            <Button onClick={() => form.submit()}>Save settings</Button>
+          </div>
+        }
+      />
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={initialValues}
+        onFinish={saveSettings}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
+      >
+        <Tabs
+          items={tabs}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          scrollable
+        />
       </Form>
-    </Dialog>
-  </div>;
+      <Dialog
+        open={dialog !== null}
+        title={
+          dialog === "year"
+            ? "Add academic year"
+            : dialog === "fee"
+              ? "Add fee head"
+              : editingUser
+                ? "Edit user"
+                : "Add user"
+        }
+        okText={dialog === "user" && !editingUser ? "Add user" : "Add"}
+        onClose={() => setDialog(null)}
+        onConfirm={submitDialog}
+      >
+        <Form form={dialogForm} layout="vertical" className="space-y-4">
+          {dialog === "year" && (
+            <>
+              <Input
+                name="year"
+                label="Academic year"
+                isRequird
+                placeholder="2027-28"
+              />
+              <Input
+                name="duration"
+                label="Duration"
+                isRequird
+                placeholder="Aug 2027 - Jun 2028"
+              />
+            </>
+          )}
+          {dialog === "fee" && (
+            <>
+              <Input name="name" label="Fee head" isRequird />
+              <Input
+                name="amount"
+                label="Default amount (Rs.)"
+                type="number"
+                isRequird
+              />
+              <Select
+                name="required"
+                label="Required"
+                isRequird
+                options={[
+                  { label: "Yes", value: "Yes" },
+                  { label: "No", value: "No" },
+                ]}
+              />
+            </>
+          )}
+          {dialog === "user" && (
+            <>
+              <Input name="name" label="Name" isRequird />
+              <Input name="email" label="Email" type="email" isRequird />
+              <Select
+                name="role"
+                label="Role"
+                isRequird
+                options={["Super admin", "Teacher", "Staff", "Viewer"].map(
+                  (role) => ({ label: role, value: role }),
+                )}
+              />
+            </>
+          )}
+        </Form>
+      </Dialog>
+    </div>
+  );
 }

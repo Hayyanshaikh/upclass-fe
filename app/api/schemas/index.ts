@@ -32,6 +32,8 @@ export * from './documents';
 export * from './loginDto';
 export * from './loginResponseDto';
 export * from './loginResponseUserDto';
+export * from './lookupItemDto';
+export * from './lookupResponseDto';
 export * from './permissionDataDto';
 export * from './permissionKey';
 export * from './permissionResponseDto';

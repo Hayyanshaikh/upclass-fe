@@ -28,6 +28,7 @@ import type {
   ClassFindOneResponseDto,
   ClassesControllerFindAllParams,
   CreateClassDto,
+  LookupResponseDto,
   UpdateClassDto
 } from '../../schemas';
 
@@ -236,6 +237,106 @@ export function useClassesControllerFindAll<TData = Awaited<ReturnType<typeof cl
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getClassesControllerFindAllQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getClassesControllerLookupUrl = () => {
+
+
+
+
+  return `/api/classes/lookup`
+}
+
+/**
+ * @summary Get classes for dropdown
+ */
+export const classesControllerLookup = async ( options?: Parameters<typeof customInstance>[1]): Promise<LookupResponseDto> => {
+
+  return customInstance<LookupResponseDto>(getClassesControllerLookupUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getClassesControllerLookupQueryKey = () => {
+    return [
+    `/api/classes/lookup`
+    ] as const;
+    }
+
+
+export const getClassesControllerLookupQueryOptions = <TData = Awaited<ReturnType<typeof classesControllerLookup>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof classesControllerLookup>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getClassesControllerLookupQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof classesControllerLookup>>> = ({ signal }) => classesControllerLookup({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof classesControllerLookup>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ClassesControllerLookupQueryResult = NonNullable<Awaited<ReturnType<typeof classesControllerLookup>>>
+export type ClassesControllerLookupQueryError = unknown
+
+
+export function useClassesControllerLookup<TData = Awaited<ReturnType<typeof classesControllerLookup>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof classesControllerLookup>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof classesControllerLookup>>,
+          TError,
+          Awaited<ReturnType<typeof classesControllerLookup>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useClassesControllerLookup<TData = Awaited<ReturnType<typeof classesControllerLookup>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof classesControllerLookup>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof classesControllerLookup>>,
+          TError,
+          Awaited<ReturnType<typeof classesControllerLookup>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useClassesControllerLookup<TData = Awaited<ReturnType<typeof classesControllerLookup>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof classesControllerLookup>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get classes for dropdown
+ */
+
+export function useClassesControllerLookup<TData = Awaited<ReturnType<typeof classesControllerLookup>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof classesControllerLookup>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getClassesControllerLookupQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
