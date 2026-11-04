@@ -5,6 +5,8 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
+import type { SchoolDtoEducationSystem } from './schoolDtoEducationSystem';
+import type { SchoolDtoSchoolType } from './schoolDtoSchoolType';
 
 export interface SchoolDto {
   id: string;
@@ -19,4 +21,33 @@ export interface SchoolDto {
   createdAt: string;
   updatedAt: string;
   usersCount?: number;
+  /** @nullable */
+  logo: string | null;
+  /** @nullable */
+  shortCode: string | null;
+  /** @nullable */
+  schoolType: SchoolDtoSchoolType;
+  /** @nullable */
+  educationSystem: SchoolDtoEducationSystem;
+  /** @nullable */
+  establishedYear: number | null;
+  /** @nullable */
+  description: string | null;
+  /** @nullable */
+  principalName: string | null;
+  /** @nullable */
+  vicePrincipalName: string | null;
+  /** @nullable */
+  adminContact: string | null;
+  /** @nullable */
+  ownerName: string | null;
+  /** @nullable */
+  dateFormat: string | null;
+  /** @nullable */
+  feeDueDate: number | null;
+  workingDays: string[];
+  /** @nullable */
+  openingTime: string | null;
+  /** @nullable */
+  closingTime: string | null;
 }

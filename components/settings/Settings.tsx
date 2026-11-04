@@ -23,6 +23,16 @@ import {
   settingsUsers,
 } from "@/constants/settings";
 import type { AcademicYear, FeeHead, SettingsUser } from "@/types/settings";
+import {
+  useSchoolsControllerFindOne,
+  useSchoolsControllerUpdate,
+} from "@/app/api/endpoints";
+import { useStorageStore } from "@/stores/storage";
+import { UpdateSchoolDto } from "@/app/api/schemas";
+import { handleImageUpload } from "@/utils/handle-image-upload";
+import { isAxiosError } from "axios";
+import ErrorDialog from "../shared/ErrorDialog";
+import SuccessDialog from "../shared/SuccessDialog";
 
 type DialogKind = "year" | "fee" | "user" | null;
 type SavedSettings = {
@@ -33,27 +43,27 @@ type SavedSettings = {
 };
 
 const storageKey = "upclass-settings-demo";
-const initialValues = {
-  schoolName: "[School Name]",
-  shortCode: "SCH",
-  phone: "",
-  email: "",
-  website: "",
-  timeZone: "Asia/Karachi",
-  address: "",
-  academicYear: "2026",
-  terms: "2",
-  leaveTypes,
-  approvalRequired: "Yes",
-  carryForward: "No",
-  emailNotifications: true,
-  smsNotifications: false,
-  leaveRequestAlert: true,
-  overdueReminders: true,
-  examResultsPublished: true,
-  senderEmail: "notifications@school.edu",
-  smsSenderId: "SCHOOL",
-};
+// const initialValues = {
+//   schoolName: "[School Name]",
+//   shortCode: "SCH",
+//   phone: "",
+//   email: "",
+//   website: "",
+//   timeZone: "Asia/Karachi",
+//   address: "",
+//   academicYear: "2026",
+//   terms: "2",
+//   leaveTypes,
+//   approvalRequired: "Yes",
+//   carryForward: "No",
+//   emailNotifications: true,
+//   smsNotifications: false,
+//   leaveRequestAlert: true,
+//   overdueReminders: true,
+//   examResultsPublished: true,
+//   senderEmail: "notifications@school.edu",
+//   smsSenderId: "SCHOOL",
+// };
 
 export default function Settings() {
   const router = useRouter();
@@ -65,7 +75,11 @@ export default function Settings() {
   const [fees, setFees] = useState(feeHeads);
   const [users, setUsers] = useState(settingsUsers);
   const [dialog, setDialog] = useState<DialogKind>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState<string | null>(null);
+  const { values } = useStorageStore();
+  const schoolId = values?.user?.school?.id ?? "";
 
   useEffect(() => {
     try {
@@ -81,26 +95,60 @@ export default function Settings() {
     }
   }, [form]);
 
-  function saveSettings() {
-    form
-      .validateFields()
-      .then(() => {
-        try {
-          localStorage.setItem(
-            storageKey,
-            JSON.stringify({
-              values: form.getFieldsValue(true),
-              years,
-              fees,
-              users,
-            } satisfies SavedSettings),
-          );
-          message.success("Settings saved in this browser.");
-        } catch {
-          message.error("Settings could not be saved in this browser.");
-        }
-      })
-      .catch(() => message.error("Please complete the required fields."));
+  const { mutateAsync: updateSchoolProfile, isPending: isUpdating } =
+    useSchoolsControllerUpdate();
+
+  async function saveSettings(values: any) {
+    setSubmitError(null);
+    setSubmitSuccess(null);
+
+    try {
+      const logo = await handleImageUpload(values.logo);
+
+      const payload: UpdateSchoolDto = {
+        name: values.schoolName,
+        logo: logo.url ?? "",
+        shortCode: values.shortCode,
+        schoolType: values.schoolType,
+        educationSystem: values.educationSystem,
+        establishedYear: values.establishedYear
+          ? Number(values.establishedYear)
+          : undefined,
+        description: values.description,
+        phone: values.phone,
+        email: values.email,
+        address: values.address,
+        principalName: values.principalName,
+        vicePrincipalName: values.vicePrincipalName,
+        adminContact: values.adminContact,
+        ownerName: values.ownerName,
+        dateFormat: values.dateFormat,
+        feeDueDate: values.feeDueDate ? Number(values.feeDueDate) : undefined,
+        workingDays: values.workingDays,
+        openingTime: values.openingTime,
+        closingTime: values.closingTime,
+      };
+
+      await updateSchoolProfile({
+        id: schoolId,
+        data: payload,
+      });
+
+      setSubmitSuccess("School settings updated successfully.");
+    } catch (error: any) {
+      const body = isAxiosError(error)
+        ? (error.response?.data as
+            | { message?: string; data?: { errors?: string[] } }
+            | undefined)
+        : undefined;
+
+      const errorMessage =
+        body?.data?.errors?.[0] ??
+        body?.message ??
+        (error instanceof Error ? error.message : undefined);
+
+      setSubmitError(errorMessage ?? "Unable to update school settings.");
+    }
   }
 
   function cancelChanges() {
@@ -179,7 +227,11 @@ export default function Settings() {
   }
 
   const tabs = [
-    { key: "profile", label: "School profile", children: <SchoolProfileTab /> },
+    {
+      key: "profile",
+      label: "School profile",
+      children: <SchoolProfileTab form={form} schoolId={schoolId} />,
+    },
     {
       key: "academic",
       label: "Academic year",
@@ -224,14 +276,26 @@ export default function Settings() {
             <Button variant="secondary" onClick={cancelChanges}>
               Cancel
             </Button>
-            <Button onClick={() => form.submit()}>Save settings</Button>
+            <Button loading={isUpdating} onClick={() => form.submit()}>
+              Save settings
+            </Button>
           </div>
         }
+      />
+      <ErrorDialog
+        open={submitError !== null}
+        message={submitError ?? ""}
+        onClose={() => setSubmitError(null)}
+      />
+
+      <SuccessDialog
+        open={submitSuccess !== null}
+        message={submitSuccess ?? ""}
+        onClose={() => setSubmitSuccess(null)}
       />
       <Form
         form={form}
         layout="vertical"
-        initialValues={initialValues}
         onFinish={saveSettings}
         className="flex min-h-0 flex-1 flex-col overflow-hidden"
       >
