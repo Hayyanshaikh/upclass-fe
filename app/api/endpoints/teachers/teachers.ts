@@ -26,6 +26,7 @@ import type {
 
 import type {
   CreateTeacherDto,
+  LookupResponseDto,
   TeacherFindOneResponseDto,
   TeacherResponseDto,
   TeachersControllerFindAllParams,
@@ -237,6 +238,106 @@ export function useTeachersControllerFindAll<TData = Awaited<ReturnType<typeof t
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getTeachersControllerFindAllQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getTeachersControllerLookupUrl = () => {
+
+
+
+
+  return `/api/teachers/lookup`
+}
+
+/**
+ * @summary Get teachers for dropdown
+ */
+export const teachersControllerLookup = async ( options?: Parameters<typeof customInstance>[1]): Promise<LookupResponseDto> => {
+
+  return customInstance<LookupResponseDto>(getTeachersControllerLookupUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getTeachersControllerLookupQueryKey = () => {
+    return [
+    `/api/teachers/lookup`
+    ] as const;
+    }
+
+
+export const getTeachersControllerLookupQueryOptions = <TData = Awaited<ReturnType<typeof teachersControllerLookup>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof teachersControllerLookup>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTeachersControllerLookupQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof teachersControllerLookup>>> = ({ signal }) => teachersControllerLookup({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof teachersControllerLookup>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TeachersControllerLookupQueryResult = NonNullable<Awaited<ReturnType<typeof teachersControllerLookup>>>
+export type TeachersControllerLookupQueryError = unknown
+
+
+export function useTeachersControllerLookup<TData = Awaited<ReturnType<typeof teachersControllerLookup>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof teachersControllerLookup>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof teachersControllerLookup>>,
+          TError,
+          Awaited<ReturnType<typeof teachersControllerLookup>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTeachersControllerLookup<TData = Awaited<ReturnType<typeof teachersControllerLookup>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof teachersControllerLookup>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof teachersControllerLookup>>,
+          TError,
+          Awaited<ReturnType<typeof teachersControllerLookup>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTeachersControllerLookup<TData = Awaited<ReturnType<typeof teachersControllerLookup>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof teachersControllerLookup>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get teachers for dropdown
+ */
+
+export function useTeachersControllerLookup<TData = Awaited<ReturnType<typeof teachersControllerLookup>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof teachersControllerLookup>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTeachersControllerLookupQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
