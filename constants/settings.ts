@@ -1,8 +1,27 @@
-import type { AcademicYear, FeeHead, LeaveType, SettingsUser } from "@/types/settings";
+import {
+  UpdateSchoolDtoDateFormat,
+  UpdateSchoolDtoEducationSystem,
+} from "@/app/api/schemas";
+import type {
+  AcademicYear,
+  FeeHead,
+  LeaveType,
+  SettingsUser,
+} from "@/types/settings";
 
 export const academicYears: AcademicYear[] = [
-  { id: "2026", year: "2026–27", duration: "Aug 2026 – Jun 2027", status: "Active" },
-  { id: "2025", year: "2025–26", duration: "Aug 2025 – Jun 2026", status: "Closed" },
+  {
+    id: "2026",
+    year: "2026–27",
+    duration: "Aug 2026 – Jun 2027",
+    status: "Active",
+  },
+  {
+    id: "2025",
+    year: "2025–26",
+    duration: "Aug 2025 – Jun 2026",
+    status: "Closed",
+  },
 ];
 
 export const leaveTypes: LeaveType[] = [
@@ -19,8 +38,55 @@ export const feeHeads: FeeHead[] = [
 ];
 
 export const settingsUsers: SettingsUser[] = [
-  { id: "imran", name: "Imran Sheikh", role: "Super admin", email: "imran@school.edu", status: "Active" },
-  { id: "sara", name: "Sara Malik", role: "Teacher", email: "sara@school.edu", status: "Active" },
-  { id: "desk", name: "Front Desk", role: "Staff", email: "frontdesk@school.edu", status: "Active" },
-  { id: "guest", name: "Guest Auditor", role: "Viewer", email: "—", status: "Inactive" },
+  {
+    id: "imran",
+    name: "Imran Sheikh",
+    role: "Super admin",
+    email: "imran@school.edu",
+    status: "Active",
+  },
+  {
+    id: "sara",
+    name: "Sara Malik",
+    role: "Teacher",
+    email: "sara@school.edu",
+    status: "Active",
+  },
+  {
+    id: "desk",
+    name: "Front Desk",
+    role: "Staff",
+    email: "frontdesk@school.edu",
+    status: "Active",
+  },
+  {
+    id: "guest",
+    name: "Guest Auditor",
+    role: "Viewer",
+    email: "—",
+    status: "Inactive",
+  },
+];
+
+export const DAYS_OPTIONS = [
+  { label: "Monday", value: "MONDAY" },
+  { label: "Tuesday", value: "TUESDAY" },
+  { label: "Wednesday", value: "WEDNESDAY" },
+  { label: "Thursday", value: "THURSDAY" },
+  { label: "Friday", value: "FRIDAY" },
+  { label: "Saturday", value: "SATURDAY" },
+  { label: "Sunday", value: "SUNDAY" },
+];
+
+export const DATE_FORMAT_OPTIONS = [
+  { label: "DD/MM/YYYY", value: UpdateSchoolDtoDateFormat["DD/MM/YYYY"] },
+  { label: "MM/DD/YYYY", value: UpdateSchoolDtoDateFormat["MM/DD/YYYY"] },
+  { label: "YYYY-MM-DD", value: UpdateSchoolDtoDateFormat["YYYY-MM-DD"] },
+];
+
+export const EDUCATION_SYSTEM_OPTIONS = [
+  { label: "Matric", value: UpdateSchoolDtoEducationSystem.MATRIC },
+  { label: "Cambridge", value: UpdateSchoolDtoEducationSystem.CAMBRIDGE },
+  { label: "Federal Board", value: UpdateSchoolDtoEducationSystem.FEDERAL },
+  { label: "Other", value: UpdateSchoolDtoEducationSystem.OTHER },
 ];

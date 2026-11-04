@@ -5,6 +5,9 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
+import type { UpdateSchoolDtoDateFormat } from './updateSchoolDtoDateFormat';
+import type { UpdateSchoolDtoEducationSystem } from './updateSchoolDtoEducationSystem';
+import type { UpdateSchoolDtoSchoolType } from './updateSchoolDtoSchoolType';
 
 export interface UpdateSchoolDto {
   name?: string;
@@ -18,4 +21,33 @@ export interface UpdateSchoolDto {
   adminName?: string;
   adminEmail?: string;
   adminPassword?: string;
+  /** @nullable */
+  logo?: string | null;
+  /** @nullable */
+  shortCode?: string | null;
+  /** @nullable */
+  schoolType?: UpdateSchoolDtoSchoolType;
+  /** @nullable */
+  educationSystem?: UpdateSchoolDtoEducationSystem;
+  /** @nullable */
+  establishedYear?: number | null;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  principalName?: string | null;
+  /** @nullable */
+  vicePrincipalName?: string | null;
+  /** @nullable */
+  adminContact?: string | null;
+  /** @nullable */
+  ownerName?: string | null;
+  /** @nullable */
+  dateFormat?: UpdateSchoolDtoDateFormat;
+  /** @nullable */
+  feeDueDate?: number | null;
+  workingDays?: string[];
+  /** @nullable */
+  openingTime?: string | null;
+  /** @nullable */
+  closingTime?: string | null;
 }

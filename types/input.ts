@@ -14,7 +14,7 @@ export type InputProps = {
   label?: string;
   rules?: InputRule[];
   isRequird?: boolean;
-  type?: "text" | "password" | "email" | "tel" | "url" | "number";
+  type?: "text" | "password" | "email" | "tel" | "url" | "number" | "time";
   placeholder?: string;
   disabled?: boolean;
   readOnly?: boolean;

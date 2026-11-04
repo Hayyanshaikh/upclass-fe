@@ -3,7 +3,24 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+interface School {
+  id: string;
+}
+
+export interface User {
+  school?: School;
+}
+
 type StorageValue = string | number | boolean | object | null;
+
+interface StorageState {
+  values: Record<string, StorageValue>;
+  setValue: (key: string, value: StorageValue) => void;
+  updateValue: (key: string, value: StorageValue) => void;
+  getValue: (key: string) => StorageValue | undefined;
+  deleteValue: (key: string) => void;
+  clearStorage: () => void;
+}
 
 interface StorageState {
   values: Record<string, StorageValue>;
