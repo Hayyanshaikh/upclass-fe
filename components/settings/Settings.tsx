@@ -27,7 +27,7 @@ import {
   useSchoolsControllerFindOne,
   useSchoolsControllerUpdate,
 } from "@/app/api/endpoints";
-import { useStorageStore } from "@/stores/storage";
+import { User, useStorageStore } from "@/stores/storage";
 import { UpdateSchoolDto } from "@/app/api/schemas";
 import { handleImageUpload } from "@/utils/handle-image-upload";
 import { isAxiosError } from "axios";
@@ -79,7 +79,8 @@ export default function Settings() {
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const { values } = useStorageStore();
-  const schoolId = values?.user?.school?.id ?? "";
+  const user = values.user as User | undefined;
+  const schoolId = user?.school?.id ?? "";
 
   useEffect(() => {
     try {
