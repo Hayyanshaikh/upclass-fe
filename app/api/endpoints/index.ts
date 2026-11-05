@@ -4,6 +4,8 @@ export * from './academic-years/academic-years';
 export * from './app/app';
 export * from './auth/auth';
 export * from './classes/classes';
+export * from './leave-policies/leave-policies';
+export * from './leave-policy-settings/leave-policy-settings';
 export * from './permissions/permissions';
 export * from './roles/roles';
 export * from './schools/schools';
