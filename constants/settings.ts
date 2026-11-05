@@ -3,26 +3,10 @@ import {
   UpdateSchoolDtoEducationSystem,
 } from "@/app/api/schemas";
 import type {
-  AcademicYear,
   FeeHead,
   LeaveType,
   SettingsUser,
 } from "@/types/settings";
-
-export const academicYears: AcademicYear[] = [
-  {
-    id: "2026",
-    year: "2026–27",
-    duration: "Aug 2026 – Jun 2027",
-    status: "Active",
-  },
-  {
-    id: "2025",
-    year: "2025–26",
-    duration: "Aug 2025 – Jun 2026",
-    status: "Closed",
-  },
-];
 
 export const leaveTypes: LeaveType[] = [
   { id: "casual", name: "Casual leave", days: 8 },

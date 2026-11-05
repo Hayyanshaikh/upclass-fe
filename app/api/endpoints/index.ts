@@ -1,3 +1,6 @@
+export * from './academic-terms/academic-terms';
+export * from './academic-year-terms/academic-year-terms';
+export * from './academic-years/academic-years';
 export * from './app/app';
 export * from './auth/auth';
 export * from './classes/classes';

@@ -11,6 +11,7 @@ export default function DatePicker({
   isRequird = false,
   pastOnly = false,
   minDate,
+  maxDate,
   onChange,
 }: DatePickerProps) {
   return (
@@ -31,7 +32,8 @@ export default function DatePicker({
         getPopupContainer={(trigger) => trigger.parentElement!}
         disabledDate={(date) =>
           (pastOnly && date.isAfter(dayjs(), "day")) ||
-          Boolean(minDate && date.isBefore(minDate, "day"))
+          Boolean(minDate && date.isBefore(minDate, "day")) ||
+          Boolean(maxDate && date.isAfter(maxDate, "day"))
         }
       />
     </Form.Item>

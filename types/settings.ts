@@ -10,8 +10,22 @@ export type SectionTitleProps = {
 export type AcademicYear = {
   id: string;
   year: string;
-  duration: string;
-  status: "Active" | "Closed";
+  startDate: string;
+  endDate: string;
+  status: "Upcoming" | "Active" | "Completed";
+};
+
+export type AcademicTerm = {
+  id: string;
+  name: string;
+};
+
+export type AssignedAcademicTerm = {
+  id: string;
+  academicYear: string;
+  term: string;
+  startDate: string;
+  endDate: string;
 };
 
 export type LeaveType = {
@@ -35,20 +49,20 @@ export type SettingsUser = {
   status: "Active" | "Inactive";
 };
 
-export type AcademicYearTabProps = {
-  years: AcademicYear[];
-  onAdd: () => void;
+export type SettingsTabActions = {
+  validate: () => Promise<void>;
+  save: () => Promise<void>;
+  reset: () => void;
 };
 
-export type FeeHeadsTabProps = {
-  fees: FeeHead[];
-  onAdd: () => void;
-};
+export type RegisterSettingsTab = (
+  key: string,
+  actions: SettingsTabActions,
+) => () => void;
 
-export type RolesUsersTabProps = {
-  users: SettingsUser[];
-  onAdd: () => void;
-  canAdd: boolean;
-  onEdit: (user: SettingsUser) => void;
-  onRemove: (id: string) => void;
+export type SettingsTabProps = {
+  registerTab: RegisterSettingsTab;
+  schoolId: string;
+  onSave?: () => void;
+  isSaving?: boolean;
 };
