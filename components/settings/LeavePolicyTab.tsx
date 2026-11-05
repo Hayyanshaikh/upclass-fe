@@ -14,6 +14,8 @@ import type { SettingsTabProps } from "@/types/settings";
 export default function LeavePolicyTab({
   registerTab,
   schoolId,
+  onSave,
+  isSaving,
 }: SettingsTabProps) {
   const [form] = Form.useForm();
   useLeavePolicySettings({ form, registerTab, schoolId });
@@ -33,6 +35,11 @@ export default function LeavePolicyTab({
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <Select name="approvalRequired" label="Approval required" options={[{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }]} />
           <Select name="carryForward" label="Carry forward unused days" options={[{ label: "No", value: "No" }, { label: "Yes", value: "Yes" }]} />
+        </div>
+        <div className="mt-6 flex justify-end">
+          <Button variant="primary" loading={isSaving} onClick={onSave}>
+            Save
+          </Button>
         </div>
       </SectionCard>
     </Form>

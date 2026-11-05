@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Form, message } from "antd";
+import { useEffect, useState } from "react";
+import { Form } from "antd";
 import type { TableColumnsType } from "antd";
+import dayjs from "dayjs";
 import { LuCalendarDays } from "react-icons/lu";
 import SectionTitle from "@/components/settings/SectionTitle";
 import Button from "@/components/ui/Button";
@@ -13,52 +14,23 @@ import SectionCard from "@/components/ui/SectionCard";
 import Select from "@/components/ui/Select";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
-import { academicYears } from "@/constants/settings";
+import ActionButtons from "@/components/shared/ActionButtons";
+import DeleteDialog from "@/components/shared/DeleteDialog";
+import ErrorDialog from "@/components/shared/ErrorDialog";
+import SuccessDialog from "@/components/shared/SuccessDialog";
 import { useAcademicYearSettings } from "@/hooks/useAcademicYearSettings";
 import type { AcademicYear, SettingsTabProps } from "@/types/settings";
+import { DISPLAY_DATE } from "@/constants/date-formats";
 
-type AcademicYearRow = AcademicYear & {
-  startDate?: string;
-  endDate?: string;
-  terms?: string;
-};
-
-const termsOptions = [
-  { label: "2 terms", value: "2" },
-  { label: "3 terms", value: "3" },
+const statusOptions = [
+  { label: "Upcoming", value: "Upcoming" },
+  { label: "Active", value: "Active" },
+  { label: "Completed", value: "Completed" },
 ];
 
-const columns: TableColumnsType<AcademicYear> = [
-  {
-    title: "Academic Year",
-    dataIndex: "year",
-    render: (value: string) => <span className="font-semibold">{value}</span>,
-  },
-  {
-    title: "Start Date",
-    dataIndex: "startDate",
-    render: (value?: string) => value ?? "—",
-  },
-  {
-    title: "End Date",
-    dataIndex: "endDate",
-    render: (value?: string) => value ?? "—",
-  },
-  {
-    title: "Terms",
-    dataIndex: "terms",
-    render: (value?: string) => (value ? `${value} terms` : "—"),
-  },
-  {
-    title: "Status",
-    dataIndex: "status",
-    render: (value: AcademicYear["status"]) => (
-      <StatusBadge variant={value === "Active" ? "success" : "danger"}>
-        {value}
-      </StatusBadge>
-    ),
-  },
-];
+function isFormValidationError(error: unknown) {
+  return typeof error === "object" && error !== null && "errorFields" in error;
+}
 
 export default function AcademicYearTab({
   registerTab,
@@ -66,48 +38,145 @@ export default function AcademicYearTab({
 }: SettingsTabProps) {
   const [form] = Form.useForm();
   const [dialogForm] = Form.useForm();
+  const [editForm] = Form.useForm();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [years, setYears] = useState<AcademicYearRow[]>(academicYears);
-  const { data } = useAcademicYearSettings({
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingYear, setEditingYear] = useState<AcademicYear | null>(null);
+  const [yearToDelete, setYearToDelete] = useState<AcademicYear | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const {
+    data,
+    isLoading,
+    isUpdating,
+    isError,
+    addAcademicYear,
+    updateAcademicYear,
+    removeAcademicYear,
+  } = useAcademicYearSettings({
     form,
     registerTab,
     schoolId,
-    data: years,
-    setData: (next) => setYears(next),
   });
+
+  const columns: TableColumnsType<AcademicYear> = [
+    {
+      title: "Academic Year",
+      dataIndex: "year",
+      render: (value: string) => <span className="font-semibold">{value}</span>,
+    },
+    {
+      title: "Start Date",
+      dataIndex: "startDate",
+      render: (value?: string) =>
+        value ? dayjs(value).format(DISPLAY_DATE) : "—",
+    },
+    {
+      title: "End Date",
+      dataIndex: "endDate",
+      render: (value?: string) =>
+        value ? dayjs(value).format(DISPLAY_DATE) : "—",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      render: (value: AcademicYear["status"]) => (
+        <StatusBadge
+          variant={
+            value === "Active"
+              ? "info"
+              : value === "Upcoming"
+                ? "warning"
+                : "success"
+          }
+        >
+          {value}
+        </StatusBadge>
+      ),
+    },
+    {
+      title: "Actions",
+      dataIndex: "id",
+      render: (_: string, record: AcademicYear) => (
+        <ActionButtons
+          showView={false}
+          deleteDisabled={isUpdating}
+          onEdit={() => openEditDialog(record)}
+          onDelete={() => setYearToDelete(record)}
+        />
+      ),
+    },
+  ];
+
+  useEffect(() => {
+    if (isError) {
+      setErrorMessage("Unable to load academic years.");
+    }
+  }, [isError]);
 
   function openDialog() {
     dialogForm.resetFields();
     setDialogOpen(true);
   }
 
-  function submitDialog() {
-    dialogForm
-      .validateFields()
-      .then((values) => {
-        setYears((current) => [
-          ...current,
-          {
-            id: crypto.randomUUID(),
-            year: String(values.year).trim(),
-            startDate: values.startDate?.format("DD/MM/YYYY") ?? "—",
-            endDate: values.endDate?.format("DD/MM/YYYY") ?? "—",
-            terms: values.terms,
-            status: "Closed",
-          } as AcademicYearRow,
-        ]);
-        setDialogOpen(false);
-        message.info(
-          "Change added locally. Use Save settings to keep it in this browser.",
-        );
-      })
-      .catch(() => undefined);
+  async function submitDialog() {
+    try {
+      const values = await dialogForm.validateFields();
+      await addAcademicYear(values);
+      setDialogOpen(false);
+      setSuccessMessage("Academic year added successfully.");
+    } catch (error) {
+      if (isFormValidationError(error)) return;
+      setErrorMessage(
+        error instanceof Error ? error.message : "Unable to add academic year.",
+      );
+    }
+  }
+
+  function openEditDialog(record: AcademicYear) {
+    setEditingYear(record);
+    setEditDialogOpen(true);
+  }
+
+  async function submitEditDialog() {
+    try {
+      const values = await editForm.validateFields();
+      if (!editingYear) return;
+      await updateAcademicYear(editingYear.id, values);
+      setEditDialogOpen(false);
+      setEditingYear(null);
+      setSuccessMessage("Academic year updated successfully.");
+    } catch (error) {
+      if (isFormValidationError(error)) return;
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to update academic year.",
+      );
+    }
+  }
+
+  async function handleRemoveYear() {
+    if (!yearToDelete) return;
+
+    try {
+      await removeAcademicYear(yearToDelete.id);
+      setSuccessMessage("Academic year deleted successfully.");
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to delete academic year.",
+      );
+    } finally {
+      setYearToDelete(null);
+    }
   }
 
   return (
     <>
       <Form form={form} layout="vertical">
-        <SectionCard className="h-[75vh]! min-h-full">
+        <SectionCard className="h-[75vh]! overflow-auto min-h-full">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <SectionTitle icon={LuCalendarDays}>Academic year</SectionTitle>
 
@@ -121,13 +190,12 @@ export default function AcademicYearTab({
               label="Current academic year"
               isRequird
               options={data.map((year) => ({
-                label: `[${year.year}]`,
+                label: year.year,
                 value: year.id,
               }))}
             />
             <DatePicker name="starts" label="Starts" />
             <DatePicker name="ends" label="Ends" />
-            <Select name="terms" label="Terms" options={termsOptions} />
           </div>
           <div className="mt-5">
             <Table
@@ -135,6 +203,7 @@ export default function AcademicYearTab({
               data={data}
               pagination={false}
               autoHeight
+              loading={isLoading}
             />
           </div>
         </SectionCard>
@@ -143,6 +212,7 @@ export default function AcademicYearTab({
         open={dialogOpen}
         title="Add academic year"
         okText="Add"
+        confirmLoading={isUpdating}
         onClose={() => setDialogOpen(false)}
         onConfirm={submitDialog}
       >
@@ -153,11 +223,74 @@ export default function AcademicYearTab({
             isRequird
             placeholder="2026-2027"
           />
-          <DatePicker name="startDate" label="Start date" />
-          <DatePicker name="endDate" label="End date" />
-          <Select name="terms" label="Terms" options={termsOptions} />
+          <DatePicker name="startDate" label="Start date" isRequird />
+          <DatePicker name="endDate" label="End date" isRequird />
+          <Select
+            name="status"
+            label="Status"
+            isRequird
+            options={statusOptions}
+          />
         </Form>
       </Dialog>
+      <Dialog
+        open={editDialogOpen}
+        title="Edit academic year"
+        okText="Save"
+        confirmLoading={isUpdating}
+        onClose={() => setEditDialogOpen(false)}
+        onConfirm={submitEditDialog}
+      >
+        <Form
+          form={editForm}
+          layout="vertical"
+          className="space-y-4!"
+          initialValues={{
+            year: editingYear?.year,
+            startDate: editingYear ? dayjs(editingYear.startDate) : undefined,
+            endDate: editingYear ? dayjs(editingYear.endDate) : undefined,
+            status: editingYear?.status,
+          }}
+        >
+          <Input
+            name="year"
+            label="Academic year"
+            isRequird
+            placeholder="2026-2027"
+          />
+          <DatePicker name="startDate" label="Start date" isRequird />
+          <DatePicker name="endDate" label="End date" isRequird />
+          <Select
+            name="status"
+            label="Status"
+            isRequird
+            options={statusOptions}
+          />
+        </Form>
+      </Dialog>
+      <DeleteDialog
+        open={yearToDelete !== null}
+        title="Delete academic year?"
+        okText="Delete"
+        message={
+          yearToDelete
+            ? `${yearToDelete.year} will be permanently deleted. This cannot be undone.`
+            : ""
+        }
+        confirmLoading={isUpdating}
+        onClose={() => setYearToDelete(null)}
+        onConfirm={handleRemoveYear}
+      />
+      <SuccessDialog
+        open={successMessage !== null}
+        message={successMessage ?? ""}
+        onClose={() => setSuccessMessage(null)}
+      />
+      <ErrorDialog
+        open={errorMessage !== null}
+        message={errorMessage ?? ""}
+        onClose={() => setErrorMessage(null)}
+      />
     </>
   );
 }

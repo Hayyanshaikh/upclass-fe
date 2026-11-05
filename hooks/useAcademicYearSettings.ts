@@ -1,47 +1,161 @@
-import { useEffect, useRef, useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormInstance } from "antd";
+import { isAxiosError } from "axios";
+import type { Dayjs } from "dayjs";
 
-import { academicYears } from "@/constants/settings";
-import type {
-  AcademicYear,
-  RegisterSettingsTab,
-} from "@/types/settings";
+import {
+  useAcademicYearsControllerCreate,
+  useAcademicYearsControllerFindAll,
+  useAcademicYearsControllerRemove,
+  useAcademicYearsControllerUpdate,
+} from "@/app/api/endpoints";
+import { AcademicYearDtoStatus } from "@/app/api/schemas";
+import type { AcademicYear, RegisterSettingsTab } from "@/types/settings";
+import dayjs from "dayjs";
 
 type UseAcademicYearSettingsParams = {
   form: FormInstance;
   registerTab: RegisterSettingsTab;
   schoolId: string;
-  data: AcademicYear[];
-  setData: Dispatch<SetStateAction<AcademicYear[]>>;
+};
+
+type AcademicYearFormValues = {
+  year: string;
+  startDate?: Dayjs;
+  endDate?: Dayjs;
+  status?: AcademicYear["status"];
+};
+
+type AcademicYearEditValues = {
+  year: string;
+  startDate: Dayjs;
+  endDate: Dayjs;
+  status: AcademicYear["status"];
 };
 
 export function useAcademicYearSettings({
   form,
   registerTab,
-  data,
-  setData,
+  schoolId,
 }: UseAcademicYearSettingsParams) {
-  const [isLoading] = useState(false);
-  const [isFetching] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const {
+    data: response,
+    isFetching,
+    isError,
+    refetch,
+  } = useAcademicYearsControllerFindAll({
+    query: {
+      enabled: !!schoolId,
+    },
+  });
+  const { mutateAsync: createAcademicYear, isPending: isCreating } =
+    useAcademicYearsControllerCreate();
+  const { mutateAsync: updateYear, isPending: isUpdatingYear } =
+    useAcademicYearsControllerUpdate();
+  const { mutateAsync: removeYear, isPending: isRemovingYear } =
+    useAcademicYearsControllerRemove();
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (!response) return;
+
+    const activeYear = response.data.find(
+      (year) => year.status === AcademicYearDtoStatus.ACTIVE,
+    );
+
+    form.setFieldsValue({
+      academicYear: activeYear?.id,
+      starts: dayjs(activeYear?.startDate),
+      ends: dayjs(activeYear?.endDate),
+    });
+  }, [response, form]);
+
+  const data = useMemo<AcademicYear[]>(
+    () =>
+      (response?.data ?? []).map((year) => ({
+        id: year.id,
+        year: year.year,
+        startDate: year.startDate,
+        endDate: year.endDate,
+        status:
+          year.status === AcademicYearDtoStatus.UPCOMING
+            ? "Upcoming"
+            : year.status === AcademicYearDtoStatus.ACTIVE
+              ? "Active"
+              : "Completed",
+      })),
+    [response],
+  );
 
   async function validate() {
     await form.validateFields();
   }
 
   async function save() {
-    setIsUpdating(true);
+    setIsSaving(true);
     try {
-      // Academic year data is managed locally until an API is available.
+      await refetch();
     } finally {
-      setIsUpdating(false);
+      setIsSaving(false);
     }
   }
 
-  function reset() {
+  async function reset() {
     form.resetFields();
-    setData(academicYears);
+    await refetch();
+  }
+
+  async function addAcademicYear(values: AcademicYearFormValues) {
+    try {
+      await createAcademicYear({
+        data: {
+          year: values.year.trim(),
+          startDate: values.startDate?.format("YYYY-MM-DD") ?? "",
+          endDate: values.endDate?.format("YYYY-MM-DD") ?? "",
+          status:
+            values.status === "Upcoming"
+              ? AcademicYearDtoStatus.UPCOMING
+              : values.status === "Completed"
+                ? AcademicYearDtoStatus.COMPLETED
+                : AcademicYearDtoStatus.ACTIVE,
+        },
+      });
+      await refetch();
+    } catch (error) {
+      throw new Error(getErrorMessage(error, "Unable to add academic year."));
+    }
+  }
+
+  async function updateAcademicYear(id: string, values: AcademicYearEditValues) {
+    try {
+      await updateYear({
+        id,
+        data: {
+          year: values.year.trim(),
+          startDate: values.startDate.format("YYYY-MM-DD"),
+          endDate: values.endDate.format("YYYY-MM-DD"),
+          status:
+            values.status === "Upcoming"
+              ? AcademicYearDtoStatus.UPCOMING
+              : values.status === "Completed"
+                ? AcademicYearDtoStatus.COMPLETED
+                : AcademicYearDtoStatus.ACTIVE,
+        },
+      });
+      await refetch();
+    } catch (error) {
+      throw new Error(getErrorMessage(error, "Unable to update academic year."));
+    }
+  }
+
+  async function removeAcademicYear(id: string) {
+    try {
+      await removeYear({ id });
+      await refetch();
+    } catch (error) {
+      throw new Error(getErrorMessage(error, "Unable to delete academic year."));
+    }
   }
 
   const actionsRef = useRef({ validate, save, reset });
@@ -57,5 +171,26 @@ export function useAcademicYearSettings({
     [registerTab],
   );
 
-  return { data, isLoading, isFetching, isUpdating };
+  return {
+    data,
+    isLoading: isFetching && !response,
+    isFetching,
+    isUpdating: isCreating || isUpdatingYear || isRemovingYear || isSaving,
+    isError,
+    addAcademicYear,
+    updateAcademicYear,
+    removeAcademicYear,
+  };
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (isAxiosError(error)) {
+    const body = error.response?.data as
+      | { message?: string; data?: { errors?: string[] } }
+      | undefined;
+
+    return body?.data?.errors?.[0] ?? body?.message ?? fallback;
+  }
+
+  return error instanceof Error ? error.message : fallback;
 }

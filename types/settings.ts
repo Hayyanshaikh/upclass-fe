@@ -10,8 +10,22 @@ export type SectionTitleProps = {
 export type AcademicYear = {
   id: string;
   year: string;
-  duration: string;
-  status: "Active" | "Closed";
+  startDate: string;
+  endDate: string;
+  status: "Upcoming" | "Active" | "Completed";
+};
+
+export type AcademicTerm = {
+  id: string;
+  name: string;
+};
+
+export type AssignedAcademicTerm = {
+  id: string;
+  academicYear: string;
+  term: string;
+  startDate: string;
+  endDate: string;
 };
 
 export type LeaveType = {
@@ -49,4 +63,6 @@ export type RegisterSettingsTab = (
 export type SettingsTabProps = {
   registerTab: RegisterSettingsTab;
   schoolId: string;
+  onSave?: () => void;
+  isSaving?: boolean;
 };

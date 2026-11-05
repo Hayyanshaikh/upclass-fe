@@ -6,6 +6,19 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from './academicTermDto';
+export * from './academicTermFindOneResponseDto';
+export * from './academicTermsResponseDto';
+export * from './academicYearDto';
+export * from './academicYearDtoStatus';
+export * from './academicYearFindOneResponseDto';
+export * from './academicYearsResponseDto';
+export * from './academicYearTermAcademicTermDto';
+export * from './academicYearTermAcademicYearDto';
+export * from './academicYearTermDto';
+export * from './academicYearTermFindOneResponseDto';
+export * from './academicYearTermsControllerFindAllParams';
+export * from './academicYearTermsResponseDto';
 export * from './classDto';
 export * from './classDtoStatus';
 export * from './classesControllerFindAllParams';
@@ -15,6 +28,10 @@ export * from './classSubjectDto';
 export * from './cloudinaryControllerUploadBody';
 export * from './cloudinaryUploadDataDto';
 export * from './cloudinaryUploadResponseDto';
+export * from './createAcademicTermDto';
+export * from './createAcademicYearDto';
+export * from './createAcademicYearDtoStatus';
+export * from './createAcademicYearTermDto';
 export * from './createClassDto';
 export * from './createClassDtoStatus';
 export * from './createClassSubjectDto';
@@ -70,6 +87,8 @@ export * from './teacherResponseDto';
 export * from './teachersControllerFindAllEmploymentType';
 export * from './teachersControllerFindAllParams';
 export * from './teachersControllerFindAllStatus';
+export * from './updateAcademicYearDto';
+export * from './updateAcademicYearDtoStatus';
 export * from './updateClassDto';
 export * from './updateClassDtoStatus';
 export * from './updateRoleDto';

@@ -4,12 +4,12 @@ import { useCallback, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import PageHeader from "@/components/shared/PageHeader";
 import AcademicYearTab from "@/components/settings/AcademicYearTab";
+import AcademicTermsTab from "@/components/settings/AcademicTermsTab";
 import FeeHeadsTab from "@/components/settings/FeeHeadsTab";
 import LeavePolicyTab from "@/components/settings/LeavePolicyTab";
 import NotificationsTab from "@/components/settings/NotificationsTab";
 import RolesUsersTab from "@/components/settings/RolesUsersTab";
 import SchoolProfileTab from "@/components/settings/SchoolProfileTab";
-import Button from "@/components/ui/Button";
 import Tabs from "@/components/ui/Tabs";
 import ErrorDialog from "@/components/shared/ErrorDialog";
 import SuccessDialog from "@/components/shared/SuccessDialog";
@@ -27,6 +27,7 @@ function isValidationError(error: unknown) {
 const TAB_KEYS = [
   "profile",
   "academic",
+  "terms",
   "leave",
   "fees",
   "users",
@@ -67,12 +68,16 @@ export default function Settings() {
   async function saveSettings() {
     setSubmitError(null);
     setSubmitSuccess(null);
+
+    const handler = handlersRef.current[activeTab];
+
+    if (!handler) return;
+
     setIsSaving(true);
 
     try {
-      const handlers = Object.values(handlersRef.current);
-      await Promise.all(handlers.map((handler) => handler.validate()));
-      await Promise.all(handlers.map((handler) => handler.save()));
+      await handler.validate();
+      await handler.save();
 
       setSubmitSuccess("School settings updated successfully.");
     } catch (error) {
@@ -86,10 +91,6 @@ export default function Settings() {
     }
   }
 
-  function cancelChanges() {
-    Object.values(handlersRef.current).forEach((handler) => handler.reset());
-  }
-
   function changeTab(key: string) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", key);
@@ -101,7 +102,12 @@ export default function Settings() {
       key: "profile",
       label: "School profile",
       children: (
-        <SchoolProfileTab registerTab={registerTab} schoolId={schoolId} />
+        <SchoolProfileTab
+          registerTab={registerTab}
+          schoolId={schoolId}
+          onSave={saveSettings}
+          isSaving={isSaving}
+        />
       ),
     },
     {
@@ -112,44 +118,55 @@ export default function Settings() {
       ),
     },
     {
+      key: "terms",
+      label: "Academic terms",
+      children: (
+        <AcademicTermsTab registerTab={registerTab} schoolId={schoolId} />
+      ),
+    },
+    {
       key: "leave",
       label: "Leave policy",
-      children: <LeavePolicyTab registerTab={registerTab} schoolId={schoolId} />,
+      children: (
+        <LeavePolicyTab
+          registerTab={registerTab}
+          schoolId={schoolId}
+          onSave={saveSettings}
+          isSaving={isSaving}
+        />
+      ),
     },
     {
       key: "fees",
       label: "Fee heads",
-      children: <FeeHeadsTab registerTab={registerTab} schoolId={schoolId} />,
+      children: (
+        <FeeHeadsTab registerTab={registerTab} schoolId={schoolId} />
+      ),
     },
     {
       key: "users",
       label: "Roles & users",
-      children: <RolesUsersTab registerTab={registerTab} schoolId={schoolId} />,
+      children: (
+        <RolesUsersTab registerTab={registerTab} schoolId={schoolId} />
+      ),
     },
     {
       key: "notifications",
       label: "Notifications",
       children: (
-        <NotificationsTab registerTab={registerTab} schoolId={schoolId} />
+        <NotificationsTab
+          registerTab={registerTab}
+          schoolId={schoolId}
+          onSave={saveSettings}
+          isSaving={isSaving}
+        />
       ),
     },
   ];
 
   return (
     <div>
-      <PageHeader
-        title="Settings"
-        actions={
-          <div className="flex flex-wrap gap-3">
-            <Button variant="secondary" onClick={cancelChanges}>
-              Cancel
-            </Button>
-            <Button loading={isSaving} onClick={saveSettings}>
-              Save settings
-            </Button>
-          </div>
-        }
-      />
+      <PageHeader title="Settings" />
       <ErrorDialog
         open={submitError !== null}
         message={submitError ?? ""}

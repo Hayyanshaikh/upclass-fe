@@ -3,6 +3,7 @@
 import { Form } from "antd";
 import { LuBell } from "react-icons/lu";
 import SectionTitle from "@/components/settings/SectionTitle";
+import Button from "@/components/ui/Button";
 import Checkbox from "@/components/ui/Checkbox";
 import Input from "@/components/ui/Input";
 import SectionCard from "@/components/ui/SectionCard";
@@ -19,6 +20,8 @@ function NotificationRow({ name, label }: { name: string; label: string }) {
 export default function NotificationsTab({
   registerTab,
   schoolId,
+  onSave,
+  isSaving,
 }: SettingsTabProps) {
   const [form] = Form.useForm();
   useNotificationsSettings({ form, registerTab, schoolId });
@@ -37,6 +40,11 @@ export default function NotificationsTab({
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <Input name="senderEmail" label="Sender email" type="email" placeholder="[notifications@school.edu]" />
           <Input name="smsSenderId" label="SMS sender ID" placeholder="[SCHOOL]" />
+        </div>
+        <div className="mt-6 flex justify-end">
+          <Button variant="primary" loading={isSaving} onClick={onSave}>
+            Save
+          </Button>
         </div>
       </SectionCard>
     </Form>

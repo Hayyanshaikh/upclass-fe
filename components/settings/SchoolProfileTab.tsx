@@ -4,6 +4,7 @@ import { Divider, Form } from "antd";
 import { LuGraduationCap } from "react-icons/lu";
 
 import SectionTitle from "@/components/settings/SectionTitle";
+import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import SectionCard from "@/components/ui/SectionCard";
 import TextArea from "@/components/ui/TextArea";
@@ -23,6 +24,8 @@ import type { SettingsTabProps } from "@/types/settings";
 export default function SchoolProfileTab({
   registerTab,
   schoolId,
+  onSave,
+  isSaving,
 }: SettingsTabProps) {
   const [form] = Form.useForm();
   const { isFetching } = useSchoolProfileSettings({
@@ -184,6 +187,12 @@ export default function SchoolProfileTab({
                   type="time"
                 />
               </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <Button variant="primary" loading={isSaving} onClick={onSave}>
+                Save
+              </Button>
             </div>
           </>
         )}
