@@ -35,20 +35,18 @@ export type SettingsUser = {
   status: "Active" | "Inactive";
 };
 
-export type AcademicYearTabProps = {
-  years: AcademicYear[];
-  onAdd: () => void;
+export type SettingsTabActions = {
+  validate: () => Promise<void>;
+  save: () => Promise<void>;
+  reset: () => void;
 };
 
-export type FeeHeadsTabProps = {
-  fees: FeeHead[];
-  onAdd: () => void;
-};
+export type RegisterSettingsTab = (
+  key: string,
+  actions: SettingsTabActions,
+) => () => void;
 
-export type RolesUsersTabProps = {
-  users: SettingsUser[];
-  onAdd: () => void;
-  canAdd: boolean;
-  onEdit: (user: SettingsUser) => void;
-  onRemove: (id: string) => void;
+export type SettingsTabProps = {
+  registerTab: RegisterSettingsTab;
+  schoolId: string;
 };
