@@ -41,7 +41,16 @@ export default function SchoolProfileTab({
           <Loader />
         ) : (
           <>
-            <SectionTitle icon={LuGraduationCap}>School profile</SectionTitle>
+            <SectionTitle
+              icon={LuGraduationCap}
+              action={
+                <Button variant="primary" loading={isSaving} onClick={onSave}>
+                  Save
+                </Button>
+              }
+            >
+              School profile
+            </SectionTitle>
 
             <div className="flex flex-col gap-5 sm:flex-row">
               <Form.Item name="logo" className="mb-0!">
@@ -189,11 +198,6 @@ export default function SchoolProfileTab({
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end">
-              <Button variant="primary" loading={isSaving} onClick={onSave}>
-                Save
-              </Button>
-            </div>
           </>
         )}
       </SectionCard>

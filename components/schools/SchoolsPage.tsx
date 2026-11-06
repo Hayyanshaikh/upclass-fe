@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
 import type { TableColumnsType } from "antd";
 import ActionButtons from "@/components/shared/ActionButtons";
 import DeleteDialog from "@/components/shared/DeleteDialog";
+import ErrorDialog from "@/components/shared/ErrorDialog";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
@@ -230,7 +232,9 @@ export default function SchoolsPage() {
             ? `Remove ${deletingSchool.name} from the school list?`
             : "Remove this school?"
         }
-        onClose={() => setDeletingSchool(null)}
+        onClose={() => {
+          if (!isDeleting) setDeletingSchool(null);
+        }}
         confirmLoading={isDeleting}
         onConfirm={async () => {
           if (!deletingSchool) return;
@@ -240,45 +244,29 @@ export default function SchoolsPage() {
             setDeletingSchool(null);
             refetch();
           } catch (error) {
+            const message = isAxiosError(error)
+              ? (error.response?.data as { message?: string } | undefined)
+                  ?.message
+              : undefined;
             setDeletingSchool(null);
-            const message =
-              error instanceof Error
-                ? error.message
-                : "Unable to delete school. Please try again.";
-            setDeleteError(message);
-            setIsDeleteErrorOpen(true);
+            setDeleteError(
+              message ?? "Unable to delete school. Please try again.",
+            );
           }
         }}
+        afterClose={() => {
+          if (deleteError) setIsDeleteErrorOpen(true);
+        }}
       />
-      {isDeleteErrorOpen && deleteError && (
-        <div
-          role="alert"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          onClick={() => {
-            setIsDeleteErrorOpen(false);
-            setDeleteError(null);
-          }}
-        >
-          <div
-            className="w-full max-w-md rounded-xl border border-border bg-background p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-lg font-semibold text-dark mb-2">
-              Unable to remove school
-            </h2>
-            <p className="text-gray mb-4">{deleteError}</p>
-            <Button
-              fullWidth
-              onClick={() => {
-                setIsDeleteErrorOpen(false);
-                setDeleteError(null);
-              }}
-            >
-              OK
-            </Button>
-          </div>
-        </div>
-      )}
+      <ErrorDialog
+        open={isDeleteErrorOpen}
+        title="Unable to remove school"
+        message={deleteError ?? "Unable to delete school. Please try again."}
+        onClose={() => {
+          setIsDeleteErrorOpen(false);
+          setDeleteError(null);
+        }}
+      />
     </div>
   );
 }

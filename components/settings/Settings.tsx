@@ -15,10 +15,7 @@ import ErrorDialog from "@/components/shared/ErrorDialog";
 import SuccessDialog from "@/components/shared/SuccessDialog";
 import type { User } from "@/stores/storage";
 import { useStorageStore } from "@/stores/storage";
-import type {
-  RegisterSettingsTab,
-  SettingsTabActions,
-} from "@/types/settings";
+import type { RegisterSettingsTab, SettingsTabActions } from "@/types/settings";
 
 function isValidationError(error: unknown) {
   return typeof error === "object" && error !== null && "errorFields" in error;
@@ -136,32 +133,32 @@ export default function Settings() {
         />
       ),
     },
-    {
-      key: "fees",
-      label: "Fee heads",
-      children: (
-        <FeeHeadsTab registerTab={registerTab} schoolId={schoolId} />
-      ),
-    },
-    {
-      key: "users",
-      label: "Roles & users",
-      children: (
-        <RolesUsersTab registerTab={registerTab} schoolId={schoolId} />
-      ),
-    },
-    {
-      key: "notifications",
-      label: "Notifications",
-      children: (
-        <NotificationsTab
-          registerTab={registerTab}
-          schoolId={schoolId}
-          onSave={saveSettings}
-          isSaving={isSaving}
-        />
-      ),
-    },
+    // {
+    //   key: "fees",
+    //   label: "Fee heads",
+    //   children: (
+    //     <FeeHeadsTab registerTab={registerTab} schoolId={schoolId} />
+    //   ),
+    // },
+    // {
+    //   key: "users",
+    //   label: "Roles & users",
+    //   children: (
+    //     <RolesUsersTab registerTab={registerTab} schoolId={schoolId} />
+    //   ),
+    // },
+    // {
+    //   key: "notifications",
+    //   label: "Notifications",
+    //   children: (
+    //     <NotificationsTab
+    //       registerTab={registerTab}
+    //       schoolId={schoolId}
+    //       onSave={saveSettings}
+    //       isSaving={isSaving}
+    //     />
+    //   ),
+    // },
   ];
 
   return (
