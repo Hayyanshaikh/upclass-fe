@@ -1,28 +1,29 @@
 import type { Dayjs } from "dayjs";
-import type { Student } from "@/types/student";
+import type {
+  CreateStudentDtoGender,
+  CreateStudentDtoStatus,
+  StudentDto,
+} from "@/app/api/schemas";
 
 export type StudentFormValues = {
   firstName: string;
   lastName: string;
-  dateOfBirth?: Dayjs;
-  gender?: string;
+  dateOfBirth?: Dayjs | null;
+  gender?: CreateStudentDtoGender;
   identityNumber?: string;
   bloodGroup?: string;
-  className: string;
-  section: string;
+  classId: string;
   roll: string;
-  admissionDate?: Dayjs;
-  status: string;
+  admissionDate?: Dayjs | null;
+  status: CreateStudentDtoStatus;
   guardian: string;
   relation: string;
   phone: string;
   email?: string;
   address?: string;
-  photo?: string;
+  photo?: File | string | null;
 };
 
 export type StudentFormProps = {
-  initialValues?: StudentFormValues;
-  student?: Student;
-  onSave?: (values: StudentFormValues) => Promise<void> | void;
+  student?: StudentDto;
 };

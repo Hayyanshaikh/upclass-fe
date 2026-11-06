@@ -22,8 +22,8 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import SectionCard from "@/components/ui/SectionCard";
 import Select from "@/components/ui/Select";
-import { academicYearOptions } from "@/constants/classes";
 import { ROUTE_NAMES } from "@/constants/routes";
+import { useAcademicYearDropdown } from "@/hooks/useAcademicYearDropdown";
 import { useSubjectDropdown } from "@/hooks/useSubjectDropdown";
 import { useTeacherDropdown } from "@/hooks/useTeacherDropdown";
 import type { ClassFormProps, ClassFormValues } from "@/types/classes";
@@ -39,6 +39,8 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
   const [successRedirect, setSuccessRedirect] = useState<string | null>(null);
   const { options: teacherOptions } = useTeacherDropdown();
   const { options: subjectOptions } = useSubjectDropdown();
+  const { options: academicYearOptions, isLoading: isAcademicYearsLoading } =
+    useAcademicYearDropdown(form);
   const { mutateAsync: createClass, isPending: isCreating } =
     useClassesControllerCreate();
   const { mutateAsync: updateClass, isPending: isUpdating } =
@@ -52,7 +54,7 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
       section: schoolClass.section,
       room: schoolClass.room,
       capacity: schoolClass.capacity,
-      academicYear: schoolClass.academicYear,
+      academicYearId: schoolClass.academicYearId,
       status: schoolClass.status,
       teacherId: schoolClass.teacherId,
       assistantTeacherId: schoolClass.assistantTeacherId ?? "",
@@ -88,7 +90,7 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
       section: values.section.trim().toUpperCase(),
       room: values.room.trim(),
       capacity: Number(values.capacity),
-      academicYear: values.academicYear,
+      academicYearId: values.academicYearId,
       status: values.status,
       teacherId: values.teacherId,
       assistantTeacherId: values.assistantTeacherId || null,
@@ -136,7 +138,7 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
           : lowerMessage?.includes("name")
             ? "name"
             : lowerMessage?.includes("academic")
-              ? "academicYear"
+              ? "academicYearId"
               : undefined;
 
         if (field) {
@@ -205,7 +207,6 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
         form={form}
         layout="vertical"
         initialValues={{
-          academicYear: academicYearOptions[0]?.value,
           status: CreateClassDtoStatus.ACTIVE,
         }}
         onFinish={(values) => void handleSubmit(values)}
@@ -270,10 +271,11 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
               ]}
             />
             <Select
-              name="academicYear"
+              name="academicYearId"
               label="Academic year"
               placeholder="Select academic year"
               options={academicYearOptions}
+              loading={isAcademicYearsLoading}
               isRequird
             />
             <Select

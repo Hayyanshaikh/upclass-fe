@@ -13,7 +13,7 @@ export const classManipulator = (
     label: `${schoolClass.name}-${schoolClass.section}`,
     room: schoolClass.room,
     capacity: schoolClass.capacity,
-    academicYear: schoolClass.academicYear,
+    academicYear: schoolClass.academicYear.year,
     status:
       schoolClass.status === ClassDtoStatus.ACTIVE ? "Active" : "Inactive",
     teacherId: schoolClass.teacherId,

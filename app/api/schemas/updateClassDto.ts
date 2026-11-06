@@ -14,7 +14,7 @@ export interface UpdateClassDto {
   room?: string;
   /** @minimum 1 */
   capacity?: number;
-  academicYear?: string;
+  academicYearId?: string;
   status?: UpdateClassDtoStatus;
   teacherId?: string;
   /** @nullable */

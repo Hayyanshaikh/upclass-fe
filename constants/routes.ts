@@ -8,4 +8,5 @@ export const ROUTE_NAMES = {
   classListing: "/classes",
   editClass: "/classes/edit/:id",
   createClass: "/classes/add",
+  editStudent: "/students/edit/:id",
 } as const;

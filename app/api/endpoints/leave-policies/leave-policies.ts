@@ -239,6 +239,107 @@ export function useLeavePoliciesControllerFindAll<TData = Awaited<ReturnType<typ
 
 
 
+
+export const getLeavePoliciesControllerFindOneUrl = (id: string,) => {
+
+
+
+
+  return `/api/leave-policies/${id}`
+}
+
+/**
+ * @summary Get a leave policy by ID
+ */
+export const leavePoliciesControllerFindOne = async (id: string, options?: Parameters<typeof customInstance>[1]): Promise<LeavePolicyFindOneResponseDto> => {
+
+  return customInstance<LeavePolicyFindOneResponseDto>(getLeavePoliciesControllerFindOneUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getLeavePoliciesControllerFindOneQueryKey = (id: string,) => {
+    return [
+    `/api/leave-policies/${id}`
+    ] as const;
+    }
+
+
+export const getLeavePoliciesControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>, TError = void>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLeavePoliciesControllerFindOneQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>> = ({ signal }) => leavePoliciesControllerFindOne(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type LeavePoliciesControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>>
+export type LeavePoliciesControllerFindOneQueryError = void
+
+
+export function useLeavePoliciesControllerFindOne<TData = Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>, TError = void>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useLeavePoliciesControllerFindOne<TData = Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useLeavePoliciesControllerFindOne<TData = Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get a leave policy by ID
+ */
+
+export function useLeavePoliciesControllerFindOne<TData = Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof leavePoliciesControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getLeavePoliciesControllerFindOneQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 export const getLeavePoliciesControllerUpdateUrl = (id: string,) => {
 
 
