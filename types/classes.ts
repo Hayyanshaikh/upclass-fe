@@ -25,7 +25,7 @@ export type ClassFormValues = {
   section: string;
   room: string;
   capacity: string | number;
-  academicYear: string;
+  academicYearId: string;
   status: CreateClassDtoStatus;
   teacherId: string;
   assistantTeacherId?: string;

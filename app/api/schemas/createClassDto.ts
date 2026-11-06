@@ -14,7 +14,7 @@ export interface CreateClassDto {
   room: string;
   /** @minimum 1 */
   capacity: number;
-  academicYear: string;
+  academicYearId: string;
   status: CreateClassDtoStatus;
   teacherId: string;
   /** @nullable */

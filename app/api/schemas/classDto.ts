@@ -5,6 +5,7 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
+import type { AcademicYearDto } from './academicYearDto';
 import type { ClassDtoStatus } from './classDtoStatus';
 import type { ClassSubjectDto } from './classSubjectDto';
 
@@ -14,7 +15,8 @@ export interface ClassDto {
   section: string;
   room: string;
   capacity: number;
-  academicYear: string;
+  academicYearId: string;
+  academicYear: AcademicYearDto;
   status: ClassDtoStatus;
   teacherId: string;
   /** @nullable */

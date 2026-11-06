@@ -439,6 +439,7 @@ export function useAcademicTermsControllerFindOne<TData = Awaited<ReturnType<typ
 
 
 
+
 export const getAcademicTermsControllerRemoveUrl = (id: string,) => {
 
 
@@ -512,9 +513,3 @@ export const useAcademicTermsControllerRemove = <TError = void,
       > => {
       return useMutation(getAcademicTermsControllerRemoveMutationOptions(options), queryClient);
     }
-
-
-
-
-
-

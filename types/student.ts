@@ -5,7 +5,7 @@ export type Student = {
   className: string;
   guardian: string;
   phone: string;
-  fees: "Paid" | "Pending" | "Overdue";
+  fees?: "Paid" | "Pending" | "Overdue";
   dateOfBirth?: string;
   gender?: string;
   admissionDate?: string;

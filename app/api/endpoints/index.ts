@@ -9,6 +9,7 @@ export * from './leave-policy-settings/leave-policy-settings';
 export * from './permissions/permissions';
 export * from './roles/roles';
 export * from './schools/schools';
+export * from './students/students';
 export * from './subjects/subjects';
 export * from './teachers/teachers';
 export * from './uploads/uploads';

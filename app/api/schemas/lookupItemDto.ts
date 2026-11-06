@@ -13,4 +13,6 @@ export interface LookupItemDto {
   name: string;
   /** Record code */
   code?: string;
+  /** Record status */
+  status?: string;
 }
