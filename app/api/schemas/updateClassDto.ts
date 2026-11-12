@@ -5,7 +5,6 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
-import type { CreateClassSubjectDto } from './createClassSubjectDto';
 import type { UpdateClassDtoStatus } from './updateClassDtoStatus';
 
 export interface UpdateClassDto {
@@ -19,5 +18,4 @@ export interface UpdateClassDto {
   teacherId?: string;
   /** @nullable */
   assistantTeacherId?: string | null;
-  subjects?: CreateClassSubjectDto[];
 }

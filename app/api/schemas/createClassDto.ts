@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 import type { CreateClassDtoStatus } from './createClassDtoStatus';
-import type { CreateClassSubjectDto } from './createClassSubjectDto';
 
 export interface CreateClassDto {
   name: string;
@@ -19,5 +18,4 @@ export interface CreateClassDto {
   teacherId: string;
   /** @nullable */
   assistantTeacherId?: string | null;
-  subjects?: CreateClassSubjectDto[];
 }

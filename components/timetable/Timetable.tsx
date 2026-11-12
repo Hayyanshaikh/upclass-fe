@@ -59,7 +59,7 @@ export default function Timetable() {
         .map((schoolClass) => schoolClass.section),
     ),
   ].sort();
-  const subjects = timetableSubjectOptions(teachers, classes, assignments);
+  const subjects = timetableSubjectOptions(teachers, assignments);
 
   const fields = timetableFilterFields.map((field) => {
     if (field.type === "date") return field;

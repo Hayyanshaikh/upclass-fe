@@ -1,11 +1,5 @@
 import type { ClassDto, CreateClassDtoStatus } from "@/app/api/schemas";
 
-export type ClassSubject = {
-  subject: string;
-  teacherId: string;
-  periodsPerWeek: number;
-};
-
 export type SchoolClass = {
   id: string;
   grade: string;
@@ -17,7 +11,6 @@ export type SchoolClass = {
   capacity: number;
   academicYear: string;
   status: "Active" | "Inactive";
-  subjects: ClassSubject[];
 };
 
 export type ClassFormValues = {
@@ -29,11 +22,6 @@ export type ClassFormValues = {
   status: CreateClassDtoStatus;
   teacherId: string;
   assistantTeacherId?: string;
-  subjects?: {
-    subjectId?: string;
-    teacherId?: string;
-    periodsPerWeek?: string | number;
-  }[];
 };
 
 export type ClassFormProps = {
@@ -42,7 +30,7 @@ export type ClassFormProps = {
 };
 
 export type ClassFormError = {
-  name: [keyof ClassFormValues] | ["subjects", number, "subjectId" | "teacherId" | "periodsPerWeek"];
+  name: [keyof ClassFormValues];
   errors: string[];
 };
 

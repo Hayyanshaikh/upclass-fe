@@ -1,5 +1,4 @@
 import type { Teacher } from "@/types/teacher";
-import type { SchoolClass } from "@/types/classes";
 import type { TimetableAssignment, TimetableFilters, TimetableSlot } from "@/types/timetable";
 import { timetableSubjects } from "@/constants/timetable";
 
@@ -28,10 +27,9 @@ export function filterTimetableAssignments(assignments: TimetableAssignment[], f
   });
 }
 
-export function timetableSubjectOptions(teachers: Teacher[], classes: SchoolClass[], assignments: TimetableAssignment[]) {
+export function timetableSubjectOptions(teachers: Teacher[], assignments: TimetableAssignment[]) {
   return [...new Set([
     ...Object.values(timetableSubjects).map((subject) => subject.name),
-    ...classes.flatMap((schoolClass) => schoolClass.subjects.map((subject) => subject.subject)),
     ...teachers.map((teacher) => teacher.subject),
     ...assignments.map((assignment) => assignment.subject),
   ])].sort().map((value) => ({ label: value, value }));

@@ -16,7 +16,6 @@ export const classFormDefaults = {
   academicYear: "2026-27",
   status: "Active",
   assistantTeacherId: "",
-  subjects: [{}, {}, {}],
 };
 
 // Sample records for the classes preview.
@@ -31,11 +30,6 @@ export const classes: SchoolClass[] = [
     capacity: 40,
     academicYear: "2026-27",
     status: "Active",
-    subjects: [
-      { subject: "Mathematics", teacherId: "T-014", periodsPerWeek: 5 },
-      { subject: "English", teacherId: "T-021", periodsPerWeek: 4 },
-      { subject: "Science", teacherId: "T-027", periodsPerWeek: 4 },
-    ],
   },
   {
     id: "8-B",
@@ -47,7 +41,6 @@ export const classes: SchoolClass[] = [
     capacity: 40,
     academicYear: "2026-27",
     status: "Active",
-    subjects: [{ subject: "Computer", teacherId: "T-038", periodsPerWeek: 3 }],
   },
   {
     id: "7-A",
@@ -59,7 +52,6 @@ export const classes: SchoolClass[] = [
     capacity: 45,
     academicYear: "2026-27",
     status: "Active",
-    subjects: [{ subject: "Urdu", teacherId: "T-032", periodsPerWeek: 4 }],
   },
   {
     id: "7-B",
@@ -71,7 +63,6 @@ export const classes: SchoolClass[] = [
     capacity: 40,
     academicYear: "2026-27",
     status: "Active",
-    subjects: [{ subject: "English", teacherId: "T-021", periodsPerWeek: 5 }],
   },
   {
     id: "6-A",
@@ -83,7 +74,6 @@ export const classes: SchoolClass[] = [
     capacity: 40,
     academicYear: "2026-27",
     status: "Active",
-    subjects: [{ subject: "Islamiyat", teacherId: "T-045", periodsPerWeek: 3 }],
   },
   {
     id: "9-C",
@@ -95,7 +85,6 @@ export const classes: SchoolClass[] = [
     capacity: 40,
     academicYear: "2026-27",
     status: "Active",
-    subjects: [{ subject: "Science", teacherId: "T-027", periodsPerWeek: 5 }],
   },
   {
     id: "6-B",
@@ -107,7 +96,6 @@ export const classes: SchoolClass[] = [
     capacity: 40,
     academicYear: "2026-27",
     status: "Active",
-    subjects: [],
   },
   {
     id: "9-A",
@@ -119,7 +107,6 @@ export const classes: SchoolClass[] = [
     capacity: 40,
     academicYear: "2026-27",
     status: "Active",
-    subjects: [],
   },
   {
     id: "9-B",
@@ -131,7 +118,6 @@ export const classes: SchoolClass[] = [
     capacity: 40,
     academicYear: "2026-27",
     status: "Active",
-    subjects: [],
   },
   {
     id: "10-A",
@@ -143,7 +129,6 @@ export const classes: SchoolClass[] = [
     capacity: 35,
     academicYear: "2026-27",
     status: "Active",
-    subjects: [],
   },
   {
     id: "10-B",
@@ -155,7 +140,6 @@ export const classes: SchoolClass[] = [
     capacity: 35,
     academicYear: "2026-27",
     status: "Active",
-    subjects: [],
   },
   {
     id: "5-A",
@@ -167,6 +151,5 @@ export const classes: SchoolClass[] = [
     capacity: 35,
     academicYear: "2026-27",
     status: "Inactive",
-    subjects: [],
   },
 ];

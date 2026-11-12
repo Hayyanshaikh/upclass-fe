@@ -7,7 +7,6 @@
  */
 import type { AcademicYearDto } from './academicYearDto';
 import type { ClassDtoStatus } from './classDtoStatus';
-import type { ClassSubjectDto } from './classSubjectDto';
 
 export interface ClassDto {
   id: string;
@@ -21,7 +20,6 @@ export interface ClassDto {
   teacherId: string;
   /** @nullable */
   assistantTeacherId: string | null;
-  subjects: ClassSubjectDto[];
   createdAt: string;
   updatedAt: string;
 }

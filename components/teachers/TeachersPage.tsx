@@ -25,7 +25,6 @@ import {
   useTeachersControllerRemove,
 } from "@/app/api/endpoints";
 import { teacherManipulator } from "@/lib/api/teachers";
-import { useSubjectDropdown } from "@/hooks/useSubjectDropdown";
 import { useTable } from "@/hooks/useTable";
 import type {
   FilterField,
@@ -60,12 +59,10 @@ export default function TeachersPage() {
     setFilters,
     setSearch,
   } = useTable<{
-    subject?: string;
     employmentType?: TeachersControllerFindAllEmploymentType;
     status?: TeachersControllerFindAllStatus;
   }>();
 
-  const { options: subjectOptions } = useSubjectDropdown();
   const {
     data: teachers,
     isFetching,
@@ -75,7 +72,6 @@ export default function TeachersPage() {
     limit: pageSize,
     offset,
     searchKey: search,
-    subject: filters.subject,
     employmentType: filters.employmentType,
     status: filters.status,
   });
@@ -186,12 +182,6 @@ export default function TeachersPage() {
   }
 
   const filterFields: FilterField[] = [
-    {
-      name: "subject",
-      label: "Subject",
-      placeholder: "All subjects",
-      options: subjectOptions,
-    },
     {
       name: "employmentType",
       label: "Employment Type",
