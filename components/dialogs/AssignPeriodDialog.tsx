@@ -7,7 +7,6 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { timetableDays } from "@/constants/timetable";
 import { useTeacherStore } from "@/stores/teachers";
-import { useClassStore } from "@/stores/classes";
 import { useTimetableStore } from "@/stores/timetable";
 import {
   availableTeachers,
@@ -28,7 +27,6 @@ export default function AssignPeriodDialog({
 }: AssignPeriodDialogProps) {
   const [form] = Form.useForm<PeriodFormValues>();
   const teachers = useTeacherStore((state) => state.records);
-  const classes = useClassStore((state) => state.records);
   const assignments = useTimetableStore((state) => state.assignments);
   const savePeriod = useTimetableStore((state) => state.savePeriod);
   const clearPeriod = useTimetableStore((state) => state.clearPeriod);
@@ -45,7 +43,7 @@ export default function AssignPeriodDialog({
     ? teacherConflict(assignments, slot, values.teacherId)
     : undefined;
   const available = availableTeachers(teachers, assignments, slot);
-  const subjects = timetableSubjectOptions(teachers, classes, assignments);
+  const subjects = timetableSubjectOptions(teachers, assignments);
   const day = timetableDays.find((record) => record.key === slot.day)?.label;
   const disabled =
     !values?.subject ||

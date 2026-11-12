@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Form } from "antd";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { LuSave, LuTrash2, LuX } from "react-icons/lu";
+import { LuSave, LuX } from "react-icons/lu";
 import {
   useClassesControllerCreate,
   useClassesControllerUpdate,
@@ -12,7 +12,6 @@ import {
 import {
   CreateClassDtoStatus,
   type CreateClassDto,
-  type CreateClassSubjectDto,
   type UpdateClassDto,
 } from "@/app/api/schemas";
 import ErrorDialog from "@/components/shared/ErrorDialog";
@@ -24,7 +23,6 @@ import SectionCard from "@/components/ui/SectionCard";
 import Select from "@/components/ui/Select";
 import { ROUTE_NAMES } from "@/constants/routes";
 import { useAcademicYearDropdown } from "@/hooks/useAcademicYearDropdown";
-import { useSubjectDropdown } from "@/hooks/useSubjectDropdown";
 import { useTeacherDropdown } from "@/hooks/useTeacherDropdown";
 import type { ClassFormProps, ClassFormValues } from "@/types/classes";
 import { toOptions } from "@/utils/enum-options";
@@ -38,7 +36,6 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [successRedirect, setSuccessRedirect] = useState<string | null>(null);
   const { options: teacherOptions } = useTeacherDropdown();
-  const { options: subjectOptions } = useSubjectDropdown();
   const { options: academicYearOptions, isLoading: isAcademicYearsLoading } =
     useAcademicYearDropdown(form);
   const { mutateAsync: createClass, isPending: isCreating } =
@@ -58,11 +55,6 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
       status: schoolClass.status,
       teacherId: schoolClass.teacherId,
       assistantTeacherId: schoolClass.assistantTeacherId ?? "",
-      subjects: schoolClass.subjects.map((subject) => ({
-        subjectId: subject.subjectId,
-        teacherId: subject.teacherId,
-        periodsPerWeek: subject.periodsPerWeek,
-      })),
     });
   }, [form, schoolClass]);
 
@@ -77,14 +69,6 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
     setSubmitError(null);
     setSubmitSuccess(null);
 
-    const subjects: CreateClassSubjectDto[] = (values.subjects ?? []).map(
-      (row) => ({
-        subjectId: row.subjectId?.trim() ?? "",
-        teacherId: row.teacherId ?? "",
-        periodsPerWeek: Number(row.periodsPerWeek),
-      }),
-    );
-
     const commonData = {
       name: values.name.trim(),
       section: values.section.trim().toUpperCase(),
@@ -94,7 +78,6 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
       status: values.status,
       teacherId: values.teacherId,
       assistantTeacherId: values.assistantTeacherId || null,
-      subjects,
     };
 
     try {
@@ -304,69 +287,6 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
               options={[{ label: "None", value: "" }, ...teacherOptions]}
             />
           </div>
-        </SectionCard>
-        <SectionCard title="Subjects and teachers" autoHeight>
-          <Form.List name="subjects">
-            {(fields, { add, remove }) => (
-              <div className="flex flex-col gap-4">
-                {fields.map((field) => (
-                  <div
-                    key={field.key}
-                    className="flex flex-col gap-3 sm:flex-row sm:items-end"
-                  >
-                    <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 md:grid-cols-3">
-                      <Select
-                        name={[field.name, "subjectId"]}
-                        label="Subject"
-                        placeholder="Select subject"
-                        options={subjectOptions}
-                        rules={[
-                          { required: true, message: "Select a subject." },
-                        ]}
-                      />
-                      <Select
-                        name={[field.name, "teacherId"]}
-                        label="Teacher"
-                        placeholder="Select teacher"
-                        options={teacherOptions}
-                        rules={[
-                          { required: true, message: "Select a teacher." },
-                        ]}
-                      />
-                      <Input
-                        name={[field.name, "periodsPerWeek"]}
-                        label="Periods per week"
-                        type="number"
-                        placeholder="Enter periods per week"
-                        rules={[
-                          {
-                            required: true,
-                            pattern: /^[1-9]\d*$/,
-                            message: "Enter a positive whole number.",
-                          },
-                        ]}
-                      />
-                    </div>
-                    <Button
-                      variant="text"
-                      danger
-                      onClick={() => remove(field.name)}
-                    >
-                      <LuTrash2 aria-hidden="true" />
-                      <span className="sr-only">
-                        Remove subject row {field.name + 1}
-                      </span>
-                    </Button>
-                  </div>
-                ))}
-                <div>
-                  <Button variant="secondary" onClick={() => add({})}>
-                    + Add subject
-                  </Button>
-                </div>
-              </div>
-            )}
-          </Form.List>
         </SectionCard>
       </Form>
     </div>

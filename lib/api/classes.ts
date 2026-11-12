@@ -22,12 +22,4 @@ export const classManipulator = (
     assistantTeacherName: schoolClass.assistantTeacherId
       ? (teacherNames[schoolClass.assistantTeacherId] ?? "Teacher unavailable")
       : null,
-    subjects: schoolClass.subjects.map((subject) => ({
-      id: subject.id,
-      subjectId: subject.subjectId,
-      subjectName: subject.subject.name,
-      teacherId: subject.teacherId,
-      teacherName: teacherNames[subject.teacherId] ?? "Teacher unavailable",
-      periodsPerWeek: subject.periodsPerWeek,
-    })),
   }));

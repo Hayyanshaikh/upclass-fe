@@ -16,15 +16,6 @@ export type ClassesListResponse = {
   warning?: string;
 };
 
-export type ClassSubjectRecord = {
-  id: string;
-  subjectId: string;
-  subjectName: string;
-  teacherId: string;
-  teacherName: string;
-  periodsPerWeek: number;
-};
-
 export type ClassRecord = {
   id: string;
   name: string;
@@ -38,7 +29,6 @@ export type ClassRecord = {
   teacherName: string;
   assistantTeacherId: string | null;
   assistantTeacherName: string | null;
-  subjects: ClassSubjectRecord[];
 };
 
 export type ClassDetailsDialogProps = {

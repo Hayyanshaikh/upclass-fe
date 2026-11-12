@@ -117,31 +117,6 @@ export default function ClassDetailsDialog({
               </dd>
             </div>
           </dl>
-          <h3 className="mt-5 mb-2 text-sm font-bold text-dark">
-            Subjects and teachers
-          </h3>
-          {classRecord.subjects.length ? (
-            <ul className="max-h-60 divide-y divide-border overflow-y-auto">
-              {classRecord.subjects.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex flex-wrap justify-between gap-2 py-3 text-sm"
-                >
-                  <div>
-                    <p className="font-semibold text-dark">
-                      {item.subjectName}
-                    </p>
-                    <p className="text-gray">{item.teacherName}</p>
-                  </div>
-                  <span className="text-gray">
-                    {item.periodsPerWeek} periods / week
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-gray">No subjects assigned yet.</p>
-          )}
         </>
       )}
       {!isFetching && !isError && !classRecord && (
