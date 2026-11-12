@@ -35,7 +35,6 @@ export * from './createAcademicYearTermDto';
 export * from './createClassDto';
 export * from './createClassDtoStatus';
 export * from './createClassSectionDto';
-export * from './createClassSectionDtoRoom';
 export * from './createLeavePolicyDto';
 export * from './createLeavePolicySettingsDto';
 export * from './createPeriodDto';

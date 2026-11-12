@@ -5,12 +5,12 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
-import type { CreateClassSectionDtoRoom } from './createClassSectionDtoRoom';
 
 export interface CreateClassSectionDto {
   sectionId: string;
   teacherId: string;
-  room?: CreateClassSectionDtoRoom;
+  /** @nullable */
+  room?: string | null;
   /** @minimum 1 */
   capacity?: number;
 }
