@@ -6,16 +6,11 @@
  * OpenAPI spec version: 1.0
  */
 import type { CreateClassDtoStatus } from './createClassDtoStatus';
+import type { CreateClassSectionDto } from './createClassSectionDto';
 
 export interface CreateClassDto {
   name: string;
-  section: string;
-  room: string;
-  /** @minimum 1 */
-  capacity: number;
   academicYearId: string;
   status: CreateClassDtoStatus;
-  teacherId: string;
-  /** @nullable */
-  assistantTeacherId?: string | null;
+  sections: CreateClassSectionDto[];
 }

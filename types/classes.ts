@@ -13,15 +13,18 @@ export type SchoolClass = {
   status: "Active" | "Inactive";
 };
 
+export type ClassSectionFormValues = {
+  sectionId: string;
+  teacherId: string;
+  room?: string;
+  capacity?: string | number;
+};
+
 export type ClassFormValues = {
   name: string;
-  section: string;
-  room: string;
-  capacity: string | number;
   academicYearId: string;
   status: CreateClassDtoStatus;
-  teacherId: string;
-  assistantTeacherId?: string;
+  sections: ClassSectionFormValues[];
 };
 
 export type ClassFormProps = {

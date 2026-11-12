@@ -5,17 +5,12 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
+import type { CreateClassSectionDto } from './createClassSectionDto';
 import type { UpdateClassDtoStatus } from './updateClassDtoStatus';
 
 export interface UpdateClassDto {
   name?: string;
-  section?: string;
-  room?: string;
-  /** @minimum 1 */
-  capacity?: number;
   academicYearId?: string;
   status?: UpdateClassDtoStatus;
-  teacherId?: string;
-  /** @nullable */
-  assistantTeacherId?: string | null;
+  sections?: CreateClassSectionDto[];
 }

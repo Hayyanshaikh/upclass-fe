@@ -42,7 +42,11 @@ export default function ClassDetailsDialog({
               {classRecord?.name}
             </h2>
             <p className="mt-0.5 text-sm font-normal text-gray">
-              Section {classRecord?.section}
+              {classRecord?.sections.length
+                ? `Sections ${classRecord.sections
+                    .map((section) => section.section)
+                    .join(", ")}`
+                : "No sections"}
             </p>
           </div>
         </div>
@@ -75,30 +79,6 @@ export default function ClassDetailsDialog({
         <>
           <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-gray">Class teacher</dt>
-              <dd className="mt-1 font-semibold text-dark">
-                {classRecord.teacherName}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-gray">Assistant teacher</dt>
-              <dd className="mt-1 font-semibold text-dark">
-                {classRecord.assistantTeacherName ?? "None"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-gray">Room</dt>
-              <dd className="mt-1 font-semibold text-dark">
-                {classRecord.room}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-gray">Capacity</dt>
-              <dd className="mt-1 font-semibold text-dark">
-                {classRecord.capacity}
-              </dd>
-            </div>
-            <div>
               <dt className="text-gray">Academic year</dt>
               <dd className="mt-1 font-semibold text-dark">
                 {classRecord.academicYear}
@@ -117,6 +97,38 @@ export default function ClassDetailsDialog({
               </dd>
             </div>
           </dl>
+          <div className="mt-4 space-y-3">
+            {classRecord.sections.map((section) => (
+              <div
+                key={section.id}
+                className="rounded-sm border border-border p-3 text-sm"
+              >
+                <p className="font-semibold text-dark">
+                  Section {section.section}
+                </p>
+                <dl className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <div>
+                    <dt className="text-gray">Class teacher</dt>
+                    <dd className="mt-1 font-semibold text-dark">
+                      {section.teacherName}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-gray">Classroom</dt>
+                    <dd className="mt-1 font-semibold text-dark">
+                      {section.room ?? "—"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-gray">Student capacity</dt>
+                    <dd className="mt-1 font-semibold text-dark">
+                      {section.capacity ?? "—"}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            ))}
+          </div>
         </>
       )}
       {!isFetching && !isError && !classRecord && (

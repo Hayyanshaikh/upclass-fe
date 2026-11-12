@@ -17,6 +17,10 @@ export const classFormDefaults = {
   status: "Active",
   assistantTeacherId: "",
 };
+export const classSectionFormDefaults = {
+  room: "",
+  capacity: "",
+};
 
 // Sample records for the classes preview.
 export const classes: SchoolClass[] = [

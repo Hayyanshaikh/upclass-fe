@@ -7,19 +7,15 @@
  */
 import type { AcademicYearDto } from './academicYearDto';
 import type { ClassDtoStatus } from './classDtoStatus';
+import type { ClassSectionDto } from './classSectionDto';
 
 export interface ClassDto {
   id: string;
   name: string;
-  section: string;
-  room: string;
-  capacity: number;
   academicYearId: string;
   academicYear: AcademicYearDto;
   status: ClassDtoStatus;
-  teacherId: string;
-  /** @nullable */
-  assistantTeacherId: string | null;
+  sections: ClassSectionDto[];
   createdAt: string;
   updatedAt: string;
 }
