@@ -12,6 +12,7 @@ function TimetableGrid({
   beforeTable,
   renderLesson,
   interactive = false,
+  loading = false,
 }: TimetableGridProps) {
   const columns = useMemo<TableColumnsType<TimetableRow>>(
     () => [
@@ -62,6 +63,7 @@ function TimetableGrid({
       scrollX={150 + days.length * 160}
       pagination={false}
       interactive={interactive}
+      loading={loading}
       showSearch={false}
       filterFields={filterFields}
       beforeTable={beforeTable}

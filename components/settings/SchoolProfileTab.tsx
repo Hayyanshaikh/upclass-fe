@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Divider, Form } from "antd";
 import { LuGraduationCap } from "react-icons/lu";
 
@@ -33,6 +34,23 @@ export default function SchoolProfileTab({
     registerTab,
     schoolId,
   });
+
+  useEffect(() => {
+    if (isFetching || window.location.hash !== "#workingDays") return;
+
+    const timer = window.setTimeout(() => {
+      const field = document.getElementById("workingDays");
+      field?.focus();
+      field?.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
+    }, 150);
+
+    return () => window.clearTimeout(timer);
+  }, [isFetching]);
 
   return (
     <Form form={form} layout="vertical">
