@@ -8,6 +8,7 @@ import AcademicTermsTab from "@/components/settings/AcademicTermsTab";
 import FeeHeadsTab from "@/components/settings/FeeHeadsTab";
 import LeavePolicyTab from "@/components/settings/LeavePolicyTab";
 import NotificationsTab from "@/components/settings/NotificationsTab";
+import PeriodConfigTab from "@/components/settings/PeriodConfigTab";
 import RolesUsersTab from "@/components/settings/RolesUsersTab";
 import SchoolProfileTab from "@/components/settings/SchoolProfileTab";
 import Tabs from "@/components/ui/Tabs";
@@ -25,6 +26,7 @@ const TAB_KEYS = [
   "profile",
   "academic",
   "terms",
+  "periods",
   "leave",
   "fees",
   "users",
@@ -120,6 +122,11 @@ export default function Settings() {
       children: (
         <AcademicTermsTab registerTab={registerTab} schoolId={schoolId} />
       ),
+    },
+    {
+      key: "periods",
+      label: "Period configuration",
+      children: <PeriodConfigTab schoolId={schoolId} />,
     },
     {
       key: "leave",
