@@ -14,5 +14,6 @@ export * from './sections/sections';
 export * from './students/students';
 export * from './subjects/subjects';
 export * from './teachers/teachers';
+export * from './timetable/timetable';
 export * from './uploads/uploads';
 export * from './users/users';
