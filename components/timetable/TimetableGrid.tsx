@@ -3,11 +3,11 @@
 import { memo, useMemo } from "react";
 import type { TableColumnsType } from "antd";
 import Table from "@/components/ui/Table";
-import { timetableDays } from "@/constants/timetable";
 import type { TimetableGridProps, TimetableRow } from "@/types/timetable";
 
 function TimetableGrid({
   rows,
+  days,
   filterFields,
   beforeTable,
   renderLesson,
@@ -22,7 +22,7 @@ function TimetableGrid({
         onCell: (row) =>
           row.type === "break"
             ? {
-                colSpan: timetableDays.length + 1,
+                colSpan: days.length + 1,
                 className: "bg-foreground! text-center",
               }
             : { className: "px-4! py-2! align-middle" },
@@ -40,7 +40,7 @@ function TimetableGrid({
             </div>
           ),
       },
-      ...timetableDays.map(
+      ...days.map(
         (day): TableColumnsType<TimetableRow>[number] => ({
           title: <span className="block text-center">{day.label}</span>,
           key: day.key,
@@ -52,14 +52,14 @@ function TimetableGrid({
         }),
       ),
     ],
-    [renderLesson],
+    [days, renderLesson],
   );
 
   return (
     <Table
       columns={columns}
       data={rows}
-      scrollX={1110}
+      scrollX={150 + days.length * 160}
       pagination={false}
       interactive={interactive}
       showSearch={false}

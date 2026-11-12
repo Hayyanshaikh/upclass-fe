@@ -1,17 +1,18 @@
 import type { FilterField } from "@/types/table-toolbar";
 import type {
-  TimetableDay,
+  TimetableDayOption,
   TimetableSubject,
   TimetableSubjectKey,
 } from "@/types/timetable";
 
-export const timetableDays: { key: TimetableDay; label: string }[] = [
+export const timetableDays: TimetableDayOption[] = [
   { key: "monday", label: "Monday" },
   { key: "tuesday", label: "Tuesday" },
   { key: "wednesday", label: "Wednesday" },
   { key: "thursday", label: "Thursday" },
   { key: "friday", label: "Friday" },
   { key: "saturday", label: "Saturday" },
+  { key: "sunday", label: "Sunday" },
 ];
 
 export const timetableSubjects: Record<TimetableSubjectKey, TimetableSubject> =

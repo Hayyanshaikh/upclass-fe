@@ -14,6 +14,7 @@ import { useSectionDropdown } from "@/hooks/useSectionDropdown";
 import { useSubjectDropdown } from "@/hooks/useSubjectDropdown";
 import { useTeacherDropdown } from "@/hooks/useTeacherDropdown";
 import { useTimetablePeriods } from "@/hooks/useTimetablePeriods";
+import { useWorkingDays } from "@/hooks/useWorkingDays";
 import { useTimetableStore } from "@/stores/timetable";
 import type {
   TimetableDay,
@@ -35,6 +36,7 @@ export default function Timetable() {
   const { options: termOptions } = useAcademicTermDropdown();
   const { options: teacherOptions } = useTeacherDropdown();
   const { options: subjectOptions } = useSubjectDropdown();
+  const { days, isLoading: isWorkingDaysLoading } = useWorkingDays();
   const [selection, setSelection] = useState<TimetableSelection>({
     class: "",
     section: "",
@@ -249,10 +251,11 @@ export default function Timetable() {
           <div className="flex flex-wrap items-center gap-3">
             <Button variant="secondary">Print</Button>
             <Button
-              disabled={!classId || !hasPeriods}
+              disabled={!classId || !hasPeriods || !days.length}
               onClick={() => {
                 const first = periodRows.find((row) => row.type === "period");
-                if (first) openPeriod(periodSlot(first, "monday"));
+                const firstDay = days[0]?.key;
+                if (first && firstDay) openPeriod(periodSlot(first, firstDay));
               }}
             >
               Edit timetable
@@ -260,8 +263,8 @@ export default function Timetable() {
           </div>
         }
       />
-      {isPeriodsLoading ? (
-        <Loader fullscreen={false} tip="Loading periods..." />
+      {isPeriodsLoading || isWorkingDaysLoading ? (
+        <Loader fullscreen={false} tip="Loading timetable..." />
       ) : isPeriodsError ? (
         <div
           role="alert"
@@ -282,10 +285,21 @@ export default function Timetable() {
             timetable.
           </p>
         </div>
+      ) : !days.length ? (
+        <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-background p-8 text-center">
+          <p className="text-sm font-semibold text-dark">
+            No working days configured.
+          </p>
+          <p className="mt-1 text-sm text-gray">
+            Select working days in Settings → School profile to generate the
+            timetable.
+          </p>
+        </div>
       ) : (
         <>
           <TimetableGrid
             rows={periodRows}
+            days={days}
             filterFields={fields}
             interactive
             renderLesson={renderLesson}

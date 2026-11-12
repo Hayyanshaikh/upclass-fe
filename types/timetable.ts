@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
 import type { FilterField } from "@/types/table-toolbar";
 
-export type TimetableDay = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday";
+export type TimetableDay = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+
+export type TimetableDayOption = {
+  key: TimetableDay;
+  label: string;
+};
 
 export type TimetableSubjectKey = "mathematics" | "english" | "science" | "urdu" | "computer" | "islamiyat" | "physical";
 
@@ -36,6 +41,7 @@ export type LessonCardProps = {
 };
 export type TimetableGridProps = {
   rows: TimetableRow[];
+  days: TimetableDayOption[];
   filterFields: FilterField[];
   beforeTable?: ReactNode;
   renderLesson: (row: TimetableRow, day: TimetableDay) => ReactNode;
