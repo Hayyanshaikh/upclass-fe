@@ -20,7 +20,7 @@ searchKey?: string;
  */
 offset?: number;
 /**
- * Filter classes by teacher ID
+ * Filter classes by section teacher ID
  */
 teacher?: string;
 status?: ClassesControllerFindAllStatus;

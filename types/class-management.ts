@@ -16,19 +16,23 @@ export type ClassesListResponse = {
   warning?: string;
 };
 
+export type ClassSectionRecord = {
+  id: string;
+  sectionId: string;
+  section: string;
+  teacherId: string;
+  teacherName: string;
+  room: string | null;
+  capacity: number | null;
+};
+
 export type ClassRecord = {
   id: string;
   name: string;
-  section: string;
   label: string;
-  room: string;
-  capacity: number;
   academicYear: string;
   status: "Active" | "Inactive";
-  teacherId: string;
-  teacherName: string;
-  assistantTeacherId: string | null;
-  assistantTeacherName: string | null;
+  sections: ClassSectionRecord[];
 };
 
 export type ClassDetailsDialogProps = {

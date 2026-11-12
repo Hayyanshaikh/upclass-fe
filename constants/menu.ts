@@ -16,6 +16,7 @@ import {
   LuUserCog,
   LuStar,
   LuSchool,
+  LuLayoutGrid,
 } from "react-icons/lu";
 
 export const menuItems: NavItem[] = [
@@ -58,6 +59,13 @@ export const menuItems: NavItem[] = [
     href: "/subjects",
     icon: LuBookOpen,
     permission: "subjects.view",
+  },
+  {
+    group: "People",
+    label: "Sections",
+    href: "/sections",
+    icon: LuLayoutGrid,
+    permission: "sections.view",
   },
   {
     group: "People",

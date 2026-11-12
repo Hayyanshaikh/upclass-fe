@@ -14,6 +14,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import ClassDetailsDialog from "@/components/dialogs/ClassDetailsDialog";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
+import TagList from "@/components/ui/TagList";
 import {
   useClassesControllerFindAll,
   useClassesControllerRemove,
@@ -28,6 +29,7 @@ import { useTeacherDropdown } from "@/hooks/useTeacherDropdown";
 import type {
   ClassFilters,
   ClassRecord,
+  ClassSectionRecord,
   ClassesListResponse,
 } from "@/types/class-management";
 import type {
@@ -84,21 +86,13 @@ export default function ClassesPage() {
 
   function downloadCsv() {
     exportCsv("classes-page.csv", [
-      [
-        "Class",
-        "Section",
-        "Class Teacher",
-        "Room",
-        "Capacity",
-        "Academic Year",
-        "Status",
-      ],
+      ["Class", "Sections", "Class Teachers", "Academic Year", "Status"],
       ...classData.map((record) => [
         record.name,
-        record.section,
-        record.teacherName,
-        record.room,
-        String(record.capacity),
+        record.sections.map((section) => section.section).join(", "),
+        [...new Set(record.sections.map((section) => section.teacherName))].join(
+          ", ",
+        ),
         record.academicYear,
         record.status,
       ]),
@@ -144,26 +138,28 @@ export default function ClassesPage() {
       ),
     },
     {
-      title: "Section",
-      dataIndex: "section",
+      title: "Sections",
+      dataIndex: "sections",
+      render: (sections: ClassSectionRecord[]) => (
+        <TagList
+          tags={sections.map((section) => section.section)}
+          showTags={1}
+        />
+      ),
     },
     {
-      title: "Class Teacher",
-      dataIndex: "teacherName",
-      render: (value: string) =>
-        value === "Teacher unavailable" ? (
-          <span className="text-gray">{value}</span>
-        ) : (
-          value
-        ),
+      title: "Class Teachers",
+      dataIndex: "sections",
+      render: (sections: ClassSectionRecord[]) => (
+        <TagList
+          tags={[...new Set(sections.map((section) => section.teacherName))]}
+          showTags={1}
+        />
+      ),
     },
     {
-      title: "Room",
-      dataIndex: "room",
-    },
-    {
-      title: "Capacity",
-      dataIndex: "capacity",
+      title: "Academic Year",
+      dataIndex: "academicYear",
     },
     {
       title: "Status",
@@ -217,7 +213,7 @@ export default function ClassesPage() {
   ];
 
   const tableSearch: TableSearch = {
-    placeholder: "Search by class, section, or teacher",
+    placeholder: "Search by class, section, room, or teacher",
     onChange: setSearch,
   };
 

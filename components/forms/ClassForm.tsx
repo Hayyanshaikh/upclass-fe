@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Form } from "antd";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { LuSave, LuX } from "react-icons/lu";
+import { LuPlus, LuSave, LuTrash2, LuX } from "react-icons/lu";
 import {
   useClassesControllerCreate,
   useClassesControllerUpdate,
@@ -22,7 +22,9 @@ import Input from "@/components/ui/Input";
 import SectionCard from "@/components/ui/SectionCard";
 import Select from "@/components/ui/Select";
 import { ROUTE_NAMES } from "@/constants/routes";
+import { classSectionFormDefaults } from "@/constants/classes";
 import { useAcademicYearDropdown } from "@/hooks/useAcademicYearDropdown";
+import { useSectionDropdown } from "@/hooks/useSectionDropdown";
 import { useTeacherDropdown } from "@/hooks/useTeacherDropdown";
 import type { ClassFormProps, ClassFormValues } from "@/types/classes";
 import { toOptions } from "@/utils/enum-options";
@@ -36,6 +38,8 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [successRedirect, setSuccessRedirect] = useState<string | null>(null);
   const { options: teacherOptions } = useTeacherDropdown();
+  const { options: sectionOptions, isLoading: isSectionsLoading } =
+    useSectionDropdown();
   const { options: academicYearOptions, isLoading: isAcademicYearsLoading } =
     useAcademicYearDropdown(form);
   const { mutateAsync: createClass, isPending: isCreating } =
@@ -48,13 +52,14 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
     if (!schoolClass) return;
     form.setFieldsValue({
       name: schoolClass.name,
-      section: schoolClass.section,
-      room: schoolClass.room,
-      capacity: schoolClass.capacity,
       academicYearId: schoolClass.academicYearId,
       status: schoolClass.status,
-      teacherId: schoolClass.teacherId,
-      assistantTeacherId: schoolClass.assistantTeacherId ?? "",
+      sections: schoolClass.sections.map((section) => ({
+        sectionId: section.sectionId,
+        teacherId: section.teacherId,
+        room: section.room ?? "",
+        capacity: section.capacity ?? "",
+      })),
     });
   }, [form, schoolClass]);
 
@@ -71,13 +76,17 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
 
     const commonData = {
       name: values.name.trim(),
-      section: values.section.trim().toUpperCase(),
-      room: values.room.trim(),
-      capacity: Number(values.capacity),
       academicYearId: values.academicYearId,
       status: values.status,
-      teacherId: values.teacherId,
-      assistantTeacherId: values.assistantTeacherId || null,
+      sections: values.sections.map((section) => ({
+        sectionId: section.sectionId,
+        teacherId: section.teacherId,
+        room: section.room?.trim() || undefined,
+        capacity:
+          section.capacity === "" || section.capacity == null
+            ? undefined
+            : Number(section.capacity),
+      })),
     };
 
     try {
@@ -116,13 +125,11 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
       if (isAxiosError(error) && error.response?.status === 409) {
         const lowerMessage = message?.toLowerCase();
 
-        const field = lowerMessage?.includes("section")
-          ? "section"
-          : lowerMessage?.includes("name")
-            ? "name"
-            : lowerMessage?.includes("academic")
-              ? "academicYearId"
-              : undefined;
+        const field = lowerMessage?.includes("name")
+          ? "name"
+          : lowerMessage?.includes("academic")
+            ? "academicYearId"
+            : undefined;
 
         if (field) {
           form.setFields([
@@ -149,11 +156,7 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
   return (
     <div>
       <PageHeader
-        title={
-          schoolClass
-            ? `${schoolClass.name}-${schoolClass.section}`
-            : "Add class"
-        }
+        title={schoolClass ? schoolClass.name : "Add class"}
         compactMobile
         breadcrumbs={[
           { title: "Classes", href: ROUTE_NAMES.classListing },
@@ -191,6 +194,7 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
         layout="vertical"
         initialValues={{
           status: CreateClassDtoStatus.ACTIVE,
+          sections: [{ ...classSectionFormDefaults }],
         }}
         onFinish={(values) => void handleSubmit(values)}
         onValuesChange={() => setSubmitError(null)}
@@ -217,42 +221,6 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
               isRequird
               rules={[{ whitespace: true, message: "Enter class name." }]}
             />
-            <Input
-              name="section"
-              label="Section"
-              placeholder="A"
-              isRequird
-              rules={[
-                {
-                  required: true,
-                  pattern: /^\s*[A-Za-z]+\s*$/,
-                  message: "Enter a section, e.g. A.",
-                },
-              ]}
-            />
-            <Input
-              name="room"
-              label="Room"
-              placeholder="Enter room, e.g. Room 12"
-              isRequird
-              rules={[
-                { required: true, whitespace: true, message: "Enter room." },
-              ]}
-            />
-            <Input
-              name="capacity"
-              label="Capacity"
-              type="number"
-              placeholder="Enter student capacity"
-              isRequird
-              rules={[
-                {
-                  required: true,
-                  pattern: /^[1-9]\d*$/,
-                  message: "Enter a positive whole number.",
-                },
-              ]}
-            />
             <Select
               name="academicYearId"
               label="Academic year"
@@ -271,22 +239,96 @@ export default function ClassForm({ schoolClass, onSaved }: ClassFormProps) {
             />
           </div>
         </SectionCard>
-        <SectionCard title="Class teacher" autoHeight>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Select
-              name="teacherId"
-              label="Class teacher"
-              placeholder="Select class teacher"
-              options={teacherOptions}
-              isRequird
-            />
-            <Select
-              name="assistantTeacherId"
-              label="Assistant teacher"
-              placeholder="None"
-              options={[{ label: "None", value: "" }, ...teacherOptions]}
-            />
-          </div>
+        <SectionCard autoHeight>
+          <Form.List name="sections">
+            {(fields, { add, remove }) => {
+              function addSection() {
+                const index = fields.length;
+
+                add({ ...classSectionFormDefaults });
+                setTimeout(() =>
+                  form.getFieldInstance(["sections", index, "sectionId"])?.focus(),
+                );
+              }
+
+              return (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h2 className="text-base font-extrabold text-dark">
+                      Sections
+                    </h2>
+                    <Button onClick={addSection}>
+                      <LuPlus size={18} aria-hidden="true" />
+                      Add Section
+                    </Button>
+                  </div>
+                  {fields.map((field, index) => (
+                    <fieldset
+                      key={field.key}
+                      className="flex items-end gap-3"
+                    >
+                      <legend className="sr-only">
+                        Section row {index + 1}
+                      </legend>
+                      <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <Select
+                          name={[field.name, "sectionId"]}
+                          label="Section"
+                          placeholder="Select section"
+                          options={sectionOptions}
+                          loading={isSectionsLoading}
+                          isRequird
+                        />
+                        <Select
+                          name={[field.name, "teacherId"]}
+                          label="Class teacher"
+                          placeholder="Select class teacher"
+                          options={teacherOptions}
+                          isRequird
+                        />
+                        <Input
+                          name={[field.name, "room"]}
+                          label="Classroom"
+                          placeholder="Enter classroom, e.g. Room 12"
+                          rules={[
+                            {
+                              whitespace: true,
+                              message: "Enter classroom.",
+                            },
+                          ]}
+                        />
+                        <Input
+                          name={[field.name, "capacity"]}
+                          label="Student capacity"
+                          type="number"
+                          placeholder="Enter student capacity"
+                          rules={[
+                            {
+                              pattern: /^[1-9]\d*$/,
+                              message: "Enter a positive whole number.",
+                            },
+                          ]}
+                        />
+                      </div>
+                      {fields.length > 1 && (
+                        <Button
+                          variant="text"
+                          danger
+                          className="shrink-0"
+                          onClick={() => remove(field.name)}
+                        >
+                          <LuTrash2 aria-hidden="true" />
+                          <span className="sr-only">
+                            Remove section row {index + 1}
+                          </span>
+                        </Button>
+                      )}
+                    </fieldset>
+                  ))}
+                </div>
+              );
+            }}
+          </Form.List>
         </SectionCard>
       </Form>
     </div>
