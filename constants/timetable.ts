@@ -1,7 +1,6 @@
 import type { FilterField } from "@/types/table-toolbar";
 import type {
   TimetableDay,
-  TimetableRow,
   TimetableSubject,
   TimetableSubjectKey,
 } from "@/types/timetable";
@@ -63,31 +62,21 @@ export const timetableSubjects: Record<TimetableSubjectKey, TimetableSubject> =
 
 export const timetableFilterFields: FilterField[] = [
   {
-    name: "grade",
+    name: "class",
     label: "Class",
     options: [],
-    value: "8",
     allowClear: false,
   },
   {
     name: "section",
     label: "Section",
-    options: [
-      { label: "A", value: "A" },
-      { label: "B", value: "B" },
-      { label: "C", value: "C" },
-    ],
-    value: "A",
+    options: [],
     allowClear: false,
   },
   {
     name: "term",
     label: "Term",
-    options: [
-      { label: "Term 1 [2026–27]", value: "term-1" },
-      { label: "Term 2 [2026–27]", value: "term-2" },
-    ],
-    value: "term-1",
+    options: [],
     allowClear: false,
   },
   {
@@ -106,104 +95,3 @@ export const timetableFilterFields: FilterField[] = [
   },
 ];
 
-export const timetableRows: TimetableRow[] = [
-  {
-    id: "period-1",
-    type: "period",
-    label: "Period 1",
-    time: "08:00–08:40",
-    subjects: {
-      monday: "mathematics",
-      tuesday: "science",
-      wednesday: "computer",
-      thursday: "physical",
-      friday: "english",
-      saturday: "urdu",
-    },
-  },
-  {
-    id: "period-2",
-    type: "period",
-    label: "Period 2",
-    time: "08:40–09:20",
-    subjects: {
-      monday: "english",
-      tuesday: "urdu",
-      wednesday: "islamiyat",
-      thursday: "mathematics",
-      friday: "science",
-      saturday: "computer",
-    },
-  },
-  {
-    id: "period-3",
-    type: "period",
-    label: "Period 3",
-    time: "09:20–10:00",
-    subjects: {
-      monday: "science",
-      tuesday: "computer",
-      wednesday: "physical",
-      thursday: "english",
-      friday: "urdu",
-      saturday: "islamiyat",
-    },
-  },
-  {
-    id: "period-4",
-    type: "period",
-    label: "Period 4",
-    time: "10:00–10:40",
-    subjects: {
-      monday: "urdu",
-      tuesday: "islamiyat",
-      wednesday: "mathematics",
-      thursday: "science",
-      friday: "computer",
-      saturday: "physical",
-    },
-  },
-  { id: "break", type: "break", time: "10:40–11:10" },
-  {
-    id: "period-5",
-    type: "period",
-    label: "Period 5",
-    time: "11:10–11:50",
-    subjects: {
-      monday: "computer",
-      tuesday: "physical",
-      wednesday: "english",
-      thursday: "urdu",
-      friday: "islamiyat",
-      saturday: "mathematics",
-    },
-  },
-  {
-    id: "period-6",
-    type: "period",
-    label: "Period 6",
-    time: "11:50–12:30",
-    subjects: {
-      monday: "islamiyat",
-      tuesday: "mathematics",
-      wednesday: "science",
-      thursday: "computer",
-      friday: "physical",
-      saturday: "english",
-    },
-  },
-  {
-    id: "period-7",
-    type: "period",
-    label: "Period 7",
-    time: "12:30–13:10",
-    subjects: {
-      monday: "physical",
-      tuesday: "english",
-      wednesday: "urdu",
-      thursday: "islamiyat",
-      friday: "mathematics",
-      saturday: "science",
-    },
-  },
-];

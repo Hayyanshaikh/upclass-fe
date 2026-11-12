@@ -1,161 +1,257 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import Button from "@/components/ui/Button";
+import Loader from "@/components/ui/Loader";
 import TimetableGrid from "@/components/timetable/TimetableGrid";
 import LessonCard from "@/components/timetable/LessonCard";
 import AssignPeriodDialog from "@/components/dialogs/AssignPeriodDialog";
-import {
-  timetableFilterFields,
-  timetableRows,
-  timetableSubjects,
-} from "@/constants/timetable";
-import { useTeacherStore } from "@/stores/teachers";
-import { useClassStore } from "@/stores/classes";
+import { timetableFilterFields } from "@/constants/timetable";
+import { useAcademicTermDropdown } from "@/hooks/useAcademicTermDropdown";
+import { useClassDropdown } from "@/hooks/useClassDropdown";
+import { useSectionDropdown } from "@/hooks/useSectionDropdown";
+import { useSubjectDropdown } from "@/hooks/useSubjectDropdown";
+import { useTeacherDropdown } from "@/hooks/useTeacherDropdown";
+import { useTimetablePeriods } from "@/hooks/useTimetablePeriods";
 import { useTimetableStore } from "@/stores/timetable";
-import {
-  filterTimetableAssignments,
-  isSameSlot,
-  timetableSubjectOptions,
-} from "@/utils/timetable";
 import type {
   TimetableDay,
-  TimetableFilters,
   TimetableRow,
+  TimetableSelection,
   TimetableSlot,
 } from "@/types/timetable";
 
 export default function Timetable() {
-  const classes = useClassStore((state) => state.records);
-  const grades = [
-    ...new Set(classes.map((schoolClass) => schoolClass.grade)),
-  ].sort((a, b) => Number(a) - Number(b));
-  const [filters, setFilters] = useState<TimetableFilters>(() => {
-    const grade = grades[0] || "";
-    const section =
-      classes
-        .filter((schoolClass) => schoolClass.grade === grade)
-        .map((schoolClass) => schoolClass.section)
-        .sort()[0] || "";
-    return { grade, section, term: "term-1" };
+  const assignments = useTimetableStore((state) => state.assignments);
+  const {
+    rows: periodRows,
+    isLoading: isPeriodsLoading,
+    isError: isPeriodsError,
+    refetch: refetchPeriods,
+  } = useTimetablePeriods();
+  const { options: classOptions } = useClassDropdown();
+  const { options: sectionOptions } = useSectionDropdown();
+  const { options: termOptions } = useAcademicTermDropdown();
+  const { options: teacherOptions } = useTeacherDropdown();
+  const { options: subjectOptions } = useSubjectDropdown();
+  const [selection, setSelection] = useState<TimetableSelection>({
+    class: "",
+    section: "",
+    term: "",
   });
   const [slot, setSlot] = useState<TimetableSlot | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const teachers = useTeacherStore((state) => state.records);
-  const assignments = useTimetableStore((state) => state.assignments);
+
+  useEffect(() => {
+    setSelection((previous) => {
+      const className = previous.class || classOptions[0]?.value || "";
+      const section = previous.section || sectionOptions[0]?.value || "";
+      const term = previous.term || termOptions[0]?.value || "";
+      if (
+        className === previous.class &&
+        section === previous.section &&
+        term === previous.term
+      )
+        return previous;
+      return { ...previous, class: className, section, term };
+    });
+  }, [classOptions, sectionOptions, termOptions]);
+
+  const classLabel = classOptions.find(
+    (option) => option.value === selection.class,
+  )?.label;
+  const sectionLabel = sectionOptions.find(
+    (option) => option.value === selection.section,
+  )?.label;
   const classId =
-    filters.grade && filters.section
-      ? filters.grade + "-" + filters.section
-      : undefined;
-  const matches = filterTimetableAssignments(assignments, filters);
-  const sections = [
-    ...new Set(
-      classes
-        .filter(
-          (schoolClass) =>
-            !filters.grade || schoolClass.grade === filters.grade,
-        )
-        .map((schoolClass) => schoolClass.section),
-    ),
-  ].sort();
-  const subjects = timetableSubjectOptions(teachers, assignments);
+    classLabel && sectionLabel ? classLabel + "-" + sectionLabel : undefined;
+  const selectedTerm = termOptions.find(
+    (option) => option.value === selection.term,
+  );
+  const hasPeriods = periodRows.length > 0;
 
-  const fields = timetableFilterFields.map((field) => {
-    if (field.type === "date") return field;
-    if (field.name === "grade")
-      return {
-        ...field,
-        value: filters.grade,
-        options: grades.map((value) => ({ label: "Class " + value, value })),
-        onChange: (value: string | undefined) => {
-          if (!value) return;
-          const grade = value;
-          const matching = classes.filter(
-            (schoolClass) => schoolClass.grade === grade,
-          );
-          const section =
-            matching.map((schoolClass) => schoolClass.section).sort()[0] || "";
-          setFilters({ ...filters, grade, section });
-        },
-      };
-    if (field.name === "section")
-      return {
-        ...field,
-        value: filters.section,
-        options: sections.map((value) => ({ label: value, value })),
-        onChange: (value: string | undefined) => {
-          if (value) setFilters({ ...filters, section: value });
-        },
-      };
-    if (field.name === "term")
-      return {
-        ...field,
-        value: filters.term,
-        onChange: (value: string | undefined) => {
-          if (value) setFilters({ ...filters, term: value });
-        },
-      };
-    if (field.name === "teacherId")
-      return {
-        ...field,
-        value: filters.teacherId,
-        options: teachers.map((teacher) => ({
-          label: teacher.name,
-          value: teacher.id,
-        })),
-        onChange: (value: string | undefined) =>
-          setFilters({ ...filters, teacherId: value }),
-      };
-    return {
-      ...field,
-      value: filters.subject,
-      options: subjects,
-      onChange: (value: string | undefined) =>
-        setFilters({ ...filters, subject: value }),
-    };
-  });
+  const fields = useMemo(
+    () =>
+      timetableFilterFields.map((field) => {
+        if (field.type === "date") return field;
 
-  function periodSlot(
-    row: TimetableRow,
-    day: TimetableDay,
-    targetClass = classId,
-  ): TimetableSlot | null {
-    return row.type === "period" && targetClass
-      ? {
-          classId: targetClass,
-          term: filters.term,
-          periodId: row.id,
-          day,
-          label: row.label,
-          time: row.time,
+        switch (field.name) {
+          case "class":
+            return {
+              ...field,
+              value: selection.class,
+              options: classOptions,
+              onChange: (value: string | undefined) => {
+                if (!value) return;
+                setSelection((previous) => ({ ...previous, class: value }));
+              },
+            };
+          case "section":
+            return {
+              ...field,
+              value: selection.section,
+              options: sectionOptions,
+              onChange: (value: string | undefined) => {
+                if (value)
+                  setSelection((previous) => ({
+                    ...previous,
+                    section: value,
+                  }));
+              },
+            };
+          case "term":
+            return {
+              ...field,
+              value: selection.term,
+              options: termOptions,
+              onChange: (value: string | undefined) => {
+                if (value)
+                  setSelection((previous) => ({ ...previous, term: value }));
+              },
+            };
+          case "teacherId":
+            return {
+              ...field,
+              value: selection.teacherId,
+              options: teacherOptions,
+              onChange: (value: string | undefined) =>
+                setSelection((previous) => ({
+                  ...previous,
+                  teacherId: value,
+                })),
+            };
+          case "subject":
+            return {
+              ...field,
+              value: selection.subject,
+              options: subjectOptions,
+              onChange: (value: string | undefined) =>
+                setSelection((previous) => ({
+                  ...previous,
+                  subject: value,
+                })),
+            };
+          default:
+            return field;
         }
-      : null;
-  }
+      }),
+    [
+      classOptions,
+      sectionOptions,
+      selection,
+      subjectOptions,
+      teacherOptions,
+      termOptions,
+    ],
+  );
 
-  function openPeriod(nextSlot: TimetableSlot | null) {
+  const periodSlot = useCallback(
+    (
+      row: TimetableRow,
+      day: TimetableDay,
+      targetClass = classId,
+    ): TimetableSlot | null => {
+      return row.type === "period" && targetClass
+        ? {
+            classId: targetClass,
+            term: selection.term,
+            periodId: row.id,
+            day,
+            label: row.label,
+            time: row.time,
+          }
+        : null;
+    },
+    [classId, selection.term],
+  );
+
+  const openPeriod = useCallback((nextSlot: TimetableSlot | null) => {
     if (!nextSlot) return;
     setSlot(nextSlot);
     setDialogOpen(true);
-  }
+  }, []);
+
+  const renderLesson = useCallback(
+    (row: TimetableRow, day: TimetableDay) => {
+      if (row.type !== "period") return null;
+      const lessons = assignments.filter(
+        (assignment) =>
+          assignment.periodId === row.id && assignment.day === day,
+      );
+      if (lessons.length)
+        return (
+          <div className="space-y-2">
+            {lessons.map((assignment) => {
+              const teacher = teacherOptions.find(
+                (option) => option.value === assignment.teacherId,
+              );
+              const subject = subjectOptions.find(
+                (option) => option.value === assignment.subject,
+              );
+              return (
+                <LessonCard
+                  key={assignment.classId}
+                  title={subject?.label || assignment.subject}
+                  subtitle={
+                    (classId ? "" : "Class " + assignment.classId + " · ") +
+                    (teacher?.label || "Unassigned teacher")
+                  }
+                  onClick={() =>
+                    openPeriod(periodSlot(row, day, assignment.classId))
+                  }
+                  ariaLabel={
+                    "Assign " +
+                    day +
+                    " " +
+                    row.label +
+                    " for Class " +
+                    assignment.classId
+                  }
+                />
+              );
+            })}
+          </div>
+        );
+      const currentSlot = periodSlot(row, day);
+      if (currentSlot) {
+        return (
+          <LessonCard
+            title="Free"
+            free
+            onClick={() => openPeriod(currentSlot)}
+            ariaLabel={
+              "Assign " + day + " " + row.label + " for Class " + classId
+            }
+          />
+        );
+      }
+      return (
+        <div
+          aria-label="No matching period"
+          className="flex min-h-20 items-center justify-center rounded-md text-sm text-gray"
+        >
+          —
+        </div>
+      );
+    },
+    [assignments, classId, openPeriod, periodSlot, subjectOptions, teacherOptions],
+  );
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
         title="Timetable"
         subtitle={
-          "Weekly timetable · " +
-          (filters.term === "term-1" ? "Term 1" : "Term 2")
+          "Weekly timetable" + (selectedTerm ? " · " + selectedTerm.label : "")
         }
         actions={
           <div className="flex flex-wrap items-center gap-3">
             <Button variant="secondary">Print</Button>
             <Button
-              disabled={!classId}
+              disabled={!classId || !hasPeriods}
               onClick={() => {
-                const first = timetableRows.find(
-                  (row) => row.type === "period",
-                );
+                const first = periodRows.find((row) => row.type === "period");
                 if (first) openPeriod(periodSlot(first, "monday"));
               }}
             >
@@ -164,125 +260,44 @@ export default function Timetable() {
           </div>
         }
       />
-      <TimetableGrid
-        rows={timetableRows}
-        filterFields={fields}
-        interactive
-        renderLesson={(row, day) => {
-          if (row.type !== "period") return null;
-          const lessons = matches.filter(
-            (assignment) =>
-              assignment.periodId === row.id && assignment.day === day,
-          );
-          if (lessons.length)
-            return (
-              <div className="space-y-2">
-                {lessons.map((assignment) => {
-                  const subject = Object.values(timetableSubjects).find(
-                    (record) => record.name === assignment.subject,
-                  );
-                  const teacher = teachers.find(
-                    (record) => record.id === assignment.teacherId,
-                  );
-                  return (
-                    <LessonCard
-                      key={assignment.classId}
-                      title={assignment.subject}
-                      subtitle={
-                        (classId ? "" : "Class " + assignment.classId + " · ") +
-                        (teacher?.name || "Unassigned teacher")
-                      }
-                      room={assignment.room}
-                      colorClass={subject?.colorClass || "bg-success/10"}
-                      onClick={() =>
-                        openPeriod(periodSlot(row, day, assignment.classId))
-                      }
-                      ariaLabel={
-                        "Assign " +
-                        day +
-                        " " +
-                        row.label +
-                        " for Class " +
-                        assignment.classId
-                      }
-                    />
-                  );
-                })}
-              </div>
-            );
-          const currentSlot = periodSlot(row, day);
-          const occupied =
-            currentSlot &&
-            assignments.some((assignment) =>
-              isSameSlot(assignment, currentSlot),
-            );
-          const teacherBusy =
-            filters.teacherId &&
-            assignments.some(
-              (assignment) =>
-                assignment.teacherId === filters.teacherId &&
-                assignment.term === filters.term &&
-                assignment.periodId === row.id &&
-                assignment.day === day,
-            );
-          if (
-            (currentSlot && !occupied && !teacherBusy) ||
-            (!currentSlot && filters.teacherId && !teacherBusy)
-          ) {
-            return (
-              <LessonCard
-                title="Free"
-                free
-                onClick={
-                  currentSlot ? () => openPeriod(currentSlot) : undefined
-                }
-                ariaLabel={
-                  currentSlot
-                    ? "Assign " +
-                      day +
-                      " " +
-                      row.label +
-                      " for Class " +
-                      classId
-                    : undefined
-                }
-              />
-            );
-          }
-          return (
-            <div
-              aria-label="No matching period"
-              className="flex min-h-20 items-center justify-center rounded-md text-sm text-gray"
-            >
-              —
-            </div>
-          );
-        }}
-        beforeTable={
-          <section
-            aria-label="Subject legend"
-            className="flex shrink-0 flex-wrap gap-2"
-          >
-            {Object.values(timetableSubjects).map((subject) => (
-              <span
-                key={subject.name}
-                className={
-                  "rounded-full px-3 py-1 text-xs font-semibold text-dark " +
-                  subject.colorClass
-                }
-              >
-                {subject.name}
-              </span>
-            ))}
-          </section>
-        }
-      />
-      <p className="mt-4 shrink-0 text-xs text-gray">
-        {classId
-          ? "Select a period to assign or clear it."
-          : "Select a class and section to assign a free period."}{" "}
-        Preview changes reset on refresh.
-      </p>
+      {isPeriodsLoading ? (
+        <Loader fullscreen={false} tip="Loading periods..." />
+      ) : isPeriodsError ? (
+        <div
+          role="alert"
+          className="flex items-center gap-3 rounded-md border border-danger bg-danger/10 px-4 py-3 text-sm text-danger"
+        >
+          <span>Unable to load periods.</span>
+          <Button variant="link" onClick={() => void refetchPeriods()}>
+            Retry
+          </Button>
+        </div>
+      ) : !hasPeriods ? (
+        <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-background p-8 text-center">
+          <p className="text-sm font-semibold text-dark">
+            No active periods configured.
+          </p>
+          <p className="mt-1 text-sm text-gray">
+            Add periods in Settings → Period configuration to generate the
+            timetable.
+          </p>
+        </div>
+      ) : (
+        <>
+          <TimetableGrid
+            rows={periodRows}
+            filterFields={fields}
+            interactive
+            renderLesson={renderLesson}
+          />
+          <p className="mt-4 shrink-0 text-xs text-gray">
+            {classId
+              ? "Select a period to assign or clear it."
+              : "Select a class and section to assign a free period."}{" "}
+            Preview changes reset on refresh.
+          </p>
+        </>
+      )}
       {slot && (
         <AssignPeriodDialog
           key={slot.classId + slot.term + slot.day + slot.periodId}

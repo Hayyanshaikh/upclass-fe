@@ -17,7 +17,6 @@ export type TimetablePeriod = {
   type: "period";
   label: string;
   time: string;
-  subjects: Record<TimetableDay, TimetableSubjectKey>;
 };
 
 export type TimetableBreak = {
@@ -31,8 +30,6 @@ export type TimetableRow = TimetablePeriod | TimetableBreak;
 export type LessonCardProps = {
   title: string;
   subtitle?: string;
-  room?: string;
-  colorClass?: string;
   free?: boolean;
   onClick?: () => void;
   ariaLabel?: string;
@@ -45,8 +42,8 @@ export type TimetableGridProps = {
   interactive?: boolean;
 };
 
-export type TimetableFilters = {
-  grade: string;
+export type TimetableSelection = {
+  class: string;
   section: string;
   term: string;
   teacherId?: string;
@@ -60,7 +57,6 @@ export type TimetableAssignment = {
   day: TimetableDay;
   subject: string;
   teacherId: string;
-  room: string;
 };
 
 export type TimetableSlot = {
@@ -75,7 +71,6 @@ export type TimetableSlot = {
 export type PeriodFormValues = {
   subject: string;
   teacherId: string;
-  room: string;
 };
 
 export type AssignPeriodDialogProps = {

@@ -3,17 +3,12 @@
 import { Form } from "antd";
 import Dialog from "@/components/ui/Dialog";
 import Select from "@/components/ui/Select";
-import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { timetableDays } from "@/constants/timetable";
-import { useTeacherStore } from "@/stores/teachers";
+import { useSubjectDropdown } from "@/hooks/useSubjectDropdown";
+import { useTeacherDropdown } from "@/hooks/useTeacherDropdown";
 import { useTimetableStore } from "@/stores/timetable";
-import {
-  availableTeachers,
-  isSameSlot,
-  teacherConflict,
-  timetableSubjectOptions,
-} from "@/utils/timetable";
+import { isSameSlot, teacherConflict } from "@/utils/timetable";
 import type {
   AssignPeriodDialogProps,
   PeriodFormValues,
@@ -26,7 +21,8 @@ export default function AssignPeriodDialog({
   afterClose,
 }: AssignPeriodDialogProps) {
   const [form] = Form.useForm<PeriodFormValues>();
-  const teachers = useTeacherStore((state) => state.records);
+  const { options: teacherOptions } = useTeacherDropdown();
+  const { options: subjectOptions } = useSubjectDropdown();
   const assignments = useTimetableStore((state) => state.assignments);
   const savePeriod = useTimetableStore((state) => state.savePeriod);
   const clearPeriod = useTimetableStore((state) => state.clearPeriod);
@@ -36,27 +32,20 @@ export default function AssignPeriodDialog({
   const values = Form.useWatch([], form) as
     | Partial<PeriodFormValues>
     | undefined;
-  const selectedTeacher = teachers.find(
-    (teacher) => teacher.id === values?.teacherId,
+  const selectedTeacher = teacherOptions.find(
+    (option) => option.value === values?.teacherId,
   );
   const conflict = values?.teacherId
     ? teacherConflict(assignments, slot, values.teacherId)
     : undefined;
-  const available = availableTeachers(teachers, assignments, slot);
-  const subjects = timetableSubjectOptions(teachers, assignments);
+  const available = teacherOptions.filter(
+    (option) => !teacherConflict(assignments, slot, option.value),
+  );
   const day = timetableDays.find((record) => record.key === slot.day)?.label;
   const disabled =
-    !values?.subject ||
-    !values.room?.trim() ||
-    !selectedTeacher ||
-    selectedTeacher.status !== "Active" ||
-    Boolean(conflict);
+    !values?.subject || !values?.teacherId || Boolean(conflict);
 
   function submit(values: PeriodFormValues) {
-    const currentTeacher = useTeacherStore
-      .getState()
-      .records.find((teacher) => teacher.id === values.teacherId);
-    if (!currentTeacher || currentTeacher.status !== "Active") return;
     if (savePeriod(slot, values)) onClose();
   }
 
@@ -106,7 +95,6 @@ export default function AssignPeriodDialog({
             ? {
                 subject: existing.subject,
                 teacherId: existing.teacherId,
-                room: existing.room,
               }
             : {}
         }
@@ -117,72 +105,46 @@ export default function AssignPeriodDialog({
           name="subject"
           label="Subject"
           isRequird
-          options={subjects}
+          options={subjectOptions}
           placeholder="Select subject"
         />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Select
-            name="teacherId"
-            label="Teacher"
-            isRequird
-            placeholder="Select teacher"
-            options={teachers.map((teacher) => ({
-              value: teacher.id,
-              label:
-                teacher.name +
-                (teacher.status !== "Active"
-                  ? " (" + teacher.status + ")"
-                  : ""),
-              disabled: teacher.status !== "Active",
-            }))}
-          />
-          <Input
-            name="room"
-            label="Room"
-            isRequird
-            placeholder="Room 12, Lab 2 or Ground"
-            rules={[{ whitespace: true, message: "Enter a room" }]}
-          />
-        </div>
+        <Select
+          name="teacherId"
+          label="Teacher"
+          isRequird
+          placeholder="Select teacher"
+          options={teacherOptions}
+        />
         {selectedTeacher &&
           (conflict ? (
             <div
               role="alert"
               className="rounded-md bg-danger/10 p-4 text-sm font-semibold text-danger"
             >
-              {selectedTeacher.name} is already teaching Class{" "}
-              {conflict.classId} in this period ({conflict.room}). Pick another
-              teacher or another period.
-            </div>
-          ) : selectedTeacher.status !== "Active" ? (
-            <div
-              role="alert"
-              className="rounded-md bg-warning/10 p-4 text-sm font-semibold text-warning"
-            >
-              {selectedTeacher.name} is {selectedTeacher.status.toLowerCase()}{" "}
-              and unavailable for assignment.
+              {selectedTeacher.label} is already teaching Class{" "}
+              {conflict.classId} in this period. Pick another teacher or
+              another period.
             </div>
           ) : (
             <p
               role="status"
               className="rounded-md bg-success/10 p-4 text-sm font-semibold text-success"
             >
-              {selectedTeacher.name} is free in this period.
+              {selectedTeacher.label} is free in this period.
             </p>
           ))}
-        {(conflict ||
-          (selectedTeacher && selectedTeacher.status !== "Active")) && (
+        {conflict && (
           <div>
             <p className="mb-2 text-sm text-gray">Available teachers</p>
             <div className="flex flex-wrap gap-2">
-              {available.map((teacher) => (
+              {available.map((option) => (
                 <Button
-                  key={teacher.id}
+                  key={option.value}
                   variant="link"
                   className="rounded-full! bg-gray/10! px-3! py-1! text-xs!"
-                  onClick={() => form.setFieldValue("teacherId", teacher.id)}
+                  onClick={() => form.setFieldValue("teacherId", option.value)}
                 >
-                  {teacher.name}
+                  {option.label}
                 </Button>
               ))}
               {!available.length && (

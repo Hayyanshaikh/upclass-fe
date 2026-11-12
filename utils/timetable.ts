@@ -1,5 +1,5 @@
 import type { Teacher } from "@/types/teacher";
-import type { TimetableAssignment, TimetableFilters, TimetableSlot } from "@/types/timetable";
+import type { TimetableAssignment, TimetableSelection, TimetableSlot } from "@/types/timetable";
 import { timetableSubjects } from "@/constants/timetable";
 
 export function isSameSlot(assignment: TimetableAssignment, slot: TimetableSlot) {
@@ -17,10 +17,10 @@ export function availableTeachers(teachers: Teacher[], assignments: TimetableAss
   return teachers.filter((teacher) => teacher.status === "Active" && !teacherConflict(assignments, slot, teacher.id));
 }
 
-export function filterTimetableAssignments(assignments: TimetableAssignment[], filters: TimetableFilters) {
+export function filterTimetableAssignments(assignments: TimetableAssignment[], filters: TimetableSelection) {
   return assignments.filter((assignment) => {
-    const [grade, section] = assignment.classId.split("-");
-    return assignment.term === filters.term && (!filters.grade || grade === filters.grade) &&
+    const [className, section] = assignment.classId.split("-");
+    return assignment.term === filters.term && (!filters.class || className === filters.class) &&
       (!filters.section || section === filters.section) &&
       (!filters.teacherId || assignment.teacherId === filters.teacherId) &&
       (!filters.subject || assignment.subject === filters.subject);
