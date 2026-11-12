@@ -1,12 +1,10 @@
 import {
+  CreatePeriodDtoStatus,
+  CreatePeriodDtoType,
   UpdateSchoolDtoDateFormat,
   UpdateSchoolDtoEducationSystem,
 } from "@/app/api/schemas";
-import type {
-  FeeHead,
-  LeaveType,
-  SettingsUser,
-} from "@/types/settings";
+import type { FeeHead, LeaveType, SettingsUser } from "@/types/settings";
 
 export const leaveTypes: LeaveType[] = [
   { id: "casual", name: "Casual leave", days: 8 },
@@ -19,6 +17,16 @@ export const feeHeads: FeeHead[] = [
   { id: "exam", name: "Exam fee", required: true, amount: 1000 },
   { id: "lab", name: "Lab fee", required: false, amount: 500 },
   { id: "sports", name: "Sports fee", required: false, amount: 500 },
+];
+
+export const periodTypeOptions = [
+  { label: "Period", value: CreatePeriodDtoType.PERIOD },
+  { label: "Break", value: CreatePeriodDtoType.BREAK },
+];
+
+export const periodStatusOptions = [
+  { label: "Active", value: CreatePeriodDtoStatus.ACTIVE },
+  { label: "Inactive", value: CreatePeriodDtoStatus.INACTIVE },
 ];
 
 export const settingsUsers: SettingsUser[] = [
