@@ -5,6 +5,8 @@ import Link from "next/link";
 import {
   LuCalendarCheck2,
   LuCalendarX2,
+  LuClock,
+  LuListChecks,
   LuSettings,
 } from "react-icons/lu";
 import PageHeader from "@/components/shared/PageHeader";
@@ -117,7 +119,7 @@ export default function Timetable() {
   const selectedTerm = termOptions.find(
     (option) => option.value === selection.term,
   );
-  const hasPeriods = periodRows.length > 0;
+  const hasPeriods = periodRows.some((row) => row.type === "period");
 
   const fields = useMemo(
     () =>
@@ -338,14 +340,39 @@ export default function Timetable() {
           </Button>
         </div>
       ) : !hasPeriods ? (
-        <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-background p-8 text-center">
-          <p className="text-sm font-semibold text-dark">
-            No active periods configured.
+        <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-background p-10 text-center">
+          <span className="flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <LuClock className="size-8" aria-hidden="true" />
+          </span>
+          <h2 className="mt-5 text-lg font-bold text-dark">
+            No active periods configured
+          </h2>
+          <p className="mt-2 max-w-md text-sm text-gray">
+            The timetable is built from active periods. Add periods or set
+            existing ones to active in your period configuration.
           </p>
-          <p className="mt-1 text-sm text-gray">
-            Add periods in Settings → Period configuration to generate the
-            timetable.
-          </p>
+          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
+            <Link
+              href="/settings?tab=periods"
+              className="flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-xs font-semibold text-dark transition-colors hover:bg-primary/10 hover:text-primary"
+            >
+              <LuSettings
+                className="size-4 text-primary"
+                aria-hidden="true"
+              />
+              Settings → Period configuration
+            </Link>
+            <Link
+              href="/settings?tab=periods"
+              className="flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-xs font-semibold text-dark transition-colors hover:bg-primary/10 hover:text-primary"
+            >
+              <LuListChecks
+                className="size-4 text-success"
+                aria-hidden="true"
+              />
+              Add active periods
+            </Link>
+          </div>
         </div>
       ) : !days.length ? (
         <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-background p-10 text-center">
