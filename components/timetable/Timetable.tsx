@@ -237,7 +237,14 @@ export default function Timetable() {
         </div>
       );
     },
-    [assignments, classId, openPeriod, periodSlot, subjectOptions, teacherOptions],
+    [
+      assignments,
+      classId,
+      openPeriod,
+      periodSlot,
+      subjectOptions,
+      teacherOptions,
+    ],
   );
 
   return (
@@ -247,21 +254,7 @@ export default function Timetable() {
         subtitle={
           "Weekly timetable" + (selectedTerm ? " · " + selectedTerm.label : "")
         }
-        actions={
-          <div className="flex flex-wrap items-center gap-3">
-            <Button variant="secondary">Print</Button>
-            <Button
-              disabled={!classId || !hasPeriods || !days.length}
-              onClick={() => {
-                const first = periodRows.find((row) => row.type === "period");
-                const firstDay = days[0]?.key;
-                if (first && firstDay) openPeriod(periodSlot(first, firstDay));
-              }}
-            >
-              Edit timetable
-            </Button>
-          </div>
-        }
+        actions={<Button>Print Timetable</Button>}
       />
       {isPeriodsLoading || isWorkingDaysLoading ? (
         <Loader fullscreen={false} tip="Loading timetable..." />
