@@ -25,8 +25,10 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CheckTeacherAvailabilityResponseDto,
   CreateTimetableEntryDto,
   TimetableClassSectionsResponseDto,
+  TimetableControllerCheckTeacherAvailabilityParams,
   TimetableControllerFindAllParams,
   TimetableEntriesResponseDto,
   TimetableEntryFindOneResponseDto,
@@ -503,6 +505,109 @@ export function useTimetableControllerClassSections<TData = Awaited<ReturnType<t
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getTimetableControllerClassSectionsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+export const getTimetableControllerCheckTeacherAvailabilityUrl = (params: TimetableControllerCheckTeacherAvailabilityParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+  return stringifiedParams.length > 0 ? `/api/timetable/check-teacher?${stringifiedParams}` : `/api/timetable/check-teacher`
+}
+
+/**
+ * @summary Check teacher availability for a timetable slot
+ */
+export const timetableControllerCheckTeacherAvailability = async (params: TimetableControllerCheckTeacherAvailabilityParams, options?: Parameters<typeof customInstance>[1]): Promise<CheckTeacherAvailabilityResponseDto> => {
+
+  return customInstance<CheckTeacherAvailabilityResponseDto>(getTimetableControllerCheckTeacherAvailabilityUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getTimetableControllerCheckTeacherAvailabilityQueryKey = (params: TimetableControllerCheckTeacherAvailabilityParams,) => {
+    return [
+    `/api/timetable/check-teacher`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getTimetableControllerCheckTeacherAvailabilityQueryOptions = <TData = Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>, TError = unknown>(params: TimetableControllerCheckTeacherAvailabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTimetableControllerCheckTeacherAvailabilityQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>> = ({ signal }) => timetableControllerCheckTeacherAvailability(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TimetableControllerCheckTeacherAvailabilityQueryResult = NonNullable<Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>>
+export type TimetableControllerCheckTeacherAvailabilityQueryError = unknown
+
+
+export function useTimetableControllerCheckTeacherAvailability<TData = Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>, TError = unknown>(
+ params: TimetableControllerCheckTeacherAvailabilityParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>,
+          TError,
+          Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTimetableControllerCheckTeacherAvailability<TData = Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>, TError = unknown>(
+ params: TimetableControllerCheckTeacherAvailabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>,
+          TError,
+          Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTimetableControllerCheckTeacherAvailability<TData = Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>, TError = unknown>(
+ params: TimetableControllerCheckTeacherAvailabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Check teacher availability for a timetable slot
+ */
+
+export function useTimetableControllerCheckTeacherAvailability<TData = Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>, TError = unknown>(
+ params: TimetableControllerCheckTeacherAvailabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof timetableControllerCheckTeacherAvailability>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTimetableControllerCheckTeacherAvailabilityQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
