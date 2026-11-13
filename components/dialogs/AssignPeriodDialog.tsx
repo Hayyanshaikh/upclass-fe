@@ -8,13 +8,15 @@ import Button from "@/components/ui/Button";
 import DeleteDialog from "@/components/shared/DeleteDialog";
 import ErrorDialog from "@/components/shared/ErrorDialog";
 import SuccessDialog from "@/components/shared/SuccessDialog";
-import { useTimetableControllerFindAll } from "@/app/api/endpoints";
+import {
+  useTimetableControllerCheckTeacherAvailability,
+  useTimetableControllerFindAll,
+} from "@/app/api/endpoints";
 import type { CreateTimetableEntryDtoDay } from "@/app/api/schemas";
 import { timetableDays } from "@/constants/timetable";
 import { useSubjectDropdown } from "@/hooks/useSubjectDropdown";
 import { useTeacherDropdown } from "@/hooks/useTeacherDropdown";
 import { useTimetableAssignments } from "@/hooks/useTimetableAssignments";
-import { useTimetableClassSections } from "@/hooks/useTimetableClassSections";
 import { useRolePermission } from "@/hooks/useRolePermission";
 import type {
   AssignPeriodDialogProps,
@@ -33,7 +35,6 @@ export default function AssignPeriodDialog({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { options: teacherOptions } = useTeacherDropdown();
   const { options: subjectOptions } = useSubjectDropdown();
-  const { classSections } = useTimetableClassSections();
   const { canCreate, canEdit, canDelete } = useRolePermission("timetable");
   const { isUpdating, createAssignment, updateAssignment, removeAssignment } =
     useTimetableAssignments({
@@ -59,20 +60,22 @@ export default function AssignPeriodDialog({
   const selectedTeacher = teacherOptions.find(
     (option) => option.value === values?.teacherId,
   );
-  const conflict = values?.teacherId
-    ? termEntries.find(
-        (entry) =>
-          entry.teacherId === values.teacherId &&
-          entry.periodId === slot.periodId &&
-          entry.day === dayKey &&
-          entry.classSectionId !== slot.classSectionId,
-      )
-    : undefined;
-  const conflictClassSection = conflict
-    ? classSections.find(
-        (classSection) => classSection.id === conflict.classSectionId,
-      )
-    : undefined;
+  const { data: teacherCheckData, isFetching: isCheckingTeacher } =
+    useTimetableControllerCheckTeacherAvailability(
+      {
+        teacherId: values?.teacherId ?? "",
+        academicTermId: slot.academicTermId,
+        periodId: slot.periodId,
+        day: dayKey,
+        excludeClassSectionId: slot.classSectionId,
+      },
+      { query: { enabled: Boolean(values?.teacherId) } },
+    );
+  const checkResult = teacherCheckData?.data;
+  const conflict = checkResult?.conflict === true;
+  const isCurrentTeacher = Boolean(
+    existing && values?.teacherId === existing.teacherId,
+  );
   const available = teacherOptions.filter(
     (option) =>
       !termEntries.some(
@@ -89,7 +92,8 @@ export default function AssignPeriodDialog({
     !values?.subjectId ||
     !values?.teacherId ||
     Boolean(conflict) ||
-    !canSave;
+    !canSave ||
+    isCheckingTeacher;
 
   useEffect(() => {
     if (!existing) return;
@@ -118,7 +122,9 @@ export default function AssignPeriodDialog({
       }
       await refetchTermEntries();
       setSuccessMessage(
-        existing ? "Period updated successfully." : "Period assigned successfully.",
+        existing
+          ? "Period updated successfully."
+          : "Period assigned successfully.",
       );
     } catch (error) {
       setErrorMessage(
@@ -186,11 +192,7 @@ export default function AssignPeriodDialog({
           </div>
         }
       >
-        <Form
-          form={form}
-          onFinish={submit}
-          className="flex flex-col gap-4"
-        >
+        <Form form={form} onFinish={submit} className="flex flex-col gap-4">
           <Select
             name="subjectId"
             label="Subject"
@@ -206,21 +208,22 @@ export default function AssignPeriodDialog({
             options={teacherOptions}
           />
           {selectedTeacher &&
+            !isCurrentTeacher &&
+            !isCheckingTeacher &&
+            checkResult &&
             (conflict ? (
               <div
                 role="alert"
                 className="rounded-md bg-danger/10 p-4 text-sm font-semibold text-danger"
               >
-                {selectedTeacher.label} is already teaching{" "}
-                {conflictClassSection?.name ?? "another class"} in this period.
-                Pick another teacher or another period.
+                {checkResult.message}
               </div>
             ) : (
               <p
                 role="status"
                 className="rounded-md bg-success/10 p-4 text-sm font-semibold text-success"
               >
-                {selectedTeacher.label} is free in this period.
+                {checkResult.message}
               </p>
             ))}
           {conflict && (
@@ -232,7 +235,9 @@ export default function AssignPeriodDialog({
                     key={option.value}
                     variant="link"
                     className="rounded-full! bg-gray/10! px-3! py-1! text-xs!"
-                    onClick={() => form.setFieldValue("teacherId", option.value)}
+                    onClick={() =>
+                      form.setFieldValue("teacherId", option.value)
+                    }
                   >
                     {option.label}
                   </Button>
