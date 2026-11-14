@@ -1,8 +1,7 @@
 export type TeacherAttendanceReportRow = {
+  teacherId: string;
   id: string;
   teacher: string;
-  department: string;
-  subject: string;
   days: number;
   present: number;
   absent: number;

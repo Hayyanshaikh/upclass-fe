@@ -5,11 +5,12 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
+import type { TimetableControllerCheckTeacherAvailabilityDay } from './timetableControllerCheckTeacherAvailabilityDay';
 
 export type TimetableControllerCheckTeacherAvailabilityParams = {
 teacherId: string;
 academicTermId: string;
 periodId: string;
-day: string;
+day: TimetableControllerCheckTeacherAvailabilityDay;
 excludeClassSectionId?: string;
 };
