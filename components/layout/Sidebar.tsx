@@ -15,6 +15,7 @@ import { useStorageStore } from "@/stores/storage";
 import type { LoginResponseUserDto } from "@/app/api/schemas";
 import { useUserControllerFindOne } from "@/app/api/endpoints";
 import { NavItem } from "@/types/menu";
+import InstallButton from "@/components/ui/InstallButton";
 
 function SidebarHeader({ onNavigate }: { onNavigate?: () => void }) {
   return (
@@ -211,6 +212,7 @@ function SidebarContent({
         isError={isError}
         onNavigate={onNavigate}
       />
+      <InstallButton />
       <SidebarProfile user={user} onLogout={onLogout} showLogout={showLogout} />
     </div>
   );
