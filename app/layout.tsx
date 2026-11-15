@@ -7,6 +7,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import Loader from "@/components/ui/Loader";
 import ServiceWorkerRegister from "@/components/shared/ServiceWorkerRegister";
+import MobileInstallGate from "@/components/shared/MobileInstallGate";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -30,7 +31,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Suspense fallback={<Loader />}>
           <Providers>
             <AntdRegistry>
-              <AntdProvider>{children}</AntdProvider>
+              <AntdProvider>
+                {children}
+                <MobileInstallGate />
+              </AntdProvider>
             </AntdRegistry>
           </Providers>
         </Suspense>
