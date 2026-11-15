@@ -6,53 +6,54 @@ import Dialog from "@/components/ui/Dialog";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+  userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+  }>;
 };
 
+// Captured at module load because Chrome may fire the event before React hydrates.
+let deferredPromptEvent: BeforeInstallPromptEvent | null = null;
+
+const promptSubscribers = new Set<(event: BeforeInstallPromptEvent) => void>();
+
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+
+    const promptEvent = event as BeforeInstallPromptEvent;
+
+    deferredPromptEvent = promptEvent;
+    promptSubscribers.forEach((subscriber) => subscriber(promptEvent));
+  });
+}
+
+function isIOSDevice() {
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
 function getInstallSteps() {
-  if (typeof navigator === "undefined") {
+  if (isIOSDevice()) {
     return [
-      "Open your browser menu.",
-      "Choose Install app or Add to Home Screen.",
-      "Confirm the installation.",
-    ];
-  }
-
-  const userAgent = navigator.userAgent;
-  const isIOS =
-    /iPad|iPhone|iPod/.test(userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-  if (isIOS) {
-    return [
-      "Tap the Share button in your browser.",
+      "Tap the Share button in Safari.",
       "Choose Add to Home Screen.",
-      "Tap Add.",
+      "Tap Add to install the app.",
     ];
   }
 
-  if (/Android/i.test(userAgent)) {
+  if (/Android/i.test(navigator.userAgent)) {
     return [
       "Open the browser menu (⋮).",
-      "Tap Install app or Add to Home screen.",
-      "Confirm the installation.",
-    ];
-  }
-
-  if (
-    /Safari/i.test(userAgent) &&
-    !/Chrome|Chromium|Edg|OPR/i.test(userAgent)
-  ) {
-    return [
-      "Open the File menu.",
-      "Choose Add to Dock.",
+      "Choose Install app or Add to Home screen.",
       "Confirm the installation.",
     ];
   }
 
   return [
-    "Click the install icon in the address bar, or open the browser menu.",
-    "Choose Install app or Install this site as an app.",
+    "Click the install icon in the browser address bar.",
+    "Choose Install app.",
     "Confirm the installation.",
   ];
 }
@@ -60,53 +61,77 @@ function getInstallSteps() {
 export default function InstallButton() {
   const [promptEvent, setPromptEvent] =
     useState<BeforeInstallPromptEvent | null>(null);
+
   const [isInstalled, setIsInstalled] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (navigator as Navigator & { standalone?: boolean }).standalone === true;
+    const standaloneQuery = window.matchMedia("(display-mode: standalone)");
 
-    if (isStandalone) {
-      setIsInstalled(true);
-    }
+    const checkInstalled = () => {
+      const standalone =
+        standaloneQuery.matches ||
+        (navigator as Navigator & { standalone?: boolean }).standalone === true;
 
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setPromptEvent(event as BeforeInstallPromptEvent);
+      setIsInstalled(standalone);
+    };
+
+    const handlePrompt = (event: BeforeInstallPromptEvent) => {
+      setPromptEvent(event);
     };
 
     const handleInstalled = () => {
+      deferredPromptEvent = null;
       setIsInstalled(true);
       setPromptEvent(null);
+      setHelpOpen(false);
     };
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    checkInstalled();
+
+    if (deferredPromptEvent) {
+      setPromptEvent(deferredPromptEvent);
+    }
+
+    promptSubscribers.add(handlePrompt);
+
     window.addEventListener("appinstalled", handleInstalled);
 
+    standaloneQuery.addEventListener("change", checkInstalled);
+
     return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt,
-      );
+      promptSubscribers.delete(handlePrompt);
+
       window.removeEventListener("appinstalled", handleInstalled);
+
+      standaloneQuery.removeEventListener("change", checkInstalled);
     };
   }, []);
 
   const handleInstall = async () => {
-    if (!promptEvent) {
-      setHelpOpen(true);
+    if (promptEvent) {
+      try {
+        await promptEvent.prompt();
+
+        const { outcome } = await promptEvent.userChoice;
+
+        if (outcome === "accepted") {
+          setIsInstalled(true);
+        }
+
+        deferredPromptEvent = null;
+        setPromptEvent(null);
+      } catch (error) {
+        deferredPromptEvent = null;
+        setPromptEvent(null);
+        console.error("Installation failed:", error);
+      }
+
       return;
     }
 
-    await promptEvent.prompt();
-    const { outcome } = await promptEvent.userChoice;
-    setPromptEvent(null);
-
-    if (outcome === "accepted") {
-      setIsInstalled(true);
-    }
+    // iOS and browsers without native install prompt
+    setHelpOpen(true);
   };
 
   if (isInstalled) return null;
@@ -136,6 +161,7 @@ export default function InstallButton() {
         <p className="mb-3 text-sm text-dark">
           Install this app on your device for quick access.
         </p>
+
         <ol className="list-decimal space-y-1.5 pl-5 text-sm text-dark">
           {getInstallSteps().map((step) => (
             <li key={step}>{step}</li>

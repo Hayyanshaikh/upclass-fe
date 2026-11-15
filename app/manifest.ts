@@ -5,11 +5,14 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "UPCLASS",
     short_name: "UPCLASS",
-    description: "School management platform — students, teachers, classes, exams, attendance, fees and more.",
+    description:
+      "School management platform — students, teachers, classes, exams, attendance, fees and more.",
 
     start_url: "/",
     scope: "/",
     display: "standalone",
+
+    prefer_related_applications: false,
 
     background_color: "#ffffff",
     theme_color: "#0f5c4d",
