@@ -3,60 +3,14 @@
 import { useEffect, useState } from "react";
 import { LuDownload } from "react-icons/lu";
 import Dialog from "@/components/ui/Dialog";
-
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{
-    outcome: "accepted" | "dismissed";
-  }>;
-};
-
-// Captured at module load because Chrome may fire the event before React hydrates.
-let deferredPromptEvent: BeforeInstallPromptEvent | null = null;
-
-const promptSubscribers = new Set<(event: BeforeInstallPromptEvent) => void>();
-
-if (typeof window !== "undefined") {
-  window.addEventListener("beforeinstallprompt", (event) => {
-    event.preventDefault();
-
-    const promptEvent = event as BeforeInstallPromptEvent;
-
-    deferredPromptEvent = promptEvent;
-    promptSubscribers.forEach((subscriber) => subscriber(promptEvent));
-  });
-}
-
-function isIOSDevice() {
-  return (
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-  );
-}
-
-function getInstallSteps() {
-  if (isIOSDevice()) {
-    return [
-      "Tap the Share button in Safari.",
-      "Choose Add to Home Screen.",
-      "Tap Add to install the app.",
-    ];
-  }
-
-  if (/Android/i.test(navigator.userAgent)) {
-    return [
-      "Open the browser menu (⋮).",
-      "Choose Install app or Add to Home screen.",
-      "Confirm the installation.",
-    ];
-  }
-
-  return [
-    "Click the install icon in the browser address bar.",
-    "Choose Install app.",
-    "Confirm the installation.",
-  ];
-}
+import {
+  type BeforeInstallPromptEvent,
+  clearDeferredPrompt,
+  getDeferredPrompt,
+  getInstallSteps,
+  isStandaloneMode,
+  subscribeToInstallPrompt,
+} from "@/lib/pwa-install";
 
 export default function InstallButton() {
   const [promptEvent, setPromptEvent] =
@@ -69,19 +23,11 @@ export default function InstallButton() {
     const standaloneQuery = window.matchMedia("(display-mode: standalone)");
 
     const checkInstalled = () => {
-      const standalone =
-        standaloneQuery.matches ||
-        (navigator as Navigator & { standalone?: boolean }).standalone === true;
-
-      setIsInstalled(standalone);
-    };
-
-    const handlePrompt = (event: BeforeInstallPromptEvent) => {
-      setPromptEvent(event);
+      setIsInstalled(isStandaloneMode());
     };
 
     const handleInstalled = () => {
-      deferredPromptEvent = null;
+      clearDeferredPrompt();
       setIsInstalled(true);
       setPromptEvent(null);
       setHelpOpen(false);
@@ -89,18 +35,20 @@ export default function InstallButton() {
 
     checkInstalled();
 
-    if (deferredPromptEvent) {
-      setPromptEvent(deferredPromptEvent);
+    const deferredPrompt = getDeferredPrompt();
+
+    if (deferredPrompt) {
+      setPromptEvent(deferredPrompt);
     }
 
-    promptSubscribers.add(handlePrompt);
+    const unsubscribe = subscribeToInstallPrompt(setPromptEvent);
 
     window.addEventListener("appinstalled", handleInstalled);
 
     standaloneQuery.addEventListener("change", checkInstalled);
 
     return () => {
-      promptSubscribers.delete(handlePrompt);
+      unsubscribe();
 
       window.removeEventListener("appinstalled", handleInstalled);
 
@@ -119,10 +67,10 @@ export default function InstallButton() {
           setIsInstalled(true);
         }
 
-        deferredPromptEvent = null;
+        clearDeferredPrompt();
         setPromptEvent(null);
       } catch (error) {
-        deferredPromptEvent = null;
+        clearDeferredPrompt();
         setPromptEvent(null);
         console.error("Installation failed:", error);
       }
