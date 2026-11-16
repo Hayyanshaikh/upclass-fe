@@ -33,6 +33,18 @@ It defines the shared theme, spacing, component reuse, styling conventions, and 
 - Follow the existing project's TypeScript conventions.
 - Do not introduce new architectural patterns without a clear requirement.
 
+## Mobile UI
+
+Mobile and desktop share the same routes; there is no `/m` prefix or separate route group. Read the mobile sections of [`.design.md`](./.design.md) before building or changing a mobile screen.
+
+- A page renders both presentations through `components/shared/PlatformSwitch` (`desktop={<Feature />}`, `mobile={<MobileFeature />}`); `app/(dashboard)/layout.tsx` picks the shell with `useIsMobile`. Keep the desktop wrapper as `hidden h-full md:block` — desktop tables depend on that height chain.
+- Build mobile screens under `components/mobile/<feature>/` using `components/mobile/ui`, `components/mobile/layout`, `components/mobile/forms` and `components/mobile/dialogs`. Do not reuse desktop tables, page headers, dialogs or feature components on mobile.
+- Listings: reuse `MobileList` (`components/mobile/ui/MobileList.tsx`, types in `types/mobile-list.ts`) with `useTable` and the Orval hooks. Pass `items`, `rowKey`, `renderItem`, `search`, `filters` (`fields`/`values`/`onApply`), loading flags, `hasMore`/`onLoadMore`, `resetSignal` and `emptyText`. Keep search, filters and pagination server-side.
+- Cards are compact and fully tappable with a trailing chevron; create is a fixed FAB above the bottom navigation (`MobileIconButton variant="fab"`); delete lives in the edit sheet's sticky footer.
+- Buttons: icon-only actions use `MobileIconButton` (`appBar`, `secondary`, `ghost`, `danger`, `fab`), text actions use `Button`. Do not write styled raw `<button>`s; only a full card/row tap target may be a raw button.
+- Feedback: `MobileConfirmDialog` before destructive API calls; `MobileFeedbackDialog` for success/error outcomes (no toasts). After a successful delete, reset search, filters and page, remove the card locally and increment `resetSignal`.
+- Gate create/edit/delete UI with `useRolePermission`; keep APIs, hooks, DTOs, auth and permissions shared with desktop.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know
