@@ -13,7 +13,7 @@ export default function PlatformSwitch({
 }: PlatformSwitchProps) {
   return (
     <>
-      <div className="hidden md:block">{desktop}</div>
+      <div className="hidden h-full md:block">{desktop}</div>
       <div className="block md:hidden">{mobile}</div>
     </>
   );
