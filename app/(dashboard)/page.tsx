@@ -5,6 +5,8 @@ import FeeCollection from "@/components/dashboard/FeeCollection";
 import TodayTimetable from "@/components/dashboard/TodayTimetable";
 import RecentNotices from "@/components/dashboard/RecentNotices";
 import BarChart from "@/components/ui/BarChart";
+import MobileHome from "@/components/mobile/home/MobileHome";
+import PlatformSwitch from "@/components/shared/PlatformSwitch";
 import { weeklyAttendance } from "@/constants/dashboard";
 
 export const metadata: Metadata = {
@@ -12,7 +14,7 @@ export const metadata: Metadata = {
   description: "School overview, attendance and fees.",
 };
 
-export default function DashboardPage() {
+function DesktopDashboard() {
   return (
     <div>
       <DashboardHeader />
@@ -62,4 +64,8 @@ export default function DashboardPage() {
       </section>
     </div>
   );
+}
+
+export default function DashboardPage() {
+  return <PlatformSwitch desktop={<DesktopDashboard />} mobile={<MobileHome />} />;
 }
