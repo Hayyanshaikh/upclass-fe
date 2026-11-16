@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
-type MobileIconButtonVariant = "appBar" | "secondary" | "ghost" | "danger" | "fab";
+type MobileIconButtonVariant =
+  | "appBar"
+  | "secondary"
+  | "ghost"
+  | "danger"
+  | "fab";
 
 type MobileIconButtonProps = {
   label: string;
@@ -20,7 +25,8 @@ const variants: Record<MobileIconButtonVariant, string> = {
     "border border-background/25 bg-background/10 focus-visible:outline-secondary",
   secondary:
     "border border-border bg-background text-dark focus-visible:outline-primary",
-  ghost: "text-gray focus-visible:outline-primary active:bg-foreground",
+  ghost:
+    "min-h-auto! min-w-auto! text-gray focus-visible:outline-primary active:bg-foreground",
   danger:
     "border border-danger/40 bg-background text-danger focus-visible:outline-danger",
   fab: "fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 size-14! rounded-full! border-0 bg-primary text-background shadow-lg shadow-primary/30 focus-visible:outline-primary",
