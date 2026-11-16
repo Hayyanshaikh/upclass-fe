@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { Drawer, Form } from "antd";
-import { LuX } from "react-icons/lu";
+import { Form } from "antd";
 import Button from "@/components/ui/Button";
 import Select from "@/components/ui/Select";
-import MobileIconButton from "@/components/mobile/ui/MobileIconButton";
-import { useSwipeToDismiss } from "@/hooks/useSwipeToDismiss";
+import MobileSheet from "@/components/mobile/ui/MobileSheet";
 import type { MobileListFilterField } from "@/types/mobile-list";
 
 type MobileListFiltersProps = {
@@ -25,9 +23,6 @@ export default function MobileListFilters({
   onClose,
 }: MobileListFiltersProps) {
   const [form] = Form.useForm();
-  const { triggerRef, triggerProps } = useSwipeToDismiss({
-    onDismiss: onClose,
-  });
 
   useEffect(() => {
     if (!open) return;
@@ -53,35 +48,12 @@ export default function MobileListFilters({
   }
 
   return (
-    <Drawer
+    <MobileSheet
       open={open}
       onClose={onClose}
-      placement="bottom"
-      size="auto"
-      closable={false}
-      mask={{ closable: true }}
-      classNames={{
-        section: "rounded-t-2xl!  shadow-xl! bg-background!",
-        body: " px-4! pt-0! pb-[calc(1rem+env(safe-area-inset-bottom))]!",
-        wrapper: "shadow-none!",
-      }}
+      title="Filters"
+      closeLabel="Close filters"
     >
-      <div
-        ref={triggerRef}
-        aria-hidden="true"
-        className="mx-auto flex w-full touch-none justify-center py-3 select-none"
-        {...triggerProps}
-      >
-        <span className="h-1 w-10 rounded-full bg-border" />
-      </div>
-
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-bold text-dark">Filters</h2>
-        <MobileIconButton variant="ghost" label="Close filters" onClick={onClose}>
-          <LuX size={20} aria-hidden="true" />
-        </MobileIconButton>
-      </div>
-
       <Form
         form={form}
         layout="vertical"
@@ -109,6 +81,6 @@ export default function MobileListFilters({
           Apply
         </Button>
       </div>
-    </Drawer>
+    </MobileSheet>
   );
 }

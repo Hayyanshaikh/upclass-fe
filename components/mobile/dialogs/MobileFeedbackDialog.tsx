@@ -1,9 +1,8 @@
 "use client";
 
-import { Drawer } from "antd";
 import { LuCircleAlert, LuCircleCheck } from "react-icons/lu";
 import Button from "@/components/ui/Button";
-import { useSwipeToDismiss } from "@/hooks/useSwipeToDismiss";
+import MobileSheet from "@/components/mobile/ui/MobileSheet";
 
 type MobileFeedbackDialogProps = {
   open: boolean;
@@ -20,35 +19,10 @@ export default function MobileFeedbackDialog({
   title,
   onClose,
 }: MobileFeedbackDialogProps) {
-  const { triggerRef, triggerProps } = useSwipeToDismiss({
-    onDismiss: onClose,
-  });
-
   const isSuccess = tone === "success";
 
   return (
-    <Drawer
-      open={open}
-      onClose={onClose}
-      placement="bottom"
-      size="auto"
-      closable={false}
-      mask={{ closable: true }}
-      classNames={{
-        section: "rounded-t-2xl!  shadow-xl! bg-background!",
-        body: " px-4! pt-0! pb-[calc(1rem+env(safe-area-inset-bottom))]!",
-        wrapper: "shadow-none!",
-      }}
-    >
-      <div
-        ref={triggerRef}
-        aria-hidden="true"
-        className="mx-auto flex w-full touch-none justify-center py-3 select-none"
-        {...triggerProps}
-      >
-        <span className="h-1 w-10 rounded-full bg-border" />
-      </div>
-
+    <MobileSheet open={open} onClose={onClose}>
       <div className="flex flex-col items-center text-center">
         <span
           className={`flex size-12 items-center justify-center rounded-full ${
@@ -73,6 +47,6 @@ export default function MobileFeedbackDialog({
           Okay
         </Button>
       </div>
-    </Drawer>
+    </MobileSheet>
   );
 }

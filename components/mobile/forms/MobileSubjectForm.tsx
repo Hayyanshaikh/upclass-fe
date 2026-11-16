@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Drawer, Form } from "antd";
+import { Form } from "antd";
 import { isAxiosError } from "axios";
-import { LuTrash2, LuX } from "react-icons/lu";
+import { LuTrash2 } from "react-icons/lu";
 import IconButton from "@/components/mobile/ui/MobileIconButton";
+import MobileSheet from "@/components/mobile/ui/MobileSheet";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -14,7 +15,6 @@ import {
   subjectStatusOptions,
   subjectTypeOptions,
 } from "@/constants/subjects";
-import { useSwipeToDismiss } from "@/hooks/useSwipeToDismiss";
 import type {
   CreateSubjectDto,
   SubjectDto,
@@ -60,10 +60,6 @@ export default function MobileSubjectForm({
   const { mutateAsync: updateSubject, isPending: isUpdating } =
     useSubjectsControllerUpdate();
   const isPending = isCreating || isUpdating;
-
-  const { triggerRef, triggerProps } = useSwipeToDismiss({
-    onDismiss: onClose,
-  });
 
   useEffect(() => {
     if (!open) return;
@@ -127,37 +123,12 @@ export default function MobileSubjectForm({
   }
 
   return (
-    <Drawer
+    <MobileSheet
       open={open}
       onClose={onClose}
-      placement="bottom"
-      size="auto"
-      closable={false}
-      mask={{ closable: true }}
-      classNames={{
-        section: "rounded-t-2xl!  shadow-xl! bg-background!",
-        body: "flex! max-h-[85dvh]! flex-col! overflow-hidden! px-4! pt-0! pb-[calc(1rem+env(safe-area-inset-bottom))]!",
-        wrapper: "shadow-none!",
-      }}
+      title={subject ? "Edit subject" : "Add subject"}
+      closeLabel="Close"
     >
-      <div
-        ref={triggerRef}
-        aria-hidden="true"
-        className="mx-auto flex w-full touch-none justify-center py-3 select-none"
-        {...triggerProps}
-      >
-        <span className="h-1 w-10 rounded-full bg-border" />
-      </div>
-
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-bold text-dark">
-          {subject ? "Edit subject" : "Add subject"}
-        </h2>
-        <IconButton variant="ghost" label="Close" onClick={onClose}>
-          <LuX size={20} aria-hidden="true" />
-        </IconButton>
-      </div>
-
       <Form
         form={form}
         layout="vertical"
@@ -261,6 +232,6 @@ export default function MobileSubjectForm({
           </Button>
         </div>
       </Form>
-    </Drawer>
+    </MobileSheet>
   );
 }
