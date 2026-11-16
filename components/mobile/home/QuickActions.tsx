@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LuChevronRight } from "react-icons/lu";
 import MobileSection from "@/components/mobile/ui/MobileSection";
 import { quickActions } from "@/constants/mobile-dashboard";
 import { useStorageStore } from "@/stores/storage";
@@ -52,7 +53,18 @@ export default function QuickActions() {
   );
 
   return (
-    <MobileSection title="Quick actions">
+    <MobileSection
+      title="Quick actions"
+      hint={
+        <Link
+          href="/actions"
+          className="inline-flex items-center gap-0.5 text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          See all
+          <LuChevronRight size={14} aria-hidden="true" />
+        </Link>
+      }
+    >
       {actions.length === 0 ? (
         <p className="text-xs text-gray">
           No quick actions are available for your role.

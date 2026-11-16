@@ -30,7 +30,7 @@ export const mobileNavItems: NavItem[] = [
   },
   {
     label: "More",
-    href: "/settings",
+    href: "/actions",
     icon: LuAlignLeft,
     permission: "settings.view",
   },
