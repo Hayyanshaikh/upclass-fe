@@ -124,7 +124,7 @@ export default function Timetable() {
   const fields = useMemo(
     () =>
       timetableFilterFields.map((field) => {
-        if (field.type === "date") return field;
+        if (field.type === "date" || field.type === "month") return field;
 
         switch (field.name) {
           case "class":

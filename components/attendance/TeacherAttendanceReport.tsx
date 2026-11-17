@@ -34,6 +34,7 @@ export default function TeacherAttendanceReport() {
     {
       type: "month",
       name: "month",
+      label: "Month",
       value: month,
       onChange: (value) => {
         if (value) setMonth(value);
