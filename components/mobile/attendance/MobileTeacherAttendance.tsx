@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { LuChevronRight, LuTrash2 } from "react-icons/lu";
+import { LuChartColumn, LuChevronRight, LuTrash2 } from "react-icons/lu";
 import StatusBadge from "@/components/ui/StatusBadge";
 import MobileConfirmDialog from "@/components/mobile/dialogs/MobileConfirmDialog";
 import MobileFeedbackDialog from "@/components/mobile/dialogs/MobileFeedbackDialog";
@@ -176,7 +176,7 @@ export default function MobileTeacherAttendance() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 pb-20">
       <h1 className="text-lg font-bold text-dark">Teacher attendance</h1>
 
       <MobileList
@@ -243,6 +243,14 @@ export default function MobileTeacherAttendance() {
         resetSignal={listResetSignal}
         emptyText="No teacher attendance found."
       />
+
+      <MobileIconButton
+        variant="fab"
+        href="/attendance/teachers/report"
+        label="View attendance report"
+      >
+        <LuChartColumn size={24} aria-hidden="true" />
+      </MobileIconButton>
 
       <MobileTeacherAttendanceForm
         open={formOpen}
