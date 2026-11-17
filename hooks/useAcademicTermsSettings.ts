@@ -24,7 +24,7 @@ import { DISPLAY_DATE } from "@/constants/date-formats";
 
 type UseAcademicTermsSettingsParams = {
   form: FormInstance;
-  registerTab: RegisterSettingsTab;
+  registerTab?: RegisterSettingsTab;
   schoolId: string;
 };
 
@@ -183,15 +183,15 @@ export function useAcademicTermsSettings({
   const actionsRef = useRef({ validate, save, reset });
   actionsRef.current = { validate, save, reset };
 
-  useEffect(
-    () =>
-      registerTab("terms", {
-        validate: () => actionsRef.current.validate(),
-        save: () => actionsRef.current.save(),
-        reset: () => actionsRef.current.reset(),
-      }),
-    [registerTab],
-  );
+  useEffect(() => {
+    if (!registerTab) return;
+
+    return registerTab("terms", {
+      validate: () => actionsRef.current.validate(),
+      save: () => actionsRef.current.save(),
+      reset: () => actionsRef.current.reset(),
+    });
+  }, [registerTab]);
 
   const isFetching =
     termsQuery.isFetching ||
