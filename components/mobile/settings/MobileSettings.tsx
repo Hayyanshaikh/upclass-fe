@@ -92,6 +92,12 @@ export default function MobileSettings() {
   const [activeSheet, setActiveSheet] = useState<SheetKey | null>(() =>
     sheetFromParam(searchParams.get("tab")),
   );
+  const [openedSheets, setOpenedSheets] = useState<ReadonlySet<SheetKey>>(
+    () => {
+      const initial = sheetFromParam(searchParams.get("tab"));
+      return new Set(initial ? [initial] : []);
+    },
+  );
   const [focusWorkingDays] = useState(
     () => typeof window !== "undefined" && window.location.hash === "#workingDays",
   );
@@ -110,6 +116,7 @@ export default function MobileSettings() {
   }
 
   function openSheet(key: SheetKey) {
+    setOpenedSheets((previous) => new Set(previous).add(key));
     setActiveSheet(key);
     updateTabParam(key);
   }
@@ -164,42 +171,42 @@ export default function MobileSettings() {
         ))}
       </div>
 
-      {activeSheet === "profile" && (
+      {openedSheets.has("profile") && (
         <MobileSchoolProfileSheet
-          open
+          open={activeSheet === "profile"}
           schoolId={schoolId}
           focusWorkingDays={focusWorkingDays}
           onClose={closeSheet}
           onFeedback={handleFeedback}
         />
       )}
-      {activeSheet === "academic" && (
+      {openedSheets.has("academic") && (
         <MobileAcademicYearSheet
-          open
+          open={activeSheet === "academic"}
           schoolId={schoolId}
           onClose={closeSheet}
           onFeedback={handleFeedback}
         />
       )}
-      {activeSheet === "terms" && (
+      {openedSheets.has("terms") && (
         <MobileAcademicTermsSheet
-          open
+          open={activeSheet === "terms"}
           schoolId={schoolId}
           onClose={closeSheet}
           onFeedback={handleFeedback}
         />
       )}
-      {activeSheet === "periods" && (
+      {openedSheets.has("periods") && (
         <MobilePeriodConfigSheet
-          open
+          open={activeSheet === "periods"}
           schoolId={schoolId}
           onClose={closeSheet}
           onFeedback={handleFeedback}
         />
       )}
-      {activeSheet === "leave" && (
+      {openedSheets.has("leave") && (
         <MobileLeavePolicySheet
-          open
+          open={activeSheet === "leave"}
           schoolId={schoolId}
           onClose={closeSheet}
           onFeedback={handleFeedback}
