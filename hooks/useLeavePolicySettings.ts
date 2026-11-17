@@ -184,6 +184,9 @@ export function useLeavePolicySettings({
     addLeavePolicy,
     updateLeavePolicy,
     removeLeavePolicy,
+    validate,
+    save,
+    reset,
   };
 }
 function getErrorMessage(error: unknown, fallback: string) {
