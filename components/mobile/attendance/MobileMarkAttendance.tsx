@@ -112,8 +112,19 @@ export default function MobileMarkAttendance() {
       status: teacherAttendanceStatusLabel(entry.status),
     }),
   );
+  const nowTime = dayjs().tz("Asia/Karachi").format("HH:mm");
+  const checkInNotice =
+    !shift?.openingTime || !shift?.closingTime
+      ? "School timings are not set · check-in unavailable"
+      : nowTime < shift.openingTime
+        ? `Check-in opens at ${shift.openingTime}`
+        : nowTime > shift.closingTime
+          ? "Check-in closed · school hours are over"
+          : null;
   const canCheckIn =
-    canMarkAttendance && (day.state === "unchecked" || day.state === "absent");
+    canMarkAttendance &&
+    checkInNotice === null &&
+    (day.state === "unchecked" || day.state === "absent");
   const canCheckOut =
     canMarkAttendance && (day.state === "checked-in" || day.state === "late");
   const tone =
@@ -211,7 +222,10 @@ export default function MobileMarkAttendance() {
             role="status"
             aria-live="polite"
           >
-            {attendanceMessage(day)}
+            {(day.state === "unchecked" || day.state === "absent") &&
+            checkInNotice
+              ? checkInNotice
+              : attendanceMessage(day)}
           </p>
 
           {canCheckIn && (
