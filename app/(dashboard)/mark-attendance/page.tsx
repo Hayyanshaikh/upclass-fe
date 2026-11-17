@@ -5,7 +5,9 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import MarkAttendance from "@/components/attendance/MarkAttendance";
+import MobileMarkAttendance from "@/components/mobile/attendance/MobileMarkAttendance";
 import PageHeader from "@/components/shared/PageHeader";
+import PlatformSwitch from "@/components/shared/PlatformSwitch";
 import type { MarkAttendanceState } from "@/types/mark-attendance";
 
 dayjs.extend(utc);
@@ -38,17 +40,40 @@ async function MarkAttendanceContent({
   const today = dayjs().tz("Asia/Karachi").format("DD MMM YYYY");
 
   return (
-    <MarkAttendance
-      key={initialState}
-      initialState={initialState}
-      today={today}
+    <PlatformSwitch
+      desktop={
+        <MarkAttendance
+          key={initialState}
+          initialState={initialState}
+          today={today}
+        />
+      }
+      mobile={
+        <MobileMarkAttendance
+          key={initialState}
+          initialState={initialState}
+          today={today}
+        />
+      }
     />
   );
 }
 
 export default function MarkAttendancePage({ searchParams }: MarkAttendancePageProps) {
   return (
-    <Suspense fallback={<PageHeader title="Mark attendance" subtitle="Check in when you arrive, check out when you leave" />}>
+    <Suspense
+      fallback={
+        <PlatformSwitch
+          desktop={
+            <PageHeader
+              title="Mark attendance"
+              subtitle="Check in when you arrive, check out when you leave"
+            />
+          }
+          mobile={<h1 className="text-lg font-bold text-dark">Mark attendance</h1>}
+        />
+      }
+    >
       <MarkAttendanceContent searchParams={searchParams} />
     </Suspense>
   );
