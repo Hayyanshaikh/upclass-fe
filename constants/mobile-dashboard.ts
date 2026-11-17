@@ -61,10 +61,10 @@ export const quickActions: NavItem[] = [
     permission: "subjects.view",
   },
   {
-    label: "Leave Requests",
-    href: "/leave-requests",
+    label: "Mark att.",
+    href: "/mark-attendance",
     icon: LuCalendarClock,
-    permission: "leave_requests.view",
+    permission: "mark_attendance.create",
   },
 ];
 
