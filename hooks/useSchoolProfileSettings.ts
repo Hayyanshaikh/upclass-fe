@@ -12,7 +12,7 @@ import { handleImageUpload } from "@/utils/handle-image-upload";
 
 type UseSchoolProfileSettingsParams = {
   form: FormInstance;
-  registerTab: RegisterSettingsTab;
+  registerTab?: RegisterSettingsTab;
   schoolId: string;
 };
 
@@ -133,20 +133,23 @@ export function useSchoolProfileSettings({
   const actionsRef = useRef({ validate, save, reset });
   actionsRef.current = { validate, save, reset };
 
-  useEffect(
-    () =>
-      registerTab("profile", {
-        validate: () => actionsRef.current.validate(),
-        save: () => actionsRef.current.save(),
-        reset: () => actionsRef.current.reset(),
-      }),
-    [registerTab],
-  );
+  useEffect(() => {
+    if (!registerTab) return;
+
+    return registerTab("profile", {
+      validate: () => actionsRef.current.validate(),
+      save: () => actionsRef.current.save(),
+      reset: () => actionsRef.current.reset(),
+    });
+  }, [registerTab]);
 
   return {
     data: school,
     isLoading: isFetching && !school,
     isFetching,
     isUpdating,
+    validate,
+    save,
+    reset,
   };
 }
