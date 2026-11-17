@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { TableColumnsType } from "antd";
 import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
 import PageHeader from "@/components/shared/PageHeader";
 import Button from "@/components/ui/Button";
 import ProgressBar from "@/components/ui/ProgressBar";
@@ -17,31 +18,26 @@ import type { TeacherAttendanceReportRow } from "@/types/teacher-attendance-repo
 import type { FilterField } from "@/types/table-toolbar";
 
 export default function TeacherAttendanceReport() {
-  const [month, setMonth] = useState(dayjs().format("YYYY-MM"));
+  const [month, setMonth] = useState<Dayjs>(dayjs());
   const [band, setBand] = useState<TeacherAttendanceControllerReportBand>(
     TeacherAttendanceControllerReportBand.all,
   );
 
   const { data, isFetching, error, refetch } =
-    useTeacherAttendanceControllerReport({ month, band });
+    useTeacherAttendanceControllerReport({
+      month: month.format("YYYY-MM"),
+      band,
+    });
   const rows = teacherAttendanceReportRowManipulator(data?.data);
-
-  const monthOptions = Array.from({ length: 6 }, (_, index) => {
-    const value = dayjs().subtract(index, "month");
-    return {
-      label: `${value.format("MMMM")} [${value.format("YYYY")}]`,
-      value: value.format("YYYY-MM"),
-    };
-  });
 
   const filters: FilterField[] = [
     {
+      type: "month",
       name: "month",
-      label: "Month",
       value: month,
-      allowClear: false,
-      options: monthOptions,
-      onChange: (value) => setMonth(value ?? dayjs().format("YYYY-MM")),
+      onChange: (value) => {
+        if (value) setMonth(value);
+      },
     },
     {
       name: "show",
@@ -49,7 +45,10 @@ export default function TeacherAttendanceReport() {
       value: band,
       allowClear: false,
       options: [
-        { label: "All teachers", value: TeacherAttendanceControllerReportBand.all },
+        {
+          label: "All teachers",
+          value: TeacherAttendanceControllerReportBand.all,
+        },
         {
           label: "Good (90% and above)",
           value: TeacherAttendanceControllerReportBand.good,
@@ -136,7 +135,7 @@ export default function TeacherAttendanceReport() {
   ];
 
   function downloadCsv() {
-    exportCsv(`teacher-attendance-${month}.csv`, [
+    exportCsv(`teacher-attendance-${month.format("YYYY-MM")}.csv`, [
       [
         "ID",
         "Teacher",

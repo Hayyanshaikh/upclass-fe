@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useState } from "react";
 import { Form } from "antd";
 import { LuListFilter, LuSearch } from "react-icons/lu";
 import Input from "@/components/ui/Input";
+import MonthPicker from "@/components/ui/MonthPicker";
 import Select from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 import DatePicker from "@/components/ui/DatePicker";
@@ -109,6 +110,12 @@ export default function TableToolbar({
                   key={field.name}
                   name={field.name}
                   pastOnly={field.pastOnly}
+                />
+              ) : field.type === "month" ? (
+                <MonthPicker
+                  key={field.name}
+                  name={field.name}
+                  label={field.label}
                 />
               ) : (
                 <Select

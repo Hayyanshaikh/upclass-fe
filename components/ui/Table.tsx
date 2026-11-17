@@ -190,7 +190,7 @@ export default function Table<
     onFilterValuesChange?.(filterChanges as Partial<TFilters>);
     for (const [name, value] of Object.entries(filterChanges)) {
       const field = filterFields.find((item) => item.name === name);
-      if (field?.type === "date") {
+      if (field?.type === "date" || field?.type === "month") {
         field.onChange?.(value as Dayjs | null);
       } else {
         field?.onChange?.(value as string | undefined);

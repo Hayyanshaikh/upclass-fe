@@ -25,6 +25,7 @@ import { DISPLAY_DATE } from "@/constants/date-formats";
 import { teacherAttendanceStatusVariants } from "@/constants/teacher-attendance";
 import { useRolePermission } from "@/hooks/useRolePermission";
 import { useTable } from "@/hooks/useTable";
+import { useTeacherDropdown } from "@/hooks/useTeacherDropdown";
 import {
   getTeacherAttendanceErrorMessage,
   teacherAttendanceRowManipulator,
@@ -60,15 +61,19 @@ export default function TeacherAttendance() {
     setFilters,
     setSearch,
   } = useTable<{
+    teacherId?: string;
     date?: Dayjs | null;
     status?: TeacherAttendanceControllerFindAllStatus;
   }>({ pageSize: 8 });
+
+  const { options: teacherOptions } = useTeacherDropdown();
 
   const { data, isFetching, error, refetch } =
     useTeacherAttendanceControllerFindAll({
       limit: pageSize,
       offset,
       searchKey: search,
+      teacherId: filters.teacherId,
       date: filters.date?.format("YYYY-MM-DD"),
       status: filters.status,
     });
@@ -105,6 +110,12 @@ export default function TeacherAttendance() {
   }
 
   const filterFields: FilterField[] = [
+    {
+      name: "teacherId",
+      label: "Teacher",
+      placeholder: "Any teacher",
+      options: teacherOptions,
+    },
     {
       type: "date",
       name: "date",
