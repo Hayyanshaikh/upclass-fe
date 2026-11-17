@@ -276,8 +276,8 @@ export default function StudentForm({ student }: StudentFormProps) {
                 placeholder="00000-0000000-0"
                 rules={[
                   {
-                    pattern: /^\d{5}-\d{7}-\d$/,
-                    message: "Use format 00000-0000000-0",
+                    pattern: /^(\d{5}-\d{7}-\d|\d{13})$/,
+                    message: "Use format 00000-0000000-0 or 0000000000000",
                   },
                 ]}
               />

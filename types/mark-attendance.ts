@@ -11,6 +11,8 @@ export type AttendanceDay = {
   checkIn?: string;
   checkOut?: string;
   lateMinutes?: number;
+  leaveType?: string;
+  leaveRequest?: string;
 };
 
 export type WeeklyAttendance = {

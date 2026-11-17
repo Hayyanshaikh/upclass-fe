@@ -10,7 +10,7 @@ const benefits = [
 export default function LoginBranding() {
   return (
     <section
-      className="flex flex-col bg-primary px-6 py-8 text-white sm:px-12 lg:py-12"
+      className="hidden flex-col bg-primary px-6 py-8 text-white sm:px-12 lg:flex lg:py-12"
       aria-label="School portal"
     >
       <Logo size="md" />

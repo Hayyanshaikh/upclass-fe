@@ -16,7 +16,7 @@ import type { LeaveType, RegisterSettingsTab } from "@/types/settings";
 
 type UseLeavePolicySettingsParams = {
   form: FormInstance;
-  registerTab: RegisterSettingsTab;
+  registerTab?: RegisterSettingsTab;
   schoolId: string;
 };
 
@@ -159,15 +159,15 @@ export function useLeavePolicySettings({
   const actionsRef = useRef({ validate, save, reset });
   actionsRef.current = { validate, save, reset };
 
-  useEffect(
-    () =>
-      registerTab("leave", {
-        validate: () => actionsRef.current.validate(),
-        save: () => actionsRef.current.save(),
-        reset: () => actionsRef.current.reset(),
-      }),
-    [registerTab],
-  );
+  useEffect(() => {
+    if (!registerTab) return;
+
+    return registerTab("leave", {
+      validate: () => actionsRef.current.validate(),
+      save: () => actionsRef.current.save(),
+      reset: () => actionsRef.current.reset(),
+    });
+  }, [registerTab]);
 
   return {
     policies,
@@ -184,6 +184,9 @@ export function useLeavePolicySettings({
     addLeavePolicy,
     updateLeavePolicy,
     removeLeavePolicy,
+    validate,
+    save,
+    reset,
   };
 }
 function getErrorMessage(error: unknown, fallback: string) {

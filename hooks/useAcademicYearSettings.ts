@@ -15,7 +15,7 @@ import dayjs from "dayjs";
 
 type UseAcademicYearSettingsParams = {
   form: FormInstance;
-  registerTab: RegisterSettingsTab;
+  registerTab?: RegisterSettingsTab;
   schoolId: string;
 };
 
@@ -161,15 +161,15 @@ export function useAcademicYearSettings({
   const actionsRef = useRef({ validate, save, reset });
   actionsRef.current = { validate, save, reset };
 
-  useEffect(
-    () =>
-      registerTab("academic", {
-        validate: () => actionsRef.current.validate(),
-        save: () => actionsRef.current.save(),
-        reset: () => actionsRef.current.reset(),
-      }),
-    [registerTab],
-  );
+  useEffect(() => {
+    if (!registerTab) return;
+
+    return registerTab("academic", {
+      validate: () => actionsRef.current.validate(),
+      save: () => actionsRef.current.save(),
+      reset: () => actionsRef.current.reset(),
+    });
+  }, [registerTab]);
 
   return {
     data,

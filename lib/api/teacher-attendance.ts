@@ -6,10 +6,10 @@ import type {
   TeacherAttendanceReportRowDto,
 } from "@/app/api/schemas";
 import type {
-  TeacherAttendanceReportRow,
   TeacherAttendanceRow,
   TeacherAttendanceStatus,
 } from "@/types/teacher-attendance";
+import type { TeacherAttendanceReportRow } from "@/types/teacher-attendance-report";
 
 const statusLabels: Record<TeacherAttendanceDtoStatus, TeacherAttendanceStatus> = {
   PRESENT: "Present",

@@ -18,7 +18,7 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <div className="w-full max-w-[486px] rounded-lg border border-border bg-white p-6 text-dark sm:p-8">
+    <div className="w-full flex-1 rounded-t-[28px] bg-foreground px-6 pt-8 pb-10 text-dark lg:max-w-[486px] lg:flex-none lg:rounded-lg lg:border lg:border-border lg:bg-white lg:p-8">
       <Button
         variant="link"
         className="mt-3 mb-6"
@@ -30,7 +30,7 @@ export default function ForgotPasswordForm() {
 
       <h2
         id="forgot-password-heading"
-        className="text-[28px] leading-tight font-extrabold tracking-[-0.025em]"
+        className="text-[28px] leading-tight font-extrabold tracking-[-0.025em] max-lg:text-[30px]"
       >
         Forgot password?
       </h2>
@@ -40,7 +40,7 @@ export default function ForgotPasswordForm() {
       </p>
 
       <Form
-        className="mt-5! [&_.ant-form-item]:mb-0! [&_.ant-form-item-label]:pb-1.5! [&_.ant-form-item-label>label]:text-[13px]!"
+        className="mt-5! [&_.ant-form-item]:mb-0! [&_.ant-form-item-label]:pb-1.5! [&_.ant-form-item-label>label]:text-[13px]! max-lg:[&_.ant-form-item-label>label]:text-[15px]! max-lg:[&_.ant-form-item-label>label]:font-bold! max-lg:[&_.ant-form-item-label]:pb-2! max-lg:[&_.ant-input]:h-13! max-lg:[&_.ant-input]:rounded-md! max-lg:[&_.ant-input]:px-4! max-lg:[&_.ant-input]:text-[15px]!"
         requiredMark={false}
         onFinish={handleSubmit}
       >
@@ -60,7 +60,11 @@ export default function ForgotPasswordForm() {
             },
           ]}
         />
-        <Button type="submit" fullWidth className="mt-5">
+        <Button
+          type="submit"
+          fullWidth
+          className="mt-5 max-lg:h-13! max-lg:rounded-md! max-lg:text-base!"
+        >
           Send reset link
         </Button>
       </Form>
