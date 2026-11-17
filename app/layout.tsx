@@ -33,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <AntdRegistry>
               <AntdProvider>
                 {children}
-                {/* <MobileInstallGate /> */}
+                <MobileInstallGate />
               </AntdProvider>
             </AntdRegistry>
           </Providers>
