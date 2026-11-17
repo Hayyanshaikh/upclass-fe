@@ -8,12 +8,6 @@
 
 export interface CheckTeacherAvailabilityResponseDto {
   statusCode: number;
-  message: string;
-  data: CheckTeacherAvailabilityData;
-}
-
-export interface CheckTeacherAvailabilityData {
-  statusCode: number;
   conflict: boolean;
   message: string;
 }

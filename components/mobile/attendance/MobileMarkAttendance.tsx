@@ -12,6 +12,7 @@ import {
   shiftEnd,
   shiftStart,
   weeklyAttendance,
+  weeklyStatusVariants,
 } from "@/constants/mark-attendance";
 import type {
   AttendanceDay,
@@ -23,12 +24,6 @@ type MobileMarkAttendanceProps = {
   initialState: MarkAttendanceState;
   today: string;
 };
-
-const weeklyStatusVariant = {
-  Present: "success",
-  Late: "warning",
-  Leave: "neutral",
-} as const;
 
 function clockMinutes(time: string) {
   const [hours, minutes] = time.split(":").map(Number);
@@ -63,6 +58,8 @@ function attendanceMessage(day: AttendanceDay) {
       return `Late by ${day.lateMinutes ?? 0} min · checked in at ${day.checkIn}`;
     case "leave":
       return `On leave today · ${day.leaveType} (${day.leaveRequest})`;
+    case "absent":
+      return "Marked absent today";
     case "completed":
       return `${day.lateMinutes ? "Late" : "Present"} · ${workedTime(day)} worked`;
   }
@@ -75,7 +72,7 @@ function WeeklyRow({ day, checkIn, status }: WeeklyAttendance) {
       <span className="min-w-0 flex-1 truncate text-xs text-gray">
         {checkIn ? `Check-in ${checkIn}` : "No check-in"}
       </span>
-      <StatusBadge variant={weeklyStatusVariant[status]}>{status}</StatusBadge>
+      <StatusBadge variant={weeklyStatusVariants[status]}>{status}</StatusBadge>
     </li>
   );
 }

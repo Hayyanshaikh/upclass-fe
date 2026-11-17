@@ -1,85 +1,77 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { TableColumnsType } from "antd";
+import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
 import PageHeader from "@/components/shared/PageHeader";
 import Button from "@/components/ui/Button";
 import ProgressBar from "@/components/ui/ProgressBar";
-import StatCard from "@/components/ui/StatCard";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Table from "@/components/ui/Table";
-import {
-  teacherAttendanceDepartmentOptions,
-  teacherAttendanceSubjectOptions,
-} from "@/constants/teacher-attendance";
-import {
-  teacherAttendanceReportRows,
-  teacherAttendanceReportVariants,
-} from "@/constants/teacher-attendance-report";
+import { useTeacherAttendanceControllerReport } from "@/app/api/endpoints";
+import { TeacherAttendanceControllerReportBand } from "@/app/api/schemas";
+import { teacherAttendanceReportVariants } from "@/constants/teacher-attendance-report";
+import { teacherAttendanceReportRowManipulator } from "@/lib/api/teacher-attendance";
+import { exportCsv } from "@/utils/export-csv";
 import type { TeacherAttendanceReportRow } from "@/types/teacher-attendance-report";
 import type { FilterField } from "@/types/table-toolbar";
 
 export default function TeacherAttendanceReport() {
-  const [month, setMonth] = useState("2026-10");
-  const [department, setDepartment] = useState<string>();
-  const [subject, setSubject] = useState<string>();
-  const [show, setShow] = useState("all");
-
-  const rows = useMemo(
-    () =>
-      teacherAttendanceReportRows.filter(
-        (row) =>
-          month === "2026-10" &&
-          (!department || row.department === department) &&
-          (!subject || row.subject === subject) &&
-          (show === "all" ||
-            show === row.status.toLowerCase() ||
-            (show === "perfect" && row.percent === 100)),
-      ),
-    [month, department, subject, show],
+  const [month, setMonth] = useState<Dayjs>(dayjs());
+  const [band, setBand] = useState<TeacherAttendanceControllerReportBand>(
+    TeacherAttendanceControllerReportBand.all,
   );
+
+  const { data, isFetching, error, refetch } =
+    useTeacherAttendanceControllerReport({
+      month: month.format("YYYY-MM"),
+      band,
+    });
+  const rows = teacherAttendanceReportRowManipulator(data?.data);
+
   const filters: FilterField[] = [
     {
+      type: "month",
       name: "month",
       label: "Month",
       value: month,
-      allowClear: false,
-      options: [
-        { label: "October [2026]", value: "2026-10" },
-        { label: "September [2026]", value: "2026-09" },
-        { label: "August [2026]", value: "2026-08" },
-      ],
-      onChange: (value) => setMonth(value ?? "2026-10"),
-    },
-    {
-      name: "department",
-      label: "Department",
-      placeholder: "All departments",
-      value: department,
-      options: teacherAttendanceDepartmentOptions,
-      onChange: setDepartment,
-    },
-    {
-      name: "subject",
-      label: "Subject",
-      placeholder: "All subjects",
-      value: subject,
-      options: teacherAttendanceSubjectOptions,
-      onChange: setSubject,
+      onChange: (value) => {
+        if (value) setMonth(value);
+      },
     },
     {
       name: "show",
       label: "Show",
-      value: show,
+      value: band,
       allowClear: false,
       options: [
-        { label: "All teachers", value: "all" },
-        { label: "Good (90% and above)", value: "good" },
-        { label: "Watch (75–89%)", value: "watch" },
-        { label: "Low (below 75%)", value: "low" },
-        { label: "Perfect attendance", value: "perfect" },
+        {
+          label: "All teachers",
+          value: TeacherAttendanceControllerReportBand.all,
+        },
+        {
+          label: "Good (90% and above)",
+          value: TeacherAttendanceControllerReportBand.good,
+        },
+        {
+          label: "Watch (75–89%)",
+          value: TeacherAttendanceControllerReportBand.watch,
+        },
+        {
+          label: "Low (below 75%)",
+          value: TeacherAttendanceControllerReportBand.low,
+        },
+        {
+          label: "Perfect attendance",
+          value: TeacherAttendanceControllerReportBand.perfect,
+        },
       ],
-      onChange: (value) => setShow(value ?? "all"),
+      onChange: (value) =>
+        setBand(
+          (value as TeacherAttendanceControllerReportBand | undefined) ??
+            TeacherAttendanceControllerReportBand.all,
+        ),
     },
   ];
 
@@ -143,47 +135,44 @@ export default function TeacherAttendanceReport() {
     },
   ];
 
-  function exportCsv() {
-    const headings = [
-      "ID",
-      "Teacher",
-      "Department",
-      "Subject",
-      "Days",
-      "Present",
-      "Absent",
-      "Late",
-      "Leave",
-      "Attendance",
-      "Status",
-    ];
-    const values = rows.map((row) => [
-      row.id,
-      row.teacher,
-      row.department,
-      row.subject,
-      row.days,
-      row.present,
-      row.absent,
-      row.late,
-      row.leave,
-      `${row.percent}%`,
-      row.status,
+  function downloadCsv() {
+    exportCsv(`teacher-attendance-${month.format("YYYY-MM")}.csv`, [
+      [
+        "ID",
+        "Teacher",
+        "Days",
+        "Present",
+        "Absent",
+        "Late",
+        "Leave",
+        "Attendance",
+        "Status",
+      ],
+      ...rows.map((row) => [
+        row.id,
+        row.teacher,
+        String(row.days),
+        String(row.present),
+        String(row.absent),
+        String(row.late),
+        String(row.leave),
+        `${row.percent}%`,
+        row.status,
+      ]),
     ]);
-    const csv = [headings, ...values]
-      .map((line) =>
-        line.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(","),
-      )
-      .join("\r\n");
-    const url = URL.createObjectURL(
-      new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }),
-    );
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `teacher-attendance-${month}.csv`;
-    anchor.click();
-    URL.revokeObjectURL(url);
   }
+
+  const beforeTable = error ? (
+    <div
+      role="alert"
+      className="flex items-center gap-3 rounded-md border border-danger bg-danger/10 px-4 py-3 text-sm text-danger"
+    >
+      <span>Unable to load teacher attendance report.</span>
+      <Button variant="link" onClick={() => void refetch()}>
+        Retry
+      </Button>
+    </div>
+  ) : undefined;
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -195,7 +184,7 @@ export default function TeacherAttendanceReport() {
         ]}
         actions={
           <div className="flex flex-wrap items-center gap-3">
-            <Button variant="secondary" onClick={exportCsv}>
+            <Button variant="secondary" onClick={downloadCsv}>
               Export CSV
             </Button>
             <Button onClick={() => window.print()}>Print</Button>
@@ -205,8 +194,10 @@ export default function TeacherAttendanceReport() {
       <Table
         columns={columns}
         data={rows}
-        rowKey="id"
+        rowKey="teacherId"
         pageSize={6}
+        loading={isFetching}
+        beforeTable={beforeTable}
         scrollX={1120}
         showSearch={false}
         filterFields={filters}

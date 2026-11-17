@@ -1,10 +1,10 @@
 "use client";
 
-import { useTimetableControllerClassSections } from "@/app/api/endpoints";
+import { useTimetableControllerFindClassSections } from "@/app/api/endpoints";
 
 export function useTimetableClassSections() {
   const { data, isLoading, isError, refetch } =
-    useTimetableControllerClassSections();
+    useTimetableControllerFindClassSections();
 
   return {
     classSections: data?.data ?? [],

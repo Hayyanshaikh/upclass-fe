@@ -41,13 +41,7 @@ async function MarkAttendanceContent({
 
   return (
     <PlatformSwitch
-      desktop={
-        <MarkAttendance
-          key={initialState}
-          initialState={initialState}
-          today={today}
-        />
-      }
+      desktop={<MarkAttendance />}
       mobile={
         <MobileMarkAttendance
           key={initialState}

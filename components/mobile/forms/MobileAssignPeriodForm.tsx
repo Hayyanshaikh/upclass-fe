@@ -80,7 +80,7 @@ export default function MobileAssignPeriodForm({
       },
       { query: { enabled: Boolean(values?.teacherId) } },
     );
-  const checkResult = teacherCheckData?.data;
+  const checkResult = teacherCheckData;
   const conflict = checkResult?.conflict === true;
   const isCurrentTeacher = Boolean(
     existing && values?.teacherId === existing.teacherId,

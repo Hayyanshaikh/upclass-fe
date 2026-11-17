@@ -33,7 +33,7 @@ export default function TeacherAttendanceDetailsDialog({
           </span>
           <div>
             <h2 className="text-lg leading-tight font-bold text-dark">{record.teacher}</h2>
-            <p className="mt-0.5 text-sm font-normal text-gray">{record.id} · {record.subject}</p>
+            <p className="mt-0.5 text-sm font-normal text-gray">{record.employeeId}</p>
           </div>
         </div>
       )}
@@ -43,10 +43,6 @@ export default function TeacherAttendanceDetailsDialog({
           <div>
             <dt className="text-xs text-gray">Date</dt>
             <dd className="mt-1 text-sm font-semibold text-dark">{date?.[2]}/{date?.[1]}/{date?.[0]}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-gray">Department</dt>
-            <dd className="mt-1 text-sm font-semibold text-dark">{record.department}</dd>
           </div>
           <div>
             <dt className="text-xs text-gray">Attendance status</dt>
@@ -73,6 +69,10 @@ export default function TeacherAttendanceDetailsDialog({
           <div>
             <dt className="text-xs text-gray">Hours</dt>
             <dd className="mt-1 text-sm font-semibold text-dark">{record.hours ?? "–"}</dd>
+          </div>
+          <div className="sm:col-span-2">
+            <dt className="text-xs text-gray">Remarks</dt>
+            <dd className="mt-1 text-sm font-semibold text-dark">{record.remarks ?? "–"}</dd>
           </div>
         </dl>
       )}

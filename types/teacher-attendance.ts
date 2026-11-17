@@ -2,9 +2,9 @@ export type TeacherAttendanceStatus = "Present" | "Absent" | "Late" | "Leave";
 
 export type TeacherAttendanceRow = {
   id: string;
+  teacherId: string;
+  employeeId: string;
   teacher: string;
-  department: string;
-  subject: string;
   status: TeacherAttendanceStatus;
   lateMinutes?: number;
   checkIn?: string;
@@ -12,6 +12,5 @@ export type TeacherAttendanceRow = {
   hours?: string;
   source: string;
   date: string;
-  absenceType?: string;
-  leaveType?: string;
+  remarks?: string;
 };

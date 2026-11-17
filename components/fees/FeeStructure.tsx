@@ -87,7 +87,7 @@ export default function FeeStructure() {
   );
 
   const filters: FilterField[] = feeStructureFilters.map((field) => {
-    if (field.type === "date") return field;
+    if (field.type === "date" || field.type === "month") return field;
     return field.name === "academicYear"
       ? {
           ...field,

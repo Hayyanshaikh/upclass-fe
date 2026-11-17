@@ -77,7 +77,7 @@ export default function Fees() {
   );
 
   const filters: FilterField[] = feeFilterFields.map((field) => {
-    if (field.type === "date") return field;
+    if (field.type === "date" || field.type === "month") return field;
     if (field.name === "class")
       return { ...field, value: classFilter, onChange: setClassFilter };
     if (field.name === "month")
