@@ -52,7 +52,7 @@ export default function MobileSheet({
       </div>
 
       {title !== undefined && (
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 pb-2">
           <h2 className="text-lg font-bold text-dark">{title}</h2>
           <IconButton variant="ghost" label={closeLabel} onClick={onClose}>
             <LuX size={20} aria-hidden="true" />

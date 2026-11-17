@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Form } from "antd";
 import MobileSheet from "@/components/mobile/ui/MobileSheet";
 import Button from "@/components/ui/Button";
@@ -45,8 +45,13 @@ export default function MobileSchoolProfileSheet({
   const { isLoading, isFetching, isUpdating, validate, save } =
     useSchoolProfileSettings({ form, schoolId });
 
+  const focusHandledRef = useRef(false);
+
   useEffect(() => {
-    if (!open || !focusWorkingDays || isFetching) return;
+    if (!open || !focusWorkingDays || isFetching || focusHandledRef.current)
+      return;
+
+    focusHandledRef.current = true;
 
     const timer = window.setTimeout(() => {
       const field = document.getElementById("workingDays");

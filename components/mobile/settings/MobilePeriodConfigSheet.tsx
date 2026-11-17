@@ -182,7 +182,7 @@ export default function MobilePeriodConfigSheet({
         title="Period configuration"
         closeLabel="Close period configuration"
       >
-        <div className="mt-6 flex min-h-0 flex-1 flex-col gap-3">
+        <div className="mt-6 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pb-1">
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-sm font-semibold text-dark">Periods</h3>
             <Button onClick={() => openPeriodForm()}>
