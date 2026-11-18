@@ -17,6 +17,22 @@ export const attendanceSectionOptions = [
   { label: "C", value: "C" },
 ];
 
+export const attendancePeriodOptions = [
+  { label: "Full day", value: "full-day" },
+  { label: "Period 1", value: "period-1" },
+  { label: "Period 2", value: "period-2" },
+];
+
+export const attendanceStatusVariants: Record<
+  AttendanceStatus,
+  "success" | "danger" | "warning" | "neutral"
+> = {
+  Present: "success",
+  Absent: "danger",
+  Late: "warning",
+  Leave: "neutral",
+};
+
 export const attendanceFilterFields: FilterField[] = [
   {
     name: "grade",
@@ -36,11 +52,7 @@ export const attendanceFilterFields: FilterField[] = [
   {
     name: "period",
     label: "Period",
-    options: [
-      { label: "Full day", value: "full-day" },
-      { label: "Period 1", value: "period-1" },
-      { label: "Period 2", value: "period-2" },
-    ],
+    options: attendancePeriodOptions,
     value: "full-day",
     allowClear: false,
   },
