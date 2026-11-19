@@ -13,7 +13,7 @@ export default function Select({
   placeholder,
   disabled = false,
   loading = false,
-  showSearch = true,
+  showSearch = false,
   allowClear = false,
   className = "",
   onChange,
