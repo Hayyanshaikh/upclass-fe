@@ -22,6 +22,10 @@ export interface StudentDto {
   /** @nullable */
   bloodGroup: string | null;
   classId: string;
+  /** @nullable */
+  classSectionId: string | null;
+  /** @nullable */
+  sectionName: string | null;
   roll: string;
   /** @nullable */
   admissionDate: string | null;

@@ -12,6 +12,7 @@ export * from './permissions/permissions';
 export * from './roles/roles';
 export * from './schools/schools';
 export * from './sections/sections';
+export * from './student-attendance/student-attendance';
 export * from './students/students';
 export * from './subjects/subjects';
 export * from './teacher-attendance/teacher-attendance';

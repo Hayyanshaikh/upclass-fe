@@ -1,8 +1,7 @@
-import dayjs from "dayjs";
-
 import type { AttendanceRow, AttendanceStatus } from "@/types/attendance";
-import type { FilterField } from "@/types/table-toolbar";
 import type { SegmentedOption } from "@/types/segmented-control";
+import { FilterField } from "@/types/table-toolbar";
+import dayjs from "dayjs";
 
 export const attendanceStatusOptions: SegmentedOption<AttendanceStatus>[] = [
   { label: "Present", value: "Present", variant: "primary" },

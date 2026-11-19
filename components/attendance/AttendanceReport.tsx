@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
 import type { TableColumnsType } from "antd";
 import PageHeader from "@/components/shared/PageHeader";
 import Button from "@/components/ui/Button";
@@ -7,15 +10,79 @@ import Table from "@/components/ui/Table";
 import StatCard from "@/components/ui/StatCard";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ProgressBar from "@/components/ui/ProgressBar";
-import {
-  attendanceReportFilterFields,
-  attendanceReportRows,
-  attendanceReportStats,
-  attendanceReportVariants,
-} from "@/constants/attendance-report";
+import { useStudentAttendanceControllerReport } from "@/app/api/endpoints";
+import type { StudentAttendanceControllerReportBand } from "@/app/api/schemas";
+import { attendanceReportVariants } from "@/constants/attendance-report";
+import { useClassDropdown } from "@/hooks/useClassDropdown";
+import { useClassSectionDropdown } from "@/hooks/useClassSectionDropdown";
+import { useTable } from "@/hooks/useTable";
+import { studentAttendanceReportRowManipulator } from "@/lib/api/student-attendance";
+import type { FilterField } from "@/types/table-toolbar";
+import type { StatCardProps } from "@/types/stat-card";
 import type { AttendanceReportRow } from "@/types/attendance-report";
 
 export default function AttendanceReport() {
+  const { filters, setFilters, page, pageSize, offset, setPage } = useTable<{
+    classId?: string;
+    classSectionId?: string;
+    month?: Dayjs | null;
+    band?: StudentAttendanceControllerReportBand;
+  }>({ pageSize: 6, initialFilters: { month: dayjs() } });
+
+  const { options: classOptions } = useClassDropdown();
+  const { options: sectionOptions } = useClassSectionDropdown(filters.classId);
+
+  useEffect(() => {
+    if (filters.classId || classOptions.length === 0) return;
+    setFilters({ classId: classOptions[0].value });
+  }, [classOptions, filters.classId, setFilters]);
+
+  const classId = filters.classId ?? "";
+  const monthValue = filters.month?.format("YYYY-MM") ?? "";
+
+  const { data, isFetching, error, refetch } =
+    useStudentAttendanceControllerReport(
+      {
+        month: monthValue,
+        classId,
+        classSectionId: filters.classSectionId,
+        band: filters.band,
+        limit: pageSize,
+        offset,
+      },
+      { query: { enabled: Boolean(classId && monthValue) } },
+    );
+
+  const rows = studentAttendanceReportRowManipulator(data?.data);
+  const summary = data?.summary;
+  const classLabel = classOptions.find(
+    (option) => option.value === classId,
+  )?.label;
+
+  const stats: StatCardProps[] = [
+    {
+      title: "Average attendance",
+      value: `${summary?.averagePercent ?? 0}%`,
+      description: classLabel,
+    },
+    {
+      title: "Working days",
+      value: summary?.workingDays ?? 0,
+      description: filters.month?.format("MMMM YYYY"),
+    },
+    {
+      title: "Below 75%",
+      value: summary?.below75Count ?? 0,
+      description: "Students at risk",
+      variant: "danger",
+    },
+    {
+      title: "Perfect attendance",
+      value: summary?.perfectCount ?? 0,
+      description: "Students",
+    },
+  ];
+
   const columns: TableColumnsType<AttendanceReportRow> = [
     {
       title: "Roll",
@@ -74,6 +141,71 @@ export default function AttendanceReport() {
     },
   ];
 
+  const filterFields: FilterField[] = [
+    {
+      name: "classId",
+      label: "Class",
+      placeholder: "Select class",
+      options: classOptions,
+      allowClear: false,
+      onChange: () => setFilters({ classSectionId: undefined }),
+    },
+    {
+      name: "classSectionId",
+      label: "Section",
+      placeholder: "All sections",
+      options: sectionOptions,
+      allowClear: true,
+    },
+    {
+      type: "month",
+      name: "month",
+      label: "Month",
+    },
+    {
+      name: "band",
+      label: "Show",
+      value: "all",
+      allowClear: false,
+      options: [
+        { label: "All students", value: "all" },
+        { label: "Below 75%", value: "low" },
+        { label: "Watch (75–89%)", value: "watch" },
+        { label: "Good (90% and above)", value: "good" },
+        { label: "Perfect attendance", value: "perfect" },
+      ],
+    },
+  ];
+
+  const beforeTable = (
+    <>
+      <section
+        aria-label="Monthly attendance summary"
+        className="flex shrink-0 gap-3 overflow-x-auto sm:grid sm:grid-cols-4"
+      >
+        {stats.map((stat) => (
+          <StatCard
+            key={stat.title}
+            {...stat}
+            size="sm"
+            className="min-w-40 flex-1 sm:min-w-0"
+          />
+        ))}
+      </section>
+      {error && (
+        <div
+          role="alert"
+          className="flex items-center gap-3 rounded-md border border-danger bg-danger/10 px-4 py-3 text-sm text-danger"
+        >
+          <span>Unable to load the attendance report.</span>
+          <Button variant="link" onClick={() => void refetch()}>
+            Retry
+          </Button>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
@@ -91,28 +223,18 @@ export default function AttendanceReport() {
       />
       <Table
         columns={columns}
-        data={attendanceReportRows}
-        total={38}
-        current={1}
-        pageSize={6}
-        interactive={false}
+        data={rows}
+        total={data?.total ?? 0}
+        loading={isFetching}
+        beforeTable={beforeTable}
+        rowKey="id"
+        pageSize={pageSize}
+        current={page}
+        onPageChange={setPage}
         showSearch={false}
-        filterFields={attendanceReportFilterFields}
-        beforeTable={
-          <section
-            aria-label="Monthly attendance summary"
-            className="flex shrink-0 gap-3 overflow-x-auto sm:grid sm:grid-cols-4"
-          >
-            {attendanceReportStats.map((stat) => (
-              <StatCard
-                key={stat.title}
-                {...stat}
-                size="sm"
-                className="min-w-40 flex-1 sm:min-w-0"
-              />
-            ))}
-          </section>
-        }
+        filterValues={filters}
+        onFilterValuesChange={setFilters}
+        filterFields={filterFields}
       />
     </div>
   );

@@ -68,6 +68,7 @@ function StudentCardBody({
       <p className="truncate text-sm font-semibold text-dark">{name}</p>
       <p className="mt-0.5 truncate text-xs text-gray">
         Roll {student.roll} · Class {className}
+        {student.sectionName ? ` · ${student.sectionName}` : ""}
       </p>
       <p className="mt-0.5 truncate text-xs text-gray">
         {student.guardian} · {student.phone}

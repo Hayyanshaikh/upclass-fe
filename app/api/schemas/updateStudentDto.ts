@@ -21,6 +21,8 @@ export interface UpdateStudentDto {
   /** @nullable */
   bloodGroup?: UpdateStudentDtoBloodGroup;
   classId?: string;
+  /** Class section ID */
+  classSectionId?: string;
   roll?: string;
   /** @nullable */
   admissionDate?: string | null;

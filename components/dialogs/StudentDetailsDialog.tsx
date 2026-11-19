@@ -43,7 +43,9 @@ export default function StudentDetailsDialog({
                 {student.name || "-"}
               </h2>
               <p className="mt-0.5 text-sm font-normal text-gray">
-                Class {student.className || "-"} · Roll {student.roll || "-"}
+                Class {student.className || "-"}
+                {student.sectionName ? ` · ${student.sectionName}` : ""} · Roll{" "}
+                {student.roll || "-"}
               </p>
             </div>
           </div>

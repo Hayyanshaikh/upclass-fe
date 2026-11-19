@@ -13,6 +13,7 @@ export type StudentFormValues = {
   identityNumber?: string;
   bloodGroup?: string;
   classId: string;
+  classSectionId: string;
   roll: string;
   admissionDate?: Dayjs | null;
   status: CreateStudentDtoStatus;
@@ -26,4 +27,5 @@ export type StudentFormValues = {
 
 export type StudentFormProps = {
   student?: StudentDto;
+  onSaved?: () => Promise<unknown>;
 };

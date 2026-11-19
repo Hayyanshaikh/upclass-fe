@@ -15,6 +15,7 @@ import Select from "@/components/ui/Select";
 import TextArea from "@/components/ui/TextArea";
 import { bloodGroupOptions, relationOptions } from "@/constants/student-form";
 import { useClassDropdown } from "@/hooks/useClassDropdown";
+import { useClassSectionDropdown } from "@/hooks/useClassSectionDropdown";
 import {
   CreateStudentDtoGender,
   CreateStudentDtoStatus,
@@ -69,6 +70,12 @@ export default function MobileStudentForm({
     isLoading: isClassesLoading,
     isError: isClassesError,
   } = useClassDropdown();
+  const selectedClassId = Form.useWatch("classId", form);
+  const {
+    options: sectionOptions,
+    isLoading: isSectionsLoading,
+    isError: isSectionsError,
+  } = useClassSectionDropdown(selectedClassId);
   const { mutateAsync: createStudent, isPending: isCreating } =
     useStudentsControllerCreate();
   const { mutateAsync: updateStudent, isPending: isUpdating } =
@@ -89,6 +96,7 @@ export default function MobileStudentForm({
         identityNumber: student.identityNumber ?? "",
         bloodGroup: student.bloodGroup ?? undefined,
         classId: student.classId,
+        classSectionId: student.classSectionId ?? undefined,
         roll: student.roll,
         admissionDate: student.admissionDate
           ? dayjs(student.admissionDate)
@@ -127,6 +135,7 @@ export default function MobileStudentForm({
         identityNumber: values.identityNumber?.trim() || null,
         bloodGroup: (values.bloodGroup || null) as CreateStudentDtoBloodGroup,
         classId: values.classId,
+        classSectionId: values.classSectionId,
         roll: values.roll.trim(),
         admissionDate: values.admissionDate?.format("YYYY-MM-DD") ?? null,
         status: values.status,
@@ -263,12 +272,32 @@ export default function MobileStudentForm({
               Unable to load classes. Please refresh and try again.
             </p>
           )}
+          {isSectionsError && (
+            <p
+              role="alert"
+              className="rounded-md bg-danger/10 px-3 py-2 text-sm font-semibold text-danger"
+            >
+              Unable to load sections. Please refresh and try again.
+            </p>
+          )}
           <Select
             name="classId"
             label="Class"
             options={classOptions}
             placeholder="Select class"
             loading={isClassesLoading}
+            isRequird
+            onChange={() => form.setFieldValue("classSectionId", undefined)}
+          />
+          <Select
+            name="classSectionId"
+            label="Section"
+            options={sectionOptions}
+            placeholder={
+              selectedClassId ? "Select section" : "Select class first"
+            }
+            loading={isSectionsLoading}
+            disabled={!selectedClassId}
             isRequird
           />
           <Input
