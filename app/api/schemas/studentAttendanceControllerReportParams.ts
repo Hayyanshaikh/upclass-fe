@@ -16,6 +16,10 @@ month: string;
  * Class ID
  */
 classId: string;
+/**
+ * Class section ID
+ */
+classSectionId?: string;
 band?: StudentAttendanceControllerReportBand;
 /**
  * Maximum number of report rows to return

@@ -12,6 +12,10 @@ export type StudentAttendanceControllerFindAllParams = {
  */
 classId: string;
 /**
+ * Class section ID
+ */
+classSectionId?: string;
+/**
  * Attendance date (YYYY-MM-DD)
  */
 date: string;
