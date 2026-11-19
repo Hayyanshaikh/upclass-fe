@@ -1,29 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { LuCheck, LuChevronRight, LuX } from "react-icons/lu";
+import type { Dayjs } from "dayjs";
+import { LuCheck, LuChevronLeft, LuChevronRight, LuX } from "react-icons/lu";
 import Button from "@/components/ui/Button";
 import StatusBadge from "@/components/ui/StatusBadge";
 import MobileFeedbackDialog from "@/components/mobile/dialogs/MobileFeedbackDialog";
 import MobileStudentAttendanceForm from "@/components/mobile/forms/MobileStudentAttendanceForm";
 import type { StudentAttendanceValues } from "@/components/mobile/forms/MobileStudentAttendanceForm";
+import MobileIconButton from "@/components/mobile/ui/MobileIconButton";
 import MobileList from "@/components/mobile/ui/MobileList";
-import {
-  attendancePeriodOptions,
-  attendanceRows,
-  attendanceStatusVariants,
-} from "@/constants/attendance";
+import { attendanceStatusVariants } from "@/constants/attendance";
 import { DISPLAY_DATE } from "@/constants/date-formats";
-import { useSectionDropdown } from "@/hooks/useSectionDropdown";
 import { useClassDropdown } from "@/hooks/useClassDropdown";
+import { useClassSectionDropdown } from "@/hooks/useClassSectionDropdown";
 import { useRolePermission } from "@/hooks/useRolePermission";
+import { useTable } from "@/hooks/useTable";
+import {
+  getStudentAttendanceErrorMessage,
+  studentAttendanceRowManipulator,
+  studentAttendanceStatusValue,
+} from "@/lib/api/student-attendance";
+import {
+  useStudentAttendanceControllerFindAll,
+  useStudentAttendanceControllerSaveBulk,
+} from "@/app/api/endpoints";
 import type { AttendanceRow, AttendanceStatus } from "@/types/attendance";
+
+// Backend pages the roster at 10 by default; load the whole class so one save covers every student.
+const ROSTER_LIMIT = 200;
 
 type AttendanceFilters = {
   classId?: string;
-  sectionId?: string;
-  period?: string;
+  classSectionId?: string;
+};
+
+type Feedback = {
+  tone: "success" | "error";
+  message: string;
 };
 
 type StudentCardProps = {
@@ -128,16 +143,63 @@ function StudentCard({
 }
 
 export default function MobileStudentAttendance() {
-  const [rows, setRows] = useState<AttendanceRow[]>(attendanceRows);
+  const [date, setDate] = useState<Dayjs>(() => dayjs());
+  const [statuses, setStatuses] = useState<Record<string, AttendanceStatus>>({});
+  const [remarks, setRemarks] = useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState<Partial<AttendanceFilters>>({});
   const [editing, setEditing] = useState<AttendanceRow | null>(null);
-  const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
-  const { canCreate: canMark, canEdit: canEditStatus } =
-    useRolePermission("student_attendance");
+  const { canCreate: canMark } = useRolePermission("student_attendance");
+
+  const { filters, setFilters } = useTable<AttendanceFilters>({});
+
   const { options: classOptions } = useClassDropdown();
-  const { options: sectionOptions } = useSectionDropdown();
+  const { options: sectionOptions } = useClassSectionDropdown(filters.classId);
+
+  useEffect(() => {
+    if (filters.classId || classOptions.length === 0) return;
+    setFilters({ classId: classOptions[0].value });
+  }, [classOptions, filters.classId, setFilters]);
+
+  const classId = filters.classId ?? "";
+  const dateValue = date.format("YYYY-MM-DD");
+  const isToday = date.isSame(dayjs(), "day");
+
+  const { data, isFetching, isError, refetch } =
+    useStudentAttendanceControllerFindAll(
+      {
+        classId,
+        classSectionId: filters.classSectionId,
+        date: dateValue,
+        limit: ROSTER_LIMIT,
+      },
+      { query: { enabled: Boolean(classId && dateValue) } },
+    );
+
+  useEffect(() => {
+    if (!data) return;
+
+    const nextStatuses: Record<string, AttendanceStatus> = {};
+    const nextRemarks: Record<string, string> = {};
+
+    for (const row of studentAttendanceRowManipulator(data.data)) {
+      nextStatuses[row.id] = row.status;
+      nextRemarks[row.id] = row.remarks;
+    }
+
+    setStatuses(nextStatuses);
+    setRemarks(nextRemarks);
+  }, [data]);
+
+  const { mutateAsync: saveAttendance, isPending: isSaving } =
+    useStudentAttendanceControllerSaveBulk();
+
+  const rows = studentAttendanceRowManipulator(data?.data).map((row) => ({
+    ...row,
+    status: statuses[row.id] ?? row.status,
+    remarks: remarks[row.id] ?? row.remarks,
+  }));
 
   const searchKey = search.trim().toLowerCase();
   const visibleRows = searchKey
@@ -148,36 +210,85 @@ export default function MobileStudentAttendance() {
       )
     : rows;
 
+  function applyFilters(next: Partial<AttendanceFilters>) {
+    if (next.classId !== filters.classId) {
+      setFilters({ ...next, classSectionId: undefined });
+      return;
+    }
+    setFilters(next);
+  }
+
   function handleMark(student: AttendanceRow, status: AttendanceStatus) {
-    setRows((previous) =>
-      previous.map((row) =>
-        row.id === student.id ? { ...row, status, remarks: "" } : row,
-      ),
-    );
+    setStatuses((previous) => ({ ...previous, [student.id]: status }));
+    setRemarks((previous) => ({ ...previous, [student.id]: "" }));
   }
 
   function applyDetails(values: StudentAttendanceValues) {
     if (!editing) return;
 
-    setRows((previous) =>
-      previous.map((row) =>
-        row.id === editing.id ? { ...row, ...values } : row,
-      ),
-    );
+    setStatuses((previous) => ({ ...previous, [editing.id]: values.status }));
+    setRemarks((previous) => ({ ...previous, [editing.id]: values.remarks }));
     setEditing(null);
   }
 
-  function handleSave() {
-    setSavedMessage(`Attendance saved for ${rows.length} students.`);
+  async function handleSave() {
+    if (!classId || !dateValue || isSaving) return;
+
+    try {
+      const result = await saveAttendance({
+        data: {
+          classId,
+          date: dateValue,
+          records: rows.map((row) => ({
+            studentId: row.id,
+            status: studentAttendanceStatusValue(row.status),
+            remarks: row.remarks || undefined,
+          })),
+        },
+      });
+
+      setFeedback({
+        tone: "success",
+        message: result.message || `${rows.length} students' attendance saved.`,
+      });
+      void refetch();
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        message: getStudentAttendanceErrorMessage(
+          error,
+          "Unable to save attendance. Please try again.",
+        ),
+      });
+    }
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-lg font-bold text-dark">Student attendance</h1>
-        <span className="shrink-0 rounded-full bg-foreground px-2.5 py-1 text-xs font-semibold text-gray">
-          {dayjs().format(DISPLAY_DATE)}
-        </span>
+      <h1 className="text-lg font-bold text-dark">Student attendance</h1>
+
+      <div className="flex h-11 items-center justify-between gap-2 rounded-lg border border-border bg-background px-2">
+        <MobileIconButton
+          variant="ghost"
+          label="Previous day"
+          onClick={() => setDate((current) => current.subtract(1, "day"))}
+        >
+          <LuChevronLeft size={20} aria-hidden="true" />
+        </MobileIconButton>
+        <p className="text-sm font-semibold text-dark">
+          {date.format(DISPLAY_DATE)}
+        </p>
+        {isToday ? (
+          <span className="size-9" aria-hidden="true" />
+        ) : (
+          <MobileIconButton
+            variant="ghost"
+            label="Next day"
+            onClick={() => setDate((current) => current.add(1, "day"))}
+          >
+            <LuChevronRight size={20} aria-hidden="true" />
+          </MobileIconButton>
+        )}
       </div>
 
       <MobileList
@@ -186,7 +297,7 @@ export default function MobileStudentAttendance() {
         renderItem={(student) => (
           <StudentCard
             student={student}
-            canEdit={canEditStatus}
+            canEdit={canMark}
             onMark={handleMark}
             onOpenDetails={setEditing}
           />
@@ -200,25 +311,22 @@ export default function MobileStudentAttendance() {
             {
               name: "classId",
               label: "Class",
-              placeholder: "All classes",
+              placeholder: "Select class",
               options: classOptions,
             },
             {
-              name: "sectionId",
+              name: "classSectionId",
               label: "Section",
               placeholder: "All sections",
               options: sectionOptions,
             },
-            {
-              name: "period",
-              label: "Period",
-              placeholder: "Full day",
-              options: attendancePeriodOptions,
-            },
           ],
           values: filters,
-          onApply: setFilters,
+          onApply: applyFilters,
         }}
+        loading={isFetching && rows.length === 0 && !isError}
+        error={isError && rows.length === 0}
+        onRetry={() => void refetch()}
         emptyText="No students found."
       />
 
@@ -226,7 +334,9 @@ export default function MobileStudentAttendance() {
         <Button
           fullWidth
           className="min-h-12! text-base! font-bold!"
-          onClick={handleSave}
+          loading={isSaving}
+          disabled={!classId || !dateValue || rows.length === 0}
+          onClick={() => void handleSave()}
         >
           Save attendance
         </Button>
@@ -240,10 +350,10 @@ export default function MobileStudentAttendance() {
       />
 
       <MobileFeedbackDialog
-        open={savedMessage !== null}
-        tone="success"
-        message={savedMessage ?? ""}
-        onClose={() => setSavedMessage(null)}
+        open={feedback !== null}
+        tone={feedback?.tone ?? "success"}
+        message={feedback?.message ?? ""}
+        onClose={() => setFeedback(null)}
       />
     </div>
   );
