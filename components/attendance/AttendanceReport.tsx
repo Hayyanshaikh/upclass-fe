@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 import type { TableColumnsType } from "antd";
@@ -10,18 +10,23 @@ import Table from "@/components/ui/Table";
 import StatCard from "@/components/ui/StatCard";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ProgressBar from "@/components/ui/ProgressBar";
-import { useStudentAttendanceControllerReport } from "@/app/api/endpoints";
+import {
+  studentAttendanceControllerReport,
+  useStudentAttendanceControllerReport,
+} from "@/app/api/endpoints";
 import type { StudentAttendanceControllerReportBand } from "@/app/api/schemas";
 import { attendanceReportVariants } from "@/constants/attendance-report";
 import { useClassDropdown } from "@/hooks/useClassDropdown";
 import { useClassSectionDropdown } from "@/hooks/useClassSectionDropdown";
 import { useTable } from "@/hooks/useTable";
 import { studentAttendanceReportRowManipulator } from "@/lib/api/student-attendance";
+import { exportCsv } from "@/utils/export-csv";
 import type { FilterField } from "@/types/table-toolbar";
 import type { StatCardProps } from "@/types/stat-card";
 import type { AttendanceReportRow } from "@/types/attendance-report";
 
 export default function AttendanceReport() {
+  const [isExporting, setIsExporting] = useState(false);
   const { filters, setFilters, page, pageSize, offset, setPage } = useTable<{
     classId?: string;
     classSectionId?: string;
@@ -177,6 +182,49 @@ export default function AttendanceReport() {
     },
   ];
 
+  function exportRowsToCsv(exportRows: AttendanceReportRow[]) {
+    exportCsv("attendance-report.csv", [
+      [
+        "Roll",
+        "Student",
+        "Days",
+        "Present",
+        "Absent",
+        "Late",
+        "Attendance",
+        "Status",
+      ],
+      ...exportRows.map((row) => [
+        row.roll,
+        row.name,
+        String(row.days),
+        String(row.present),
+        String(row.absent),
+        String(row.late),
+        `${row.percent}%`,
+        row.status,
+      ]),
+    ]);
+  }
+
+  async function downloadCsv() {
+    setIsExporting(true);
+    try {
+      const response = await studentAttendanceControllerReport({
+        month: monthValue,
+        classId,
+        classSectionId: filters.classSectionId,
+        band: filters.band,
+        limit: 1000,
+      });
+      exportRowsToCsv(studentAttendanceReportRowManipulator(response.data));
+    } catch {
+      exportRowsToCsv(rows);
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   const beforeTable = (
     <>
       <section
@@ -216,7 +264,14 @@ export default function AttendanceReport() {
         ]}
         actions={
           <div className="flex flex-wrap items-center gap-3">
-            <Button variant="secondary">Export CSV</Button>
+            <Button
+              variant="secondary"
+              disabled={rows.length === 0}
+              loading={isExporting}
+              onClick={() => void downloadCsv()}
+            >
+              Export CSV
+            </Button>
             <Button>Print</Button>
           </div>
         }

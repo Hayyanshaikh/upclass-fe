@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
-import { LuCheck, LuChevronLeft, LuChevronRight, LuX } from "react-icons/lu";
+import {
+  LuChartColumn,
+  LuCheck,
+  LuChevronLeft,
+  LuChevronRight,
+  LuX,
+} from "react-icons/lu";
 import Button from "@/components/ui/Button";
 import StatusBadge from "@/components/ui/StatusBadge";
 import MobileFeedbackDialog from "@/components/mobile/dialogs/MobileFeedbackDialog";
@@ -264,7 +270,7 @@ export default function MobileStudentAttendance() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 pb-20">
       <h1 className="text-lg font-bold text-dark">Student attendance</h1>
 
       <div className="flex h-11 items-center justify-between gap-2 rounded-lg border border-border bg-background px-2">
@@ -341,6 +347,14 @@ export default function MobileStudentAttendance() {
           Save attendance
         </Button>
       )}
+
+      <MobileIconButton
+        variant="fab"
+        href="/attendance/students/report"
+        label="View attendance report"
+      >
+        <LuChartColumn size={24} aria-hidden="true" />
+      </MobileIconButton>
 
       <MobileStudentAttendanceForm
         open={editing !== null}
