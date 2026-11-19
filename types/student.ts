@@ -3,6 +3,7 @@ export type Student = {
   name: string;
   roll: string;
   className: string;
+  sectionName?: string;
   guardian: string;
   phone: string;
   fees?: "Paid" | "Pending" | "Overdue";

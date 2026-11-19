@@ -27,6 +27,7 @@ import type {
 import type {
   ClassFindOneResponseDto,
   ClassesControllerFindAllParams,
+  ClassesControllerFindClassSectionsParams,
   CreateClassDto,
   LookupResponseDto,
   UpdateClassDto
@@ -337,6 +338,113 @@ export function useClassesControllerLookup<TData = Awaited<ReturnType<typeof cla
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getClassesControllerLookupQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getClassesControllerFindClassSectionsUrl = (params: ClassesControllerFindClassSectionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/classes/class-sections?${stringifiedParams}` : `/api/classes/class-sections`
+}
+
+/**
+ * @summary Get sections of a class for dropdown
+ */
+export const classesControllerFindClassSections = async (params: ClassesControllerFindClassSectionsParams, options?: Parameters<typeof customInstance>[1]): Promise<LookupResponseDto> => {
+
+  return customInstance<LookupResponseDto>(getClassesControllerFindClassSectionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getClassesControllerFindClassSectionsQueryKey = (params?: ClassesControllerFindClassSectionsParams,) => {
+    return [
+    `/api/classes/class-sections`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getClassesControllerFindClassSectionsQueryOptions = <TData = Awaited<ReturnType<typeof classesControllerFindClassSections>>, TError = unknown>(params: ClassesControllerFindClassSectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof classesControllerFindClassSections>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getClassesControllerFindClassSectionsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof classesControllerFindClassSections>>> = ({ signal }) => classesControllerFindClassSections(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof classesControllerFindClassSections>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ClassesControllerFindClassSectionsQueryResult = NonNullable<Awaited<ReturnType<typeof classesControllerFindClassSections>>>
+export type ClassesControllerFindClassSectionsQueryError = unknown
+
+
+export function useClassesControllerFindClassSections<TData = Awaited<ReturnType<typeof classesControllerFindClassSections>>, TError = unknown>(
+ params: ClassesControllerFindClassSectionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof classesControllerFindClassSections>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof classesControllerFindClassSections>>,
+          TError,
+          Awaited<ReturnType<typeof classesControllerFindClassSections>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useClassesControllerFindClassSections<TData = Awaited<ReturnType<typeof classesControllerFindClassSections>>, TError = unknown>(
+ params: ClassesControllerFindClassSectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof classesControllerFindClassSections>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof classesControllerFindClassSections>>,
+          TError,
+          Awaited<ReturnType<typeof classesControllerFindClassSections>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useClassesControllerFindClassSections<TData = Awaited<ReturnType<typeof classesControllerFindClassSections>>, TError = unknown>(
+ params: ClassesControllerFindClassSectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof classesControllerFindClassSections>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get sections of a class for dropdown
+ */
+
+export function useClassesControllerFindClassSections<TData = Awaited<ReturnType<typeof classesControllerFindClassSections>>, TError = unknown>(
+ params: ClassesControllerFindClassSectionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof classesControllerFindClassSections>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getClassesControllerFindClassSectionsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

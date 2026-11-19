@@ -21,6 +21,8 @@ export interface CreateStudentDto {
   /** @nullable */
   bloodGroup?: CreateStudentDtoBloodGroup;
   classId: string;
+  /** Class section ID */
+  classSectionId: string;
   roll: string;
   /** @nullable */
   admissionDate?: string | null;

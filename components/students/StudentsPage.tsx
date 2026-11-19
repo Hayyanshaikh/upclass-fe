@@ -92,6 +92,7 @@ export default function StudentsPage() {
         name: `${student.firstName} ${student.lastName}`.trim(),
         roll: student.roll,
         className: classNames.get(student.classId) ?? "—",
+        sectionName: student.sectionName ?? "—",
         guardian: student.guardian,
         phone: student.phone,
         dateOfBirth: formatDate(student.dateOfBirth),
@@ -108,11 +109,12 @@ export default function StudentsPage() {
 
   function downloadCsv() {
     exportCsv("students-page.csv", [
-      ["Student", "Roll", "Class", "Guardian", "Phone", "Status"],
+      ["Student", "Roll", "Class", "Section", "Guardian", "Phone", "Status"],
       ...studentData.map((student) => [
         student.name,
         student.roll,
         student.className,
+        student.sectionName ?? "—",
         student.guardian,
         student.phone,
         student.status === StudentDtoStatus.ACTIVE ? "Active" : "Inactive",
@@ -164,6 +166,12 @@ export default function StudentsPage() {
       title: "Class",
       dataIndex: "className",
       key: "class",
+      width: 120,
+    },
+    {
+      title: "Section",
+      dataIndex: "sectionName",
+      key: "section",
       width: 120,
     },
     {

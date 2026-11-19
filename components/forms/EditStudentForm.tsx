@@ -48,5 +48,5 @@ export default function EditStudentForm() {
     );
   }
 
-  return <StudentForm key={id} student={response.data} />;
+  return <StudentForm key={id} student={response.data} onSaved={refetch} />;
 }

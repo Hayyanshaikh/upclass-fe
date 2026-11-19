@@ -31,6 +31,7 @@ import TextArea from "@/components/ui/TextArea";
 import { ROUTE_NAMES } from "@/constants/routes";
 import { bloodGroupOptions, relationOptions } from "@/constants/student-form";
 import { useClassDropdown } from "@/hooks/useClassDropdown";
+import { useClassSectionDropdown } from "@/hooks/useClassSectionDropdown";
 import type { StudentFormProps, StudentFormValues } from "@/types/student-form";
 import { toOptions } from "@/utils/enum-options";
 import { handleImageUpload } from "@/utils/handle-image-upload";
@@ -38,7 +39,7 @@ import { handleImageUpload } from "@/utils/handle-image-upload";
 const genderOptions = toOptions(CreateStudentDtoGender);
 const statusOptions = toOptions(CreateStudentDtoStatus);
 
-export default function StudentForm({ student }: StudentFormProps) {
+export default function StudentForm({ student, onSaved }: StudentFormProps) {
   const router = useRouter();
   const [form] = Form.useForm<StudentFormValues>();
   const [isUploading, setIsUploading] = useState(false);
@@ -50,6 +51,12 @@ export default function StudentForm({ student }: StudentFormProps) {
     isLoading: isClassesLoading,
     isError: isClassesError,
   } = useClassDropdown();
+  const selectedClassId = Form.useWatch("classId", form);
+  const {
+    options: sectionOptions,
+    isLoading: isSectionsLoading,
+    isError: isSectionsError,
+  } = useClassSectionDropdown(selectedClassId);
   const { mutateAsync: createStudent, isPending: isCreating } =
     useStudentsControllerCreate();
   const { mutateAsync: updateStudent, isPending: isUpdating } =
@@ -66,6 +73,7 @@ export default function StudentForm({ student }: StudentFormProps) {
       identityNumber: student.identityNumber ?? "",
       bloodGroup: student.bloodGroup ?? undefined,
       classId: student.classId,
+      classSectionId: student.classSectionId ?? undefined,
       roll: student.roll,
       admissionDate: student.admissionDate
         ? dayjs(student.admissionDate)
@@ -102,6 +110,7 @@ export default function StudentForm({ student }: StudentFormProps) {
         identityNumber: values.identityNumber?.trim() || null,
         bloodGroup: (values.bloodGroup || null) as CreateStudentDtoBloodGroup,
         classId: values.classId,
+        classSectionId: values.classSectionId,
         roll: values.roll.trim(),
         admissionDate: values.admissionDate?.format("YYYY-MM-DD") ?? null,
         status: values.status,
@@ -116,6 +125,7 @@ export default function StudentForm({ student }: StudentFormProps) {
       if (student) {
         const updateData: UpdateStudentDto = data;
         await updateStudent({ id: student.id, data: updateData });
+        await onSaved?.();
         setSubmitSuccess("Student updated successfully.");
         return;
       }
@@ -299,6 +309,13 @@ export default function StudentForm({ student }: StudentFormProps) {
               message="Unable to load classes. Please refresh and try again."
             />
           )}
+          {isSectionsError && (
+            <Alert
+              type="error"
+              role="alert"
+              message="Unable to load sections. Please refresh and try again."
+            />
+          )}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <Select
               name="classId"
@@ -307,6 +324,18 @@ export default function StudentForm({ student }: StudentFormProps) {
               placeholder="Select class"
               isRequird
               loading={isClassesLoading}
+              onChange={() => form.setFieldValue("classSectionId", undefined)}
+            />
+            <Select
+              name="classSectionId"
+              label="Section"
+              options={sectionOptions}
+              placeholder={
+                selectedClassId ? "Select section" : "Select class first"
+              }
+              isRequird
+              disabled={!selectedClassId}
+              loading={isSectionsLoading}
             />
             <Input
               name="roll"
