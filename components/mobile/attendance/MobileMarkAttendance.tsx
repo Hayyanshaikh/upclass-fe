@@ -176,7 +176,7 @@ export default function MobileMarkAttendance() {
         {canRequestLeave && (
           <MobileIconButton
             variant="secondary"
-            href="/teacher-leaves/apply"
+            href="/teacher-leaves"
             label="Request leave"
           >
             <LuCalendarPlus size={20} aria-hidden="true" />

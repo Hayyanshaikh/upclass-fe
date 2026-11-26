@@ -36,7 +36,10 @@ export type MonthFilterField = {
   onChange?: (value: Dayjs | null) => void;
 };
 
-export type FilterField = SelectFilterField | DateFilterField | MonthFilterField;
+export type FilterField =
+  | SelectFilterField
+  | DateFilterField
+  | MonthFilterField;
 
 export type TableAction = {
   label: string;

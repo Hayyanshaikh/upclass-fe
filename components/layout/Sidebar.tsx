@@ -16,6 +16,7 @@ import type { LoginResponseUserDto } from "@/app/api/schemas";
 import { useUserControllerFindOne } from "@/app/api/endpoints";
 import { NavItem } from "@/types/menu";
 import InstallButton from "@/components/ui/InstallButton";
+import { usePendingLeaveRequestCount } from "@/hooks/usePendingLeaveRequestCount";
 
 function SidebarHeader({ onNavigate }: { onNavigate?: () => void }) {
   return (
@@ -79,9 +80,15 @@ function SidebarMenu({
   const permissionKeys =
     user?.role?.permissions?.map((permission) => permission.key) ?? [];
 
-  const filteredMenuItems = menuItems.filter((item) =>
-    permissionKeys.includes(item.permission),
-  );
+  const pendingLeaveCount = usePendingLeaveRequestCount();
+
+  const filteredMenuItems = menuItems
+    .filter((item) => permissionKeys.includes(item.permission))
+    .map((item) =>
+      item.href === "/leave-requests" && pendingLeaveCount > 0
+        ? { ...item, badge: pendingLeaveCount }
+        : item,
+    );
 
   const groupedMenuItems = filteredMenuItems.reduce(
     (groups, item) => {

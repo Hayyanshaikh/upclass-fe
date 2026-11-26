@@ -1,18 +1,30 @@
 "use client";
 
-import { LuTrash2 } from "react-icons/lu";
+import { LuX } from "react-icons/lu";
 import Dialog from "@/components/ui/Dialog";
-import type { LeaveRequest } from "@/types/leave-request";
+import type { LeaveRequestDto } from "@/app/api/schemas";
+import {
+  formatLeaveRequestDates,
+  formatTeacherName,
+} from "@/lib/api/leave-requests";
 
 type CancelLeaveRequestDialogProps = {
-  request: LeaveRequest;
+  request: LeaveRequestDto;
   open: boolean;
+  isSubmitting: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  afterClose: () => void;
+  afterClose?: () => void;
 };
 
-export default function CancelLeaveRequestDialog({ request, open, onClose, onConfirm, afterClose }: CancelLeaveRequestDialogProps) {
+export default function CancelLeaveRequestDialog({
+  request,
+  open,
+  isSubmitting,
+  onClose,
+  onConfirm,
+  afterClose,
+}: CancelLeaveRequestDialogProps) {
   return (
     <Dialog
       open={open}
@@ -20,9 +32,11 @@ export default function CancelLeaveRequestDialog({ request, open, onClose, onCon
       title={
         <div className="flex items-center gap-4">
           <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-secondary/20 text-warning">
-            <LuTrash2 className="size-6" aria-hidden="true" />
+            <LuX className="size-6" aria-hidden="true" />
           </span>
-          <span className="text-xl font-extrabold text-dark">Cancel your request?</span>
+          <span className="text-xl font-extrabold text-dark">
+            Cancel this request?
+          </span>
         </div>
       }
       onClose={onClose}
@@ -30,10 +44,15 @@ export default function CancelLeaveRequestDialog({ request, open, onClose, onCon
       afterClose={afterClose}
       okText="Cancel request"
       cancelText="Keep request"
+      confirmLoading={isSubmitting}
       confirmDanger
     >
       <p className="text-sm leading-relaxed text-gray">
-        {request.leaveType} on {request.dates} is still pending. If you cancel, it will be removed and your balance stays the same.
+        {formatTeacherName(request.teacher)}&apos;s{" "}
+        {request.leavePolicy?.name ?? "leave"} request for{" "}
+        {formatLeaveRequestDates(request.fromDate, request.toDate)} is still
+        pending. If you cancel it, the request is marked as Cancelled and
+        attendance stays unchanged.
       </p>
     </Dialog>
   );
