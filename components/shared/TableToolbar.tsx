@@ -43,7 +43,10 @@ export default function TableToolbar({
     (showSearch && (search || filterFields.length > 0)) || actions.length > 0,
   );
   const compactMobile = Boolean(
-    showSearch && search && actions.length > 0 && actions.every((action) => action.icon),
+    showSearch &&
+    search &&
+    actions.length > 0 &&
+    actions.every((action) => action.icon),
   );
 
   return (
@@ -55,9 +58,17 @@ export default function TableToolbar({
       onFinish={() => {}}
     >
       {hasTopRow && (
-        <div className={`flex items-end gap-3 ${compactMobile ? "flex-nowrap gap-2 sm:flex-wrap sm:gap-3" : "flex-wrap"}`}>
+        <div
+          className={`flex items-end gap-3 ${compactMobile ? "flex-nowrap gap-2 sm:flex-wrap sm:gap-3" : "flex-wrap"}`}
+        >
           {showSearch && search && (
-            <div className={compactMobile ? "min-w-0 flex-1 sm:grow sm:basis-0" : "min-w-0 grow basis-full sm:basis-0"}>
+            <div
+              className={
+                compactMobile
+                  ? "min-w-0 flex-1 sm:grow sm:basis-0"
+                  : "min-w-0 grow basis-full sm:basis-0"
+              }
+            >
               <Input
                 name="search"
                 label={search.label}
@@ -71,7 +82,11 @@ export default function TableToolbar({
           {showSearch && filterFields.length > 0 && (
             <Button
               variant={showFilters ? "primary" : "secondary"}
-              className={compactMobile ? "size-11! shrink-0 p-0! sm:h-11! sm:w-auto! sm:px-4!" : ""}
+              className={
+                compactMobile
+                  ? "size-11! shrink-0 p-0! sm:h-11! sm:w-auto! sm:px-4!"
+                  : ""
+              }
               onClick={() => setShowFilters(!showFilters)}
             >
               <LuListFilter size={18} aria-hidden="true" />
@@ -86,7 +101,11 @@ export default function TableToolbar({
               variant={action.variant}
               disabled={action.disabled}
               loading={action.loading}
-              className={action.icon ? "size-11! shrink-0 p-0! sm:h-11! sm:w-auto! sm:px-4!" : ""}
+              className={
+                action.icon
+                  ? "size-11! shrink-0 p-0! sm:h-11! sm:w-auto! sm:px-4!"
+                  : ""
+              }
               onClick={action.onClick}
             >
               {action.icon}
@@ -112,11 +131,7 @@ export default function TableToolbar({
                   pastOnly={field.pastOnly}
                 />
               ) : field.type === "month" ? (
-                <MonthPicker
-                  key={field.name}
-                  name={field.name}
-                  label={field.label}
-                />
+                <MonthPicker key={field.name} name={field.name} />
               ) : (
                 <Select
                   key={field.name}

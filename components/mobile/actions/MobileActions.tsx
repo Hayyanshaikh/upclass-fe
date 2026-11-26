@@ -5,6 +5,7 @@ import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import IconButton from "@/components/mobile/ui/MobileIconButton";
 import MobileSection from "@/components/mobile/ui/MobileSection";
 import { menuItems } from "@/constants/menu";
+import { usePendingLeaveRequestCount } from "@/hooks/usePendingLeaveRequestCount";
 import { useStorageStore } from "@/stores/storage";
 import type { LoginResponseUserDto } from "@/app/api/schemas";
 import type { NavItem } from "@/types/menu";
@@ -33,8 +34,16 @@ export default function MobileActions() {
   const permissions =
     user?.role?.permissions?.map((permission) => permission.key) ?? [];
 
+  const pendingLeaveCount = usePendingLeaveRequestCount();
+
   const groupedActions = groupActions(
-    menuItems.filter((item) => permissions.includes(item.permission)),
+    menuItems
+      .filter((item) => permissions.includes(item.permission))
+      .map((item) =>
+        item.href === "/leave-requests" && pendingLeaveCount > 0
+          ? { ...item, badge: pendingLeaveCount }
+          : item,
+      ),
   );
 
   const groups = Object.entries(groupedActions);

@@ -22,7 +22,7 @@ export default function MonthPicker({
       <AntDatePicker
         picker="month"
         format="MMMM YYYY"
-        allowClear={false}
+        allowClear={true}
         onChange={onChange}
         suffixIcon={<LuCalendarDays aria-hidden="true" />}
         className="w-full"

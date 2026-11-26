@@ -145,7 +145,6 @@ export const menuItems: NavItem[] = [
     label: "Leave Requests",
     href: "/leave-requests",
     icon: LuCalendarDays,
-    badge: 5,
     permission: "leave_requests.view",
   },
   {
