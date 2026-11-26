@@ -6,6 +6,7 @@ export * from './auth/auth';
 export * from './classes/classes';
 export * from './leave-policies/leave-policies';
 export * from './leave-policy-settings/leave-policy-settings';
+export * from './leave-requests/leave-requests';
 export * from './mark-attendance/mark-attendance';
 export * from './periods/periods';
 export * from './permissions/permissions';
