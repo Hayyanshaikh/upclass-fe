@@ -504,6 +504,7 @@ export default function TeacherForm({ teacher, onSaved }: TeacherFormProps) {
               type="tel"
               autoComplete="tel"
               placeholder="0300-0000000"
+              disabled={!!teacher?.phone}
               rules={[
                 {
                   pattern: /^\+?[\d ()-]{7,20}$/,

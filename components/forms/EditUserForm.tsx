@@ -63,6 +63,7 @@ export default function EditUserForm() {
   const user: UserAccount = {
     id: userData.id,
     email: userData.email,
+    phone: userData.phone ?? "",
     isActive: userData.isActive ? "Active" : "Inactive",
     isSystem: userData.isSystem ?? false,
     name: userData.name,

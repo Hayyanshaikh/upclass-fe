@@ -8,6 +8,7 @@ export type UserAccount = {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   role: string;
   isActive: UserStatus;
   isSystem: boolean;
@@ -16,6 +17,7 @@ export type UserAccount = {
 export type UserFormValues = {
   name: string;
   email: string;
+  phone?: string | null;
   role: string;
   status: UserStatus;
   password?: string;

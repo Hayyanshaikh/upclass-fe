@@ -27,7 +27,7 @@ export default function LoginForm() {
     try {
       const response: LoginResponseDto = await login({
         data: {
-          email: data.email,
+          identifier: data.identifier,
           password: data.password,
         },
       });
@@ -45,7 +45,7 @@ export default function LoginForm() {
       setMessage("");
     } catch (error: any) {
       const msg =
-        error?.response?.data?.message || "Invalid email or password.";
+        error?.response?.data?.message || "Invalid email or phone number.";
       console.error("Login failed:", error);
       setMessage(msg);
     }
@@ -77,12 +77,12 @@ export default function LoginForm() {
             isRequird
           /> */}
           <Input
-            name="email"
-            label="Email or ID"
+            name="identifier"
+            label="Email or phone"
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}
-            placeholder="Email or user ID"
+            placeholder="Email or phone number"
             isRequird
           />
           <Input

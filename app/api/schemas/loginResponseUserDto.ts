@@ -12,6 +12,8 @@ export interface LoginResponseUserDto {
   id: string;
   name: string;
   email: string;
+  /** @nullable */
+  phone?: string | null;
   roleId?: string;
   role?: RoleSummaryDto;
   isActive: boolean;

@@ -7,6 +7,7 @@
  */
 
 export interface LoginDto {
-  email: string;
+  /** Email address or phone number */
+  identifier: string;
   password: string;
 }
