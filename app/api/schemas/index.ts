@@ -21,6 +21,7 @@ export * from './academicYearTermsControllerFindAllParams';
 export * from './academicYearTermsResponseDto';
 export * from './approveLeaveRequestDto';
 export * from './checkTeacherAvailabilityResponseDto';
+export * from './checkTeacherAvailabilityResultDto';
 export * from './classDto';
 export * from './classDtoStatus';
 export * from './classesControllerFindAllParams';

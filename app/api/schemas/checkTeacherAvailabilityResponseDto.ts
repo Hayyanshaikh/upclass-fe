@@ -5,9 +5,10 @@
  * The cats API description
  * OpenAPI spec version: 1.0
  */
+import type { CheckTeacherAvailabilityResultDto } from './checkTeacherAvailabilityResultDto';
 
 export interface CheckTeacherAvailabilityResponseDto {
   statusCode: number;
-  conflict: boolean;
   message: string;
+  data: CheckTeacherAvailabilityResultDto;
 }

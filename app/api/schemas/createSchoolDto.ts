@@ -8,14 +8,10 @@
 
 export interface CreateSchoolDto {
   name: string;
-  /** @nullable */
-  email?: string | null;
-  /** @nullable */
-  phone?: string | null;
+  email: string;
+  phone: string;
   /** @nullable */
   address?: string | null;
   isActive?: boolean;
-  adminName: string;
-  adminEmail: string;
   adminPassword: string;
 }

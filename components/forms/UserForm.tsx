@@ -54,6 +54,7 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
       name: user.name,
       role: user.role,
       email: user.email === "—" ? "" : user.email,
+      phone: user.phone ?? "",
       status: user.isActive,
     });
   }, [form, user]);
@@ -71,6 +72,7 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
     const fields = {
       name: values.name.trim(),
       email: values.email.trim(),
+      phone: values.phone?.trim() || null,
       roleId: values.role,
       isActive: values.status === "Active",
     };
@@ -108,11 +110,17 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
         const message = body?.data?.errors?.[0] ?? body?.message;
 
         if (error.response?.status === 409) {
-          setSubmitError(message ?? "Email already exists.");
-          form.setFields([
-            { name: "email", errors: [message ?? "Email already exists."] },
-          ]);
-          form.scrollToField("email", { focus: true });
+          const field = message?.toLowerCase().includes("phone")
+            ? "phone"
+            : "email";
+          const fallback =
+            field === "phone"
+              ? "Phone number already exists."
+              : "Email already exists.";
+
+          setSubmitError(message ?? fallback);
+          form.setFields([{ name: field, errors: [message ?? fallback] }]);
+          form.scrollToField(field, { focus: true });
           return;
         }
 
@@ -201,6 +209,7 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
             <Input
               name="email"
               label="Email"
+              disabled={!!user}
               type="email"
               placeholder="name@school.edu"
               autoComplete="email"
@@ -209,6 +218,20 @@ export default function UserForm({ user, onSaved }: UserFormProps) {
                 {
                   pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                   message: "Enter a valid email address.",
+                },
+              ]}
+            />
+            <Input
+              name="phone"
+              label="Phone"
+              type="tel"
+              placeholder="0300-0000000"
+              autoComplete="tel"
+              disabled={!!user?.phone}
+              rules={[
+                {
+                  pattern: /^\+?[\d ()-]{7,20}$/,
+                  message: "Enter a valid phone number.",
                 },
               ]}
             />

@@ -9,6 +9,8 @@
 export interface CreateUserDto {
   name: string;
   email: string;
+  /** @nullable */
+  phone?: string | null;
   password: string;
   roleId: string;
   isActive?: boolean;

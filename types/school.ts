@@ -6,8 +6,6 @@ export type SchoolFormValues = {
   phone?: string | null;
   address?: string | null;
   status: string;
-  adminName: string;
-  adminEmail: string;
   adminPassword?: string;
 };
 

@@ -64,12 +64,10 @@ export default function SchoolForm({ school }: SchoolFormProps) {
 
     const baseData = {
       name: values.name?.trim(),
-      email: values.email?.trim() || null,
-      phone: values.phone?.trim() || null,
+      email: values.email?.trim() || undefined,
+      phone: values.phone?.trim() || undefined,
       address: values.address?.trim() || null,
       isActive: values.status === "Active",
-      adminName: values.adminName?.trim(),
-      adminEmail: values.adminEmail?.trim(),
     };
 
     setIsSaving(true);
@@ -82,6 +80,8 @@ export default function SchoolForm({ school }: SchoolFormProps) {
       } else {
         const data: CreateSchoolDto = {
           ...baseData,
+          email: values.email?.trim() ?? "",
+          phone: values.phone?.trim() ?? "",
           adminPassword: values.adminPassword ?? "",
         };
         const response = await createSchool({ data });
@@ -201,6 +201,7 @@ export default function SchoolForm({ school }: SchoolFormProps) {
               label="Email"
               placeholder="school@example.com"
               type="email"
+              isRequird={!school}
               rules={[
                 {
                   pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -212,6 +213,14 @@ export default function SchoolForm({ school }: SchoolFormProps) {
               name="phone"
               label="Phone"
               placeholder="Enter phone number"
+              type="tel"
+              isRequird={!school}
+              rules={[
+                {
+                  pattern: /^\+?[\d ()-]{7,20}$/,
+                  message: "Enter a valid phone number.",
+                },
+              ]}
             />
 
             <Select
@@ -234,26 +243,6 @@ export default function SchoolForm({ school }: SchoolFormProps) {
         {!school && (
           <SectionCard title="Admin account" autoHeight>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Input
-                name="adminName"
-                label="Admin name"
-                placeholder="Enter admin name"
-                isRequird
-                rules={[{ whitespace: true, message: "Enter an admin name." }]}
-              />
-              <Input
-                name="adminEmail"
-                label="Admin email"
-                placeholder="admin@example.com"
-                isRequird
-                type="email"
-                rules={[
-                  {
-                    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Enter a valid email address.",
-                  },
-                ]}
-              />
               {school && (
                 <Input
                   name="adminPassword"
